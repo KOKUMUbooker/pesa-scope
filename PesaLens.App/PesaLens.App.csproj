@@ -19,6 +19,9 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 
+		<!-- Enable Material 3 design on Android -->
+		<UseMaterial3>true</UseMaterial3>
+
 		<!-- Display name -->
 		<ApplicationTitle>PesaLens.App</ApplicationTitle>
 

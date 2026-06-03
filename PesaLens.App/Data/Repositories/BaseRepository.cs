@@ -7,10 +7,10 @@ namespace PesaLens.App.Data.Repositories;
 /// Generic base repository wiring up common CRUD operations against SQLiteAsyncConnection.
 /// All entity-specific repositories extend this and inject the same shared connection.
 /// </summary>
-public abstract class BaseRepository<T>(SQLiteAsyncConnection db) : IRepository<T>
+public abstract class BaseRepository<T>(DatabaseService databaseService) : IRepository<T>
     where T : class, new()
 {
-    protected readonly SQLiteAsyncConnection _db = db;
+    protected readonly SQLiteAsyncConnection _db = databaseService.Connection;
 
     public Task<List<T>> GetAllAsync() =>
         _db.Table<T>().ToListAsync();

@@ -4,9 +4,9 @@ using SQLite;
 
 namespace PesaLens.App.Data.Repositories;
 
-public class OverallBudgetRepository(SQLiteAsyncConnection db) : IOverallBudgetRepository
+public class OverallBudgetRepository(DatabaseService databaseService) : IOverallBudgetRepository
 {
-    private readonly SQLiteAsyncConnection _db = db;
+    private readonly SQLiteAsyncConnection _db = databaseService.Connection;
 
     public Task<OverallBudget?> GetAsync() =>
         _db.Table<OverallBudget?>().FirstOrDefaultAsync();

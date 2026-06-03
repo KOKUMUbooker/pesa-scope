@@ -1,12 +1,10 @@
 ﻿using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.App.Models;
-using PesaLens.App.Data.Repositories;
-using SQLite;
 
 namespace PesaLens.App.Data.Repositories;
 
-public class ExportHistoryRepository(SQLiteAsyncConnection db)
-    : BaseRepository<ExportHistory>(db), IExportHistoryRepository
+public class ExportHistoryRepository(DatabaseService databaseService)
+    : BaseRepository<ExportHistory>(databaseService), IExportHistoryRepository
 {
     public Task<List<ExportHistory>> GetRecentAsync(int count = 20) =>
         _db.Table<ExportHistory>()

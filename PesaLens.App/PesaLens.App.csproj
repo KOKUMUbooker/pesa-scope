@@ -23,10 +23,10 @@
 		<UseMaterial3>true</UseMaterial3>
 
 		<!-- Display name -->
-		<ApplicationTitle>PesaLens.App</ApplicationTitle>
+		<ApplicationTitle>PesaLens</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.bkokumu.pesalens.app</ApplicationId>
+		<ApplicationId>com.bkokumu.pesalens</ApplicationId>
 		<ApplicationIdGuid>d2c853b3-5f37-46c0-be1e-d50cab8976a3</ApplicationIdGuid>
 
 		<!-- Versions -->
@@ -70,5 +70,4 @@
 		<PackageReference Include="UraniumUI.Dialogs.Mopups" Version="2.11.0" />
 		<PackageReference Include="UraniumUI.Blurs" Version="2.11.0" />
 	</ItemGroup>
-
 </Project>

@@ -1,15 +1,97 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Shell
-    x:DataType="local:AppShell"
+    x:DataType="Application"
     x:Class="PesaLens.App.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:local="clr-namespace:PesaLens.App"
-    Shell.FlyoutBehavior="Disabled">
+    xmlns:dashboard="clr-namespace:PesaLens.App.Views.Dashboard"
+    xmlns:transactions="clr-namespace:PesaLens.App.Views.Transactions"
+    xmlns:categories="clr-namespace:PesaLens.App.Views.Categories"
+    xmlns:budgets="clr-namespace:PesaLens.App.Views.Budgets"
+    xmlns:settings="clr-namespace:PesaLens.App.Views.Settings"
+    xmlns:material="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
+    Shell.FlyoutBehavior="Disabled"
+    Shell.TabBarBackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+    Shell.TabBarForegroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+    Shell.TabBarUnselectedColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+    Shell.TabBarTitleColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
 
-    <ShellContent
-        Title="Home"
-        ContentTemplate="{DataTemplate local:MainPage}"
-        Route="MainPage" />
+    <Shell.Resources>
+        <ResourceDictionary>
+            <Style x:Key="BaseTabStyle" TargetType="Tab">
+                <Setter Property="Shell.TabBarIsVisible" Value="True" />
+            </Style>
+        </ResourceDictionary>
+    </Shell.Resources>
+
+    <!-- ── Dashboard ─────────────────────────────────────────────────────── -->
+    <Tab Title="Dashboard" Route="Dashboard">
+        <Tab.Icon>
+            <FontImageSource
+                FontFamily="MaterialSymbolsOutlined"
+                Glyph="{x:Static material:MaterialOutlined.Home}"
+                Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                Size="24" />
+        </Tab.Icon>
+        <ShellContent
+            ContentTemplate="{DataTemplate dashboard:DashboardPage}"
+            Route="DashboardPage" />
+    </Tab>
+
+    <!-- ── Transactions ───────────────────────────────────────────────────── -->
+    <Tab Title="Transactions" Route="Transactions">
+        <Tab.Icon>
+            <FontImageSource
+                FontFamily="MaterialSymbolsOutlined"
+                Glyph="{x:Static material:MaterialOutlined.Receipt_long}"
+                Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                Size="24" />
+        </Tab.Icon>
+        <ShellContent
+            ContentTemplate="{DataTemplate transactions:TransactionsPage}"
+            Route="TransactionsPage" />
+    </Tab>
+
+    <!-- ── Categories ────────────────────────────────────────────────────── -->
+    <Tab Title="Categories" Route="Categories">
+        <Tab.Icon>
+            <FontImageSource
+                FontFamily="MaterialSymbolsOutlined"
+                Glyph="{x:Static material:MaterialOutlined.Category}"
+                Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                Size="24" />
+        </Tab.Icon>
+        <ShellContent
+            ContentTemplate="{DataTemplate categories:CategoriesPage}"
+            Route="CategoriesPage" />
+    </Tab>
+
+    <!-- ── Budgets ────────────────────────────────────────────────────────── -->
+    <Tab Title="Budgets" Route="Budgets">
+        <Tab.Icon>
+            <FontImageSource
+                FontFamily="MaterialSymbolsOutlined"
+                Glyph="{x:Static material:MaterialOutlined.Savings}"
+                Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                Size="24" />
+        </Tab.Icon>
+        <ShellContent
+            ContentTemplate="{DataTemplate budgets:BudgetsPage}"
+            Route="BudgetsPage" />
+    </Tab>
+
+    <!-- ── Settings ───────────────────────────────────────────────────────── -->
+    <Tab Title="Settings" Route="Settings">
+        <Tab.Icon>
+            <FontImageSource
+                FontFamily="MaterialSymbolsOutlined"
+                Glyph="{x:Static material:MaterialOutlined.Settings}"
+                Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                Size="24" />
+        </Tab.Icon>
+        <ShellContent
+            ContentTemplate="{DataTemplate settings:SettingsPage}"
+            Route="SettingsPage" />
+    </Tab>
 
 </Shell>

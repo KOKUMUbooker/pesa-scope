@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<uranium:UraniumContentPage x:Class="PesaLens.App.Views.Onboarding.ImportProgressPage"
+             x:DataType="uranium:UraniumContentPage"
+             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
+             xmlns:local="clr-namespace:PesaLens.App.Views.Onboarding">
+    <StackLayout>
+        <Label Text="Welcome to import progress page"
+            HorizontalOptions="Center"
+            VerticalOptions="Center"/>
+    </StackLayout>
+</uranium:UraniumContentPage>

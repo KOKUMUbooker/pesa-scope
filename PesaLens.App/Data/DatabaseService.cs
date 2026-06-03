@@ -13,6 +13,7 @@ public class DatabaseService
 {
     private readonly SQLiteAsyncConnection _db;
     private bool _dbInitialized;
+    public SQLiteAsyncConnection Connection => _db;
 
     public DatabaseService(string dbPath)
     {

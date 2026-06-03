@@ -1,0 +1,109 @@
+﻿using PesaLens.App.Data.Repositories.Interfaces;
+using PesaLens.App.Models;
+using SQLite;
+
+namespace PesaLens.App.Data.Repositories;
+
+public class AutoCategorizationRuleRepository(SQLiteAsyncConnection db)
+    : BaseRepository<AutoCategorizationRule>(db), IAutoCategorizationRuleRepository
+{
+    public Task<List<AutoCategorizationRule>> GetEnabledOrderedByPriorityAsync() =>
+        _db.Table<AutoCategorizationRule>()
+           .Where(r => r.IsEnabled)
+           .OrderByDescending(r => r.Priority)
+           .ToListAsync();
+
+    public Task<List<AutoCategorizationRule>> GetByCategoryAsync(int categoryId) =>
+        _db.Table<AutoCategorizationRule>()
+           .Where(r => r.CategoryId == categoryId)
+           .OrderByDescending(r => r.Priority)
+           .ToListAsync();
+
+    public Task<List<AutoCategorizationRule>> GetByTypeAsync(RuleType ruleType) =>
+        _db.Table<AutoCategorizationRule>()
+           .Where(r => r.RuleType == ruleType)
+           .OrderByDescending(r => r.Priority)
+           .ToListAsync();
+
+    public async Task<int> SetEnabledAsync(int ruleId, bool isEnabled)
+    {
+        var rule = await _db.FindAsync<AutoCategorizationRule>(ruleId);
+        if (rule is null) return 0;
+
+        rule.IsEnabled = isEnabled;
+        return await _db.UpdateAsync(rule);
+    }
+
+    public async Task SeedDefaultsAsync()
+    {
+        // Each tuple: (RuleType, MatchValue, CategoryName, Priority)
+        // CategoryName is resolved to an ID at seed time
+        var defaults = new List<(RuleType Type, string Value, string CategoryName, int Priority)>
+        {
+            // Utilities — paybills
+            (RuleType.PaybillNumber, "888880", "Utilities", 10), // KPLC Prepaid
+            (RuleType.PaybillNumber, "888882", "Utilities", 10), // KPLC Postpaid
+            (RuleType.PaybillNumber, "80200",  "Utilities", 10), // Nairobi Water
+            (RuleType.ContainsText,  "KPLC",           "Utilities", 9),
+            (RuleType.ContainsText,  "WATER",  "Utilities", 9),
+            (RuleType.ContainsText,  "ZUKU",            "Utilities", 9),
+            (RuleType.ContainsText,  "FAIBA",           "Utilities", 9),
+
+            // Airtime & Data
+            (RuleType.PaybillNumber, "100",          "Airtime & Data", 10), // Safaricom
+            (RuleType.TransactionType, "AirtimePurchase", "Airtime & Data", 10),
+
+            // Transport
+            (RuleType.ContainsText, "UBER",   "Transport", 9),
+            (RuleType.ContainsText, "LITTLE", "Transport", 9),
+            (RuleType.ContainsText, "BOLT",   "Transport", 9),
+
+            // Health
+            (RuleType.PaybillNumber, "808080",    "Health", 10), // NHIF
+            (RuleType.ContainsText,  "NHIF",      "Health", 9),
+            (RuleType.ContainsText,  "PHARMACY",  "Health", 8),
+            (RuleType.ContainsText,  "HOSPITAL",  "Health", 8),
+
+            // Food & Groceries
+            (RuleType.ContainsText, "NAIVAS",    "Food & Groceries", 8),
+            (RuleType.ContainsText, "QUICKMART", "Food & Groceries", 8),
+            (RuleType.ContainsText, "CARREFOUR", "Food & Groceries", 8),
+            (RuleType.ContainsText, "JAVA",      "Food & Groceries", 8),
+            (RuleType.ContainsText, "KFC",       "Food & Groceries", 8),
+
+            // Income
+            (RuleType.TransactionType, "ReceiveMoney", "Income", 5),
+        };
+
+        foreach (var (type, value, categoryName, priority) in defaults)
+        {
+            // Check if rule already exists
+            var existing = await _db.Table<AutoCategorizationRule>()
+                .Where(r => r.RuleType == type && r.MatchValue == value)
+                .FirstOrDefaultAsync();
+
+            if (existing is not null) continue;
+
+            var category = await _db.Table<Category>()
+                .Where(c => c.Name == categoryName)
+                .FirstOrDefaultAsync();
+
+            if (category is null) continue;
+
+            await _db.InsertAsync(new AutoCategorizationRule
+            {
+                RuleType = type,
+                MatchValue = value,
+                CategoryId = category.Id,
+                Priority = priority,
+                IsEnabled = true,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+    }
+
+    public Task DeleteByCategoryAsync(int categoryId) =>
+        _db.ExecuteAsync(
+            "DELETE FROM AutoCategorizationRules WHERE category_id = ?",
+            categoryId);
+}

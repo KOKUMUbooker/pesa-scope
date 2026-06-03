@@ -1,11 +1,10 @@
 ﻿using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.App.Models;
-using SQLite;
 
 namespace PesaLens.App.Data.Repositories;
 
-public class BudgetRepository(SQLiteAsyncConnection db)
-    : BaseRepository<Budget>(db), IBudgetRepository
+public class BudgetRepository(DatabaseService databaseService)
+    : BaseRepository<Budget>(databaseService), IBudgetRepository
 {
     public Task<Budget?> GetByCategoryAsync(int categoryId) =>
         _db.Table<Budget?>()

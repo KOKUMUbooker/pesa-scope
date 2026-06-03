@@ -1,5 +1,4 @@
 ﻿using PesaLens.App.Data.Repositories;
-using UraniumUI.Material.Resources;
 
 namespace PesaLens.App
 {

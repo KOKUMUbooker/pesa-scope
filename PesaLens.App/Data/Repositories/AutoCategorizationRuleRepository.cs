@@ -1,11 +1,10 @@
 ﻿using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.App.Models;
-using SQLite;
 
 namespace PesaLens.App.Data.Repositories;
 
-public class AutoCategorizationRuleRepository(SQLiteAsyncConnection db)
-    : BaseRepository<AutoCategorizationRule>(db), IAutoCategorizationRuleRepository
+public class AutoCategorizationRuleRepository(DatabaseService databaseService)
+    : BaseRepository<AutoCategorizationRule>(databaseService), IAutoCategorizationRuleRepository
 {
     public Task<List<AutoCategorizationRule>> GetEnabledOrderedByPriorityAsync() =>
         _db.Table<AutoCategorizationRule>()

@@ -4,9 +4,9 @@ using SQLite;
 
 namespace PesaLens.App.Data.Repositories;
 
-public class SyncMetadataRepository(SQLiteAsyncConnection db) : ISyncMetadataRepository
+public class SyncMetadataRepository(DatabaseService databaseService) : ISyncMetadataRepository
 {
-    private readonly SQLiteAsyncConnection _db = db;
+    private readonly SQLiteAsyncConnection _db = databaseService.Connection;
 
     public async Task<SyncMetadata> GetAsync()
     {

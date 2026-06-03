@@ -1,11 +1,10 @@
 ﻿using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.App.Models;
-using SQLite;
 
 namespace PesaLens.App.Data.Repositories;
 
-public class CategoryRepository(SQLiteAsyncConnection db)
-    : BaseRepository<Category>(db), ICategoryRepository
+public class CategoryRepository(DatabaseService databaseService)
+    : BaseRepository<Category>(databaseService), ICategoryRepository
 {
     public Task<List<Category>> GetAllActiveAsync() =>
         _db.Table<Category>()

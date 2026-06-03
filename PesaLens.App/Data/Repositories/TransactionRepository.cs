@@ -1,11 +1,10 @@
 ﻿using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.App.Models;
-using SQLite;
 
 namespace PesaLens.App.Data.Repositories;
 
-public class TransactionRepository(SQLiteAsyncConnection db)
-    : BaseRepository<Transaction>(db), ITransactionRepository
+public class TransactionRepository(DatabaseService databaseService)
+    : BaseRepository<Transaction>(databaseService), ITransactionRepository
 {
     public async Task<bool> ExistsByMpesaCodeAsync(string mpesaCode) =>
         await _db.Table<Transaction>()

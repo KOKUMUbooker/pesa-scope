@@ -1,7 +1,7 @@
 ﻿using PesaLens.App.Data.Repositories.Interfaces;
 using SQLite;
 
-namespace PesaLens.App.Repositories;
+namespace PesaLens.App.Data.Repositories;
 
 /// <summary>
 /// Generic base repository wiring up common CRUD operations against SQLiteAsyncConnection.
@@ -16,7 +16,7 @@ public abstract class BaseRepository<T>(SQLiteAsyncConnection db) : IRepository<
         _db.Table<T>().ToListAsync();
 
     public Task<T?> GetByIdAsync(int id) =>
-        _db.FindAsync<T>(id);
+        _db.FindAsync<T?>(id);
 
     public Task<int> InsertAsync(T entity) =>
         _db.InsertAsync(entity);

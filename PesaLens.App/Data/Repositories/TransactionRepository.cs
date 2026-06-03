@@ -2,7 +2,7 @@
 using PesaLens.App.Models;
 using SQLite;
 
-namespace PesaLens.App.Repositories;
+namespace PesaLens.App.Data.Repositories;
 
 public class TransactionRepository(SQLiteAsyncConnection db)
     : BaseRepository<Transaction>(db), ITransactionRepository

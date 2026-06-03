@@ -2,7 +2,7 @@
 using PesaLens.App.Models;
 using SQLite;
 
-namespace PesaLens.App.Repositories;
+namespace PesaLens.App.Data.Repositories;
 
 public class SecuritySettingsRepository(SQLiteAsyncConnection db) : ISecuritySettingsRepository
 {

@@ -2,14 +2,14 @@
 using PesaLens.App.Models;
 using SQLite;
 
-namespace PesaLens.App.Repositories;
+namespace PesaLens.App.Data.Repositories;
 
 public class OverallBudgetRepository(SQLiteAsyncConnection db) : IOverallBudgetRepository
 {
     private readonly SQLiteAsyncConnection _db = db;
 
     public Task<OverallBudget?> GetAsync() =>
-        _db.Table<OverallBudget>().FirstOrDefaultAsync();
+        _db.Table<OverallBudget?>().FirstOrDefaultAsync();
 
     public async Task<int> UpsertAsync(OverallBudget budget)
     {

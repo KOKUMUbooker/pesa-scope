@@ -1,7 +1,8 @@
 ﻿using PesaLens.App.Data.Repositories.Interfaces;
+using PesaLens.App.Models;
 using SQLite;
 
-namespace PesaLens.App.Repositories;
+namespace PesaLens.App.Data.Repositories;
 
 public class CategoryRepository(SQLiteAsyncConnection db)
     : BaseRepository<Category>(db), ICategoryRepository

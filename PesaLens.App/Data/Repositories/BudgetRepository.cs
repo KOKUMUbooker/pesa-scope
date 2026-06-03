@@ -2,14 +2,14 @@
 using PesaLens.App.Models;
 using SQLite;
 
-namespace PesaLens.App.Repositories;
+namespace PesaLens.App.Data.Repositories;
 
 public class BudgetRepository(SQLiteAsyncConnection db)
     : BaseRepository<Budget>(db), IBudgetRepository
 {
     public Task<Budget?> GetByCategoryAsync(int categoryId) =>
-        _db.Table<Budget>()
-           .Where(b => b.CategoryId == categoryId)
+        _db.Table<Budget?>()
+           .Where(b => b != null && b.CategoryId == categoryId)
            .FirstOrDefaultAsync();
 
     public Task<List<Budget>> GetAllWithCategoryAsync() =>

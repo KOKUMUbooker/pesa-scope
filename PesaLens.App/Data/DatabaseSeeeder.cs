@@ -1,7 +1,6 @@
 ﻿using PesaLens.App.Data.Repositories.Interfaces;
-using PesaLens.Repositories.Interfaces;
 
-namespace PesaLens.App.Repositories;
+namespace PesaLens.App.Data.Repositories;
 
 /// <summary>
 /// Handles all first-launch data seeding in the correct dependency order:

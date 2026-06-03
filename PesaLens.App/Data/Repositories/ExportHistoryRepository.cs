@@ -1,9 +1,9 @@
 ﻿using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.App.Models;
-using PesaLens.App.Repositories;
+using PesaLens.App.Data.Repositories;
 using SQLite;
 
-namespace PesaLens.App.Repositories;
+namespace PesaLens.App.Data.Repositories;
 
 public class ExportHistoryRepository(SQLiteAsyncConnection db)
     : BaseRepository<ExportHistory>(db), IExportHistoryRepository

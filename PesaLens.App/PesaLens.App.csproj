@@ -26,7 +26,7 @@
 		<ApplicationTitle>PesaLens.App</ApplicationTitle>
 
 		<!-- App Identifier -->
-		<ApplicationId>com.companyname.pesalens.app</ApplicationId>
+		<ApplicationId>com.bkokumu.pesalens.app</ApplicationId>
 		<ApplicationIdGuid>d2c853b3-5f37-46c0-be1e-d50cab8976a3</ApplicationIdGuid>
 
 		<!-- Versions -->

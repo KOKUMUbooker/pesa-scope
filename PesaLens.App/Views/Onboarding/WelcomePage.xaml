@@ -11,7 +11,7 @@
     <Grid RowDefinitions="Auto, *, Auto">
 
         <!-- ── Top bar: Page counter + Skip button ────────────────────── -->
-        <Grid Grid.Row="0" Padding="16,52,16,0" ColumnDefinitions="Auto, *, Auto">
+        <Grid Grid.Row="0" Padding="16,52,16,0" HeightRequest="20" ColumnDefinitions="Auto, *, Auto">
             <Label
                 x:Name="PageCounterLabel"
                 Grid.Column="0"

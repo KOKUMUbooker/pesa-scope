@@ -1,9 +1,10 @@
 ﻿using Mopups.Hosting;
-using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.App.Data.Repositories;
 using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.App.Services;
 using PesaLens.App.Services.Interfaces;
+using PesaLens.App.Views.Onboarding;
+using PesaLens.App.Views.Security;
 using UraniumUI;
 
 namespace PesaLens.App
@@ -27,8 +28,15 @@ namespace PesaLens.App
                     fonts.AddMaterialSymbolsFonts();
                 });
             builder.Services.AddMopupsDialogs();
-            var dbPath = Path.Combine(FileSystem.AppDataDirectory, "pesalens.db");
 
+            // Onboarding pages — transient because they are created once and discarded
+            builder.Services.AddTransient<WelcomePage>();
+            builder.Services.AddTransient<PermissionPage>();
+            builder.Services.AddTransient<ImportProgressPage>();
+            builder.Services.AddTransient<AppLockPage>();
+
+            // DatabaseService registered as singleton — App.cs resolves and inits it
+            var dbPath = Path.Combine(FileSystem.AppDataDirectory, "pesalens.db");
             builder.Services.AddSingleton(new DatabaseService(dbPath));
             builder.Services.AddSingleton<ITransactionRepository, TransactionRepository>();
             builder.Services.AddSingleton<ICategoryRepository, CategoryRepository>();

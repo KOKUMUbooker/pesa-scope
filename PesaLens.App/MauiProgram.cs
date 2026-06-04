@@ -1,3 +1,4 @@
+﻿using LiveChartsCore.SkiaSharpView.Maui;
 ﻿using Mopups.Hosting;
 using PesaLens.App.Data.Repositories;
 using PesaLens.App.Data.Repositories.Interfaces;
@@ -5,6 +6,7 @@ using PesaLens.App.Services;
 using PesaLens.App.Services.Interfaces;
 using PesaLens.App.Views.Onboarding;
 using PesaLens.App.Views.Security;
+using SkiaSharp.Views.Maui.Controls.Hosting;
 using UraniumUI;
 
 namespace PesaLens.App
@@ -16,6 +18,8 @@ namespace PesaLens.App
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UseSkiaSharp()
+                .UseLiveCharts()
                 .ConfigureMopups()
                 .UseUraniumUI()
                 .UseUraniumUIMaterial()

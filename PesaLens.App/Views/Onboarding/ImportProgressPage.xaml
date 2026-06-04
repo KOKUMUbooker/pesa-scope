@@ -1,13 +1,111 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<uranium:UraniumContentPage x:Class="PesaLens.App.Views.Onboarding.ImportProgressPage"
-             x:DataType="uranium:UraniumContentPage"
-             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
-             xmlns:local="clr-namespace:PesaLens.App.Views.Onboarding">
-    <StackLayout>
-        <Label Text="Welcome to import progress page"
-            HorizontalOptions="Center"
-            VerticalOptions="Center"/>
-    </StackLayout>
+<uranium:UraniumContentPage
+    x:Class="PesaLens.App.Views.Onboarding.ImportProgressPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
+    NavigationPage.HasNavigationBar="False"
+    BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
+
+    <Grid RowDefinitions="*, Auto" Padding="32,64,32,48">
+
+        <!-- ── Main content (centered vertically) ─────────────────────── -->
+        <VerticalStackLayout
+            Grid.Row="0"
+            VerticalOptions="Center"
+            Spacing="0">
+
+            <!-- Icon -->
+            <Border
+                HorizontalOptions="Center"
+                WidthRequest="96"
+                HeightRequest="96"
+                BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
+                StrokeThickness="0"
+                Margin="0,0,0,32">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="28" />
+                </Border.StrokeShape>
+                <Label
+                    x:Name="StatusIcon"
+                    Text="📥"
+                    FontSize="40"
+                    HorizontalOptions="Center"
+                    VerticalOptions="Center" />
+            </Border>
+
+            <!-- Title -->
+            <Label
+                x:Name="TitleLabel"
+                Text="Importing Your Transactions"
+                FontSize="24"
+                FontAttributes="Bold"
+                HorizontalTextAlignment="Center"
+                TextColor="{AppThemeBinding Light={StaticResource OnBackground}, Dark={StaticResource OnBackgroundDark}}"
+                Margin="0,0,0,12" />
+
+            <!-- Subtitle -->
+            <Label
+                x:Name="SubtitleLabel"
+                Text="This only happens once. Sit tight while we read your M-Pesa messages."
+                FontSize="14"
+                LineHeight="1.5"
+                HorizontalTextAlignment="Center"
+                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                Margin="0,0,0,48" />
+
+            <!-- Progress bar -->
+            <ProgressBar
+                x:Name="ImportProgressBar"
+                Progress="0"
+                ProgressColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                HeightRequest="6"
+                Margin="0,0,0,16" />
+
+            <!-- Imported count -->
+            <Label
+                x:Name="CountLabel"
+                Text="0 transactions imported"
+                FontSize="13"
+                HorizontalTextAlignment="Center"
+                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                Margin="0,0,0,24" />
+
+            <!-- Status message card -->
+            <Border
+                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                StrokeThickness="0"
+                Margin="0,0,0,0">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="12" />
+                </Border.StrokeShape>
+                <Label
+                    x:Name="StatusLabel"
+                    Text="Reading messages from MPESA..."
+                    FontSize="13"
+                    LineHeight="1.4"
+                    HorizontalTextAlignment="Center"
+                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                    Padding="16,12" />
+            </Border>
+
+        </VerticalStackLayout>
+
+        <!-- ── Bottom: Done button (hidden until complete) ────────────── -->
+        <Button
+            x:Name="DoneButton"
+            Grid.Row="1"
+            Text="Go to Dashboard"
+            IsVisible="False"
+            Clicked="OnDoneClicked"
+            HorizontalOptions="Fill"
+            HeightRequest="52"
+            CornerRadius="14"
+            FontSize="16"
+            FontAttributes="Bold"
+            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+            TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}" />
+
+    </Grid>
+
 </uranium:UraniumContentPage>

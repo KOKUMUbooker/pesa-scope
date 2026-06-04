@@ -1,6 +1,9 @@
 ﻿using Mopups.Hosting;
 using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.App.Data.Repositories;
+using PesaLens.App.Data.Repositories.Interfaces;
+using PesaLens.App.Services;
+using PesaLens.App.Services.Interfaces;
 using UraniumUI;
 
 namespace PesaLens.App
@@ -36,6 +39,8 @@ namespace PesaLens.App
             builder.Services.AddSingleton<IAppSettingsRepository, AppSettingsRepository>();
             builder.Services.AddSingleton<ISecuritySettingsRepository, SecuritySettingsRepository>();
             builder.Services.AddSingleton<IExportHistoryRepository, ExportHistoryRepository>();
+            builder.Services.AddSingleton<ISmsReaderService,SmsReaderService>();
+            builder.Services.AddSingleton<IMpesaSmsParser,MpesaSmsParser>();
             builder.Services.AddSingleton<DatabaseSeeder>();
 
             return builder.Build();

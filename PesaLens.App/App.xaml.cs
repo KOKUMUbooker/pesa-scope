@@ -9,6 +9,7 @@ public partial class App : Application
 {
     private readonly IAppSettingsRepository _appSettingsRepo;
     private readonly ISecuritySettingsRepository _securitySettingsRepo;
+    private readonly IServiceProvider _services;
 
     // Signals when DB init + seeding are done
     private readonly TaskCompletionSource _dbReady = new();
@@ -17,15 +18,18 @@ public partial class App : Application
         DatabaseService databaseService,
         DatabaseSeeder seeder,
         IAppSettingsRepository appSettingsRepo,
-        ISecuritySettingsRepository securitySettingsRepo)
+        ISecuritySettingsRepository securitySettingsRepo,
+        IServiceProvider services)
     {
         InitializeComponent();
 
         _appSettingsRepo = appSettingsRepo;
         _securitySettingsRepo = securitySettingsRepo;
+        _services = services;
 
         // Kick off init — when done, signal _dbReady
         _ = InitializeAsync(databaseService, seeder);
+        _services = services;
     }
 
     private async Task InitializeAsync(DatabaseService databaseService, DatabaseSeeder seeder)
@@ -66,9 +70,9 @@ public partial class App : Application
             Page startPage;
 
             if (!settings.OnboardingComplete)
-                startPage = new WelcomePage();
+                startPage = _services.GetRequiredService<WelcomePage>(); 
             else if (securitySettings.BiometricsEnabled || securitySettings.PinHash is not null)
-                startPage = new AppLockPage();
+                startPage = _services.GetRequiredService<AppLockPage>(); 
             else
                 startPage = new AppShell();
 

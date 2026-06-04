@@ -24,10 +24,13 @@ public partial class WelcomePage : UraniumUI.Pages.UraniumContentPage
         }
     ];
 
-    public WelcomePage()
+    private readonly IServiceProvider _services;
+
+    public WelcomePage(IServiceProvider services)
     {
         BindingContext = this;
         InitializeComponent();
+        _services = services;
     }
 
     // ── Events ────────────────────────────────────────────────────────────────
@@ -67,7 +70,7 @@ public partial class WelcomePage : UraniumUI.Pages.UraniumContentPage
     {
         // Replace the window root so the user can't press back into onboarding
         if (Application.Current?.Windows.FirstOrDefault() is Window window)
-            window.Page = new PermissionPage();
+            window.Page = _services.GetRequiredService<PermissionPage>();
     }
 }
 

@@ -2,9 +2,12 @@
 
 public partial class PermissionPage : UraniumUI.Pages.UraniumContentPage
 {
-    public PermissionPage()
+    private readonly IServiceProvider _services;
+
+    public PermissionPage(IServiceProvider services)
     {
         InitializeComponent();
+        _services = services;
     }
 
     private async void OnGrantClicked(object? sender, EventArgs e)
@@ -18,7 +21,7 @@ public partial class PermissionPage : UraniumUI.Pages.UraniumContentPage
         {
             // Permission granted — move to import progress
             if (Application.Current?.Windows.FirstOrDefault() is Window window)
-                window.Page = new ImportProgressPage();
+                window.Page = _services.GetRequiredService<ImportProgressPage>();
         }
         else
         {

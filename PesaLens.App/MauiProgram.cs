@@ -1,10 +1,13 @@
-﻿using Mopups.Hosting;
+﻿using LiveChartsCore.SkiaSharpView.Maui;
+using Mopups.Hosting;
 using PesaLens.App.Data.Repositories;
 using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.App.Services;
 using PesaLens.App.Services.Interfaces;
+using PesaLens.App.ViewModels;
 using PesaLens.App.Views.Onboarding;
 using PesaLens.App.Views.Security;
+using SkiaSharp.Views.Maui.Controls.Hosting;
 using UraniumUI;
 
 namespace PesaLens.App
@@ -16,6 +19,8 @@ namespace PesaLens.App
             var builder = MauiApp.CreateBuilder();
             builder
                 .UseMauiApp<App>()
+                .UseSkiaSharp()
+                .UseLiveCharts()
                 .ConfigureMopups()
                 .UseUraniumUI()
                 .UseUraniumUIMaterial()
@@ -34,6 +39,9 @@ namespace PesaLens.App
             builder.Services.AddTransient<PermissionPage>();
             builder.Services.AddTransient<ImportProgressPage>();
             builder.Services.AddTransient<AppLockPage>();
+
+            // View models
+            builder.Services.AddTransient<DashboardViewModel>();
 
             // DatabaseService registered as singleton — App.cs resolves and inits it
             var dbPath = Path.Combine(FileSystem.AppDataDirectory, "pesalens.db");

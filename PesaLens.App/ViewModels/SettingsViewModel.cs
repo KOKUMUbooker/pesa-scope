@@ -115,7 +115,7 @@ public partial class SettingsViewModel : ObservableObject
         if (value)
         {
             // Navigate to a PIN setup flow — placeholder for now
-           //  await Shell.Current.DisplayAlert("PIN Lock", "PIN setup coming soon.", "OK");
+             await Shell.Current.DisplayAlertAsync("PIN Lock", "PIN setup coming soon.", "OK");
         }
         else
         {
@@ -130,14 +130,14 @@ public partial class SettingsViewModel : ObservableObject
     public async Task SyncNowAsync()
     {
         // Trigger SMS sync service — placeholder until SyncService is implemented
-        await Shell.Current.DisplayAlert("Sync", "Sync will be available soon.", "OK");
+        await Shell.Current.DisplayAlertAsync("Sync", "Sync will be available soon.", "OK");
         LastSyncedText = FormatSyncTime(DateTime.UtcNow);
     }
 
     [RelayCommand]
     public async Task ClearAllDataAsync()
     {
-        bool confirmed = await Shell.Current.DisplayAlert(
+        bool confirmed = await Shell.Current.DisplayAlertAsync(
             "Clear All Data",
             "This will permanently delete all your transactions, budgets, and categories. This cannot be undone.",
             "Delete Everything",

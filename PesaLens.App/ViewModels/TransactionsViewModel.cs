@@ -2,209 +2,227 @@
 using CommunityToolkit.Mvvm.Input;
 using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.App.Models;
-using System.Collections.ObjectModel;
+using PesaLens.App.Views.Transactions;
 
 namespace PesaLens.App.ViewModels;
 
-// ── Grouped transactions (by date header) ────────────────────────────────────
-public class TransactionGroup : ObservableCollection<Transaction>
-{
-    public string DateHeader { get; }
-
-    public TransactionGroup(string dateHeader, IEnumerable<Transaction> items)
-        : base(items)
-    {
-        DateHeader = dateHeader;
-    }
-}
-
 public partial class TransactionsViewModel : ObservableObject
 {
-    private readonly ITransactionRepository _transactions;
+    private readonly ITransactionRepository _transactionRepo;
+    private readonly ICategoryRepository _categoryRepo;
 
-    // ── Filter state ─────────────────────────────────────────────────────────
-    [ObservableProperty] private DateTime _fromDate;
-    [ObservableProperty] private DateTime _toDate;
+    // ── Filter state ──────────────────────────────────────────────────────────
+
+    [ObservableProperty] private DateTime _fromDate = GetWeekStart();
+    [ObservableProperty] private DateTime _toDate = DateTime.Today;
     [ObservableProperty] private string _searchQuery = string.Empty;
-    [ObservableProperty] private TransactionType? _selectedType = null;   // null = All
-    [ObservableProperty] private string _dateRangeLabel = string.Empty;
+    [ObservableProperty] private TransactionType? _selectedType = null;
+    [ObservableProperty] private int? _selectedCategoryId = null;
+    [ObservableProperty] private string _dateRangeLabel = "This Week";
+    [ObservableProperty] private bool _isLoading = true;
 
-    // ── UI state ─────────────────────────────────────────────────────────────
-    [ObservableProperty] private bool _isBusy;
-    [ObservableProperty] private bool _isRefreshing;
+    // ── Data ──────────────────────────────────────────────────────────────────
+
+    [ObservableProperty] private List<TransactionGroup> _groupedTransactions = [];
+    [ObservableProperty] private List<Category> _categories = [];
     [ObservableProperty] private bool _isEmpty;
 
-    // ── Data ─────────────────────────────────────────────────────────────────
-    [ObservableProperty]
-    private ObservableCollection<TransactionGroup> _groupedTransactions = [];
+    // ── Type filter chips (bound to CollectionView) ───────────────────────────
 
-    // ── Type filter chips ─────────────────────────────────────────────────────
-    public List<(string Label, TransactionType? Type)> TypeFilters { get; } =
+    public List<TypeFilterChip> TypeChips { get; } =
     [
-        ("All",       null),
-        ("Sent",      TransactionType.SendMoney),
-        ("Received",  TransactionType.ReceiveMoney),
-        ("Paybill",   TransactionType.PayBill),
-        ("Buy Goods", TransactionType.BuyGoods),
-        ("Airtime",   TransactionType.AirtimePurchase),
-        ("Withdraw",  TransactionType.Withdrawal),
+        new("All",        null,                              true),
+        new("Sent",       TransactionType.SendMoney),
+        new("Received",   TransactionType.ReceiveMoney),
+        new("Paybill",    TransactionType.PayBill),
+        new("Buy Goods",  TransactionType.BuyGoods),
+        new("Airtime",    TransactionType.AirtimePurchase),
+        new("Withdrawal", TransactionType.Withdrawal),
     ];
 
-    public TransactionsViewModel(ITransactionRepository transactions)
+    public TransactionsViewModel(
+        ITransactionRepository transactionRepo,
+        ICategoryRepository categoryRepo)
     {
-        _transactions = transactions;
-        ApplyThisWeekPreset();     // default range
+        _transactionRepo = transactionRepo;
+        _categoryRepo = categoryRepo;
     }
 
-    // ── Commands ──────────────────────────────────────────────────────────────
+    // ── Load ──────────────────────────────────────────────────────────────────
 
     [RelayCommand]
     public async Task LoadAsync()
     {
-        if (IsBusy) return;
-        IsBusy = true;
-        try { await ApplyFiltersAsync(); }
-        finally { IsBusy = false; }
-    }
+        IsLoading = true;
 
-    [RelayCommand]
-    public async Task RefreshAsync()
-    {
-        IsRefreshing = true;
-        try { await ApplyFiltersAsync(); }
-        finally { IsRefreshing = false; }
-    }
+        Categories = await _categoryRepo.GetAllActiveAsync();
 
-    [RelayCommand]
-    public async Task SearchAsync()
-    {
-        await ApplyFiltersAsync();
-    }
-
-    [RelayCommand]
-    public void SetTypeFilter(TransactionType? type)
-    {
-        SelectedType = type;
-    }
-
-    // Called from the bottom sheet "Save" button
-    [RelayCommand]
-    public async Task ApplyDateRangeAsync()
-    {
-        UpdateDateRangeLabel();
-        await ApplyFiltersAsync();
-    }
-
-    // ── Date presets ──────────────────────────────────────────────────────────
-
-    [RelayCommand]
-    public async Task ApplyTodayPresetAsync()
-    {
-        FromDate = DateTime.Today;
-        ToDate = DateTime.Today.AddHours(23).AddMinutes(59).AddSeconds(59);
-        await ApplyDateRangeAsync();
-    }
-
-    [RelayCommand]
-    public async Task ApplyThisWeekPresetAsync()
-    {
-        ApplyThisWeekPreset();
-        await ApplyFiltersAsync();
-    }
-
-    [RelayCommand]
-    public async Task ApplyLastMonthPresetAsync()
-    {
-        var now = DateTime.Now;
-        FromDate = new DateTime(now.Year, now.Month, 1).AddMonths(-1);
-        ToDate = new DateTime(now.Year, now.Month, 1).AddTicks(-1);
-        await ApplyDateRangeAsync();
-    }
-
-    [RelayCommand]
-    public async Task NavigateToDetailAsync(Transaction transaction)
-    {
-        var navParams = new Dictionary<string, object>
-        {
-            { "Transaction", transaction }
-        };
-        await Shell.Current.GoToAsync(nameof(Views.Transactions.TransactionDetailPage), navParams);
-    }
-
-    // ── Partial property callbacks (auto-reload on filter change) ─────────────
-
-    partial void OnSearchQueryChanged(string value)
-    {
-        // Debouncing can be added here with a CancellationToken if needed;
-        // for simplicity we reload immediately on change via command.
-        _ = ApplyFiltersAsync();
-    }
-
-    partial void OnSelectedTypeChanged(TransactionType? value)
-    {
-        _ = ApplyFiltersAsync();
-    }
-
-    // ── Core filter logic ─────────────────────────────────────────────────────
-
-    private async Task ApplyFiltersAsync()
-    {
-        List<Transaction> raw;
+        List<Transaction> transactions;
 
         if (!string.IsNullOrWhiteSpace(SearchQuery))
         {
-            raw = await _transactions.SearchAsync(SearchQuery.Trim());
-
-            // Further filter by date and type in-memory
-            raw = raw
-                .Where(t => t.TransactionDate >= FromDate && t.TransactionDate <= ToDate)
+            transactions = await _transactionRepo.SearchAsync(SearchQuery);
+            // Apply date + type on top of search results
+            var rangeEnd = ToDate.AddDays(1);
+            transactions = transactions
+                .Where(t => t.TransactionDate >= FromDate && t.TransactionDate <= rangeEnd)
                 .ToList();
+            if (SelectedType.HasValue)
+                transactions = transactions.Where(t => t.Type == SelectedType).ToList();
+            if (SelectedCategoryId.HasValue)
+                transactions = transactions.Where(t => t.CategoryId == SelectedCategoryId).ToList();
         }
         else
         {
-            raw = await _transactions.GetFilteredAsync(
+            transactions = await _transactionRepo.GetFilteredAsync(
                 from: FromDate,
-                to: ToDate,
-                categoryId: null,
+                to: ToDate.AddDays(1),
+                categoryId: SelectedCategoryId,
                 type: SelectedType);
         }
 
-        // Apply type filter when search is active (GetFilteredAsync handles it otherwise)
-        if (!string.IsNullOrWhiteSpace(SearchQuery) && SelectedType.HasValue)
-            raw = raw.Where(t => t.Type == SelectedType!.Value).ToList();
-
-        // Group by date
-        var groups = raw
-            .GroupBy(t => t.TransactionDate.Date)
+        GroupedTransactions = transactions
+            .GroupBy(t => t.TransactionDate.ToLocalTime().Date)
             .OrderByDescending(g => g.Key)
-            .Select(g => new TransactionGroup(FormatDateHeader(g.Key), g))
+            .Select(g => new TransactionGroup(
+                g.Key,
+                g.OrderByDescending(t => t.TransactionDate).ToList(),
+                Categories))
             .ToList();
 
-        GroupedTransactions = new ObservableCollection<TransactionGroup>(groups);
         IsEmpty = GroupedTransactions.Count == 0;
+        IsLoading = false;
     }
+
+    // ── Search ────────────────────────────────────────────────────────────────
+
+    [RelayCommand]
+    public async Task OnSearchChangedAsync() => await LoadAsync();
+
+    // ── Type filter ───────────────────────────────────────────────────────────
+
+    [RelayCommand]
+    public async Task SelectTypeAsync(TypeFilterChip chip)
+    {
+        foreach (var c in TypeChips) c.IsSelected = false;
+        chip.IsSelected = true;
+        SelectedType = chip.Type;
+        await LoadAsync();
+    }
+
+    // ── Category filter ───────────────────────────────────────────────────────
+
+    [RelayCommand]
+    public async Task SelectCategoryAsync(Category? category)
+    {
+        SelectedCategoryId = category?.Id;
+        await LoadAsync();
+    }
+
+    // ── Date range presets ────────────────────────────────────────────────────
+
+    [RelayCommand]
+    public async Task SetPresetTodayAsync()
+    {
+        FromDate = DateTime.Today;
+        ToDate = DateTime.Today;
+        DateRangeLabel = "Today";
+        await LoadAsync();
+    }
+
+    [RelayCommand]
+    public async Task SetPresetWeekAsync()
+    {
+        FromDate = GetWeekStart();
+        ToDate = DateTime.Today;
+        DateRangeLabel = "This Week";
+        await LoadAsync();
+    }
+
+    [RelayCommand]
+    public async Task SetPresetThisMonthAsync()
+    {
+        FromDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+        ToDate = DateTime.Today;
+        DateRangeLabel = DateTime.Today.ToString("MMMM yyyy");
+        await LoadAsync();
+    }
+
+    [RelayCommand]
+    public async Task SetPresetLastMonthAsync()
+    {
+        var first = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(-1);
+        FromDate = first;
+        ToDate = first.AddMonths(1).AddDays(-1);
+        DateRangeLabel = first.ToString("MMMM yyyy");
+        await LoadAsync();
+    }
+
+    // ── Custom range (called by bottom sheet Save button) ─────────────────────
+
+    [RelayCommand]
+    public async Task ApplyCustomRangeAsync()
+    {
+        if (FromDate > ToDate) (FromDate, ToDate) = (ToDate, FromDate);
+        DateRangeLabel = $"{FromDate:d MMM} – {ToDate:d MMM}";
+        await LoadAsync();
+    }
+
+    // ── Navigation ────────────────────────────────────────────────────────────
+
+    [RelayCommand]
+    public async Task OpenTransactionAsync(Transaction transaction) =>
+        await Shell.Current.GoToAsync(
+            $"{nameof(TransactionDetailPage)}?code={transaction.MpesaCode}");
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    private void ApplyThisWeekPreset()
+    private static DateTime GetWeekStart()
     {
         var today = DateTime.Today;
-        int daysSinceMon = ((int)today.DayOfWeek + 6) % 7;
-        FromDate = today.AddDays(-daysSinceMon);
-        ToDate = FromDate.AddDays(6).AddHours(23).AddMinutes(59).AddSeconds(59);
-        UpdateDateRangeLabel();
+        int diff = ((int)today.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
+        return today.AddDays(-diff);
     }
+}
 
-    private void UpdateDateRangeLabel()
-    {
-        DateRangeLabel = $"{FromDate:d MMM} – {ToDate:d MMM yyyy}";
-    }
+// ── Helper models ─────────────────────────────────────────────────────────────
 
-    private static string FormatDateHeader(DateTime date)
+public class TransactionGroup
+{
+    public string DateLabel { get; }
+    public List<Transaction> Transactions { get; }
+    private readonly List<Category> _categories;
+
+    public TransactionGroup(DateTime date, List<Transaction> txs, List<Category> categories)
     {
+        _categories = categories;
+        Transactions = txs;
         var today = DateTime.Today;
-        if (date == today) return $"Today, {date:d MMM}";
-        if (date == today.AddDays(-1)) return $"Yesterday, {date:d MMM}";
-        return date.ToString("dddd, d MMM");
+        DateLabel = date == today ? "Today"
+                     : date == today.AddDays(-1) ? "Yesterday"
+                     : date.ToString("ddd, d MMM yyyy");
+    }
+
+    public string GetCategoryName(int categoryId) =>
+        _categories.FirstOrDefault(c => c.Id == categoryId)?.Name ?? "Uncategorized";
+}
+
+public class TypeFilterChip : ObservableObject
+{
+    public string Label { get; }
+    public TransactionType? Type { get; }
+
+    private bool _isSelected;
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set => SetProperty(ref _isSelected, value);
+    }
+
+    public TypeFilterChip(string label, TransactionType? type, bool isSelected = false)
+    {
+        Label = label;
+        Type = type;
+        _isSelected = isSelected;
     }
 }

@@ -1,13 +1,449 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<uranium:UraniumContentPage x:Class="PesaLens.App.Views.Transactions.TransactionsPage"
-             x:DataType="uranium:UraniumContentPage"
-             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
-             xmlns:local="clr-namespace:PesaLens.App.Views.Transactions">
-    <StackLayout>
-        <Label Text="Welcome to transactions page"
-            HorizontalOptions="Center"
-            VerticalOptions="Center"/>
-    </StackLayout>
+<uranium:UraniumContentPage
+    x:Class="PesaLens.App.Views.Transactions.TransactionsPage"
+    x:DataType="vm:TransactionsViewModel"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:attachments="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
+    xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+    xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
+    xmlns:vm="clr-namespace:PesaLens.App.ViewModels"
+    xmlns:models="clr-namespace:PesaLens.App.Models"
+    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
+    xmlns:converters="clr-namespace:PesaLens.App.Converters"
+    Shell.NavBarIsVisible="False"
+    BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
+
+    <ContentPage.Resources>
+        <converters:TransactionTypeToEmojiConverter  x:Key="TypeToEmoji"/>
+        <converters:TransactionTypeToSignConverter   x:Key="TypeToSign"/>
+        <converters:TransactionTypeToColorConverter  x:Key="TypeToColor"/>
+        <converters:IntIsZeroConverter               x:Key="IntIsZero"/>
+        <converters:IntIsNonZeroConverter            x:Key="IntIsNonZero"/>
+    </ContentPage.Resources>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         DATE RANGE BOTTOM SHEET
+    ════════════════════════════════════════════════════════════════════════ -->
+    <uranium:UraniumContentPage.Attachments>
+        <material:BottomSheetView x:Name="DatePickerSheet">
+            <material:BottomSheetView.Header>
+                <Label Text="Select Date Range" FontSize="Header" Margin="0,10,0,10"/>
+            </material:BottomSheetView.Header>
+                    <ScrollView>
+                        <VerticalStackLayout Padding="20,0,20,40" Spacing="20">
+
+                            <!-- Preset chips -->
+                            <VerticalStackLayout Spacing="8">
+                                <Label
+                            Text="Quick select"
+                            FontSize="13"
+                            FontAttributes="Bold"
+                            TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+
+                                <HorizontalStackLayout Spacing="10">
+                                    <Button
+                                Text="Today"
+                                Command="{Binding ApplyTodayPresetCommand}"
+                                Style="{StaticResource PresetChipStyle}"/>
+                                    <Button
+                                Text="This Week"
+                                Command="{Binding ApplyThisWeekPresetCommand}"
+                                Style="{StaticResource PresetChipStyle}"/>
+                                    <Button
+                                Text="Last Month"
+                                Command="{Binding ApplyLastMonthPresetCommand}"
+                                Style="{StaticResource PresetChipStyle}"/>
+                                </HorizontalStackLayout>
+                            </VerticalStackLayout>
+
+                            <!-- Divider -->
+                            <BoxView
+                        HeightRequest="1"
+                        Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                        Opacity="0.5"/>
+
+                            <!-- From date -->
+                            <VerticalStackLayout Spacing="6">
+                                <Label
+                            Text="From"
+                            FontSize="13"
+                            FontAttributes="Bold"
+                            TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                                <Border
+                            StrokeShape="RoundRectangle 12"
+                            StrokeThickness="1"
+                            Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                            Padding="16,4">
+                                    <DatePicker
+                                Date="{Binding FromDate}"
+                                Format="ddd, d MMM yyyy"
+                                FontSize="15"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"
+                                MinimumDate="01/01/2020"/>
+                                </Border>
+                            </VerticalStackLayout>
+
+                            <!-- To date -->
+                            <VerticalStackLayout Spacing="6">
+                                <Label
+                            Text="To"
+                            FontSize="13"
+                            FontAttributes="Bold"
+                            TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                                <Border
+                            StrokeShape="RoundRectangle 12"
+                            StrokeThickness="1"
+                            Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                            Padding="16,4">
+                                    <DatePicker
+                                Date="{Binding ToDate}"
+                                Format="ddd, d MMM yyyy"
+                                FontSize="15"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"
+                                MinimumDate="01/01/2020"/>
+                                </Border>
+                            </VerticalStackLayout>
+
+                            <!-- Apply button -->
+                            <Button
+                            Text="Apply"
+                            Command="{Binding ApplyDateRangeCommand}"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"
+                            FontAttributes="Bold"
+                            FontSize="15"
+                            CornerRadius="12"
+                            HeightRequest="52">
+                                <Button.Triggers>
+                                    <EventTrigger Event="Clicked">
+                                        <uranium:CloseBottomSheetAction BottomSheet="{x:Reference DatePickerSheet}"/>
+                                    </EventTrigger>
+                                </Button.Triggers>
+                            </Button>
+
+                        </VerticalStackLayout>
+                    </ScrollView>
+        </material:BottomSheetView>
+    </uranium:UraniumContentPage.Attachments>
+
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         PAGE BODY
+    ════════════════════════════════════════════════════════════════════════ -->
+    <RefreshView
+        Command="{Binding RefreshCommand}"
+        IsRefreshing="{Binding IsRefreshing}"
+        RefreshColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
+
+        <VerticalStackLayout Spacing="0">
+
+            <!-- ── TOP APP BAR ─────────────────────────────────────────── -->
+            <Grid
+                Padding="20,12,20,12"
+                ColumnDefinitions="*,Auto"
+                BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
+
+                <Label
+                    Grid.Column="0"
+                    Text="Transactions"
+                    FontSize="22"
+                    FontAttributes="Bold"
+                    VerticalOptions="Center"
+                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+
+                <!-- Date range button -->
+                <Button
+                    Grid.Column="1"
+                    Text="{Binding DateRangeLabel}"
+                    FontSize="12"
+                    FontAttributes="Bold"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
+                    TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"
+                    CornerRadius="20"
+                    Padding="12,6"
+                    Clicked="OnDateRangeButtonClicked"/>
+            </Grid>
+
+            <!-- Hairline -->
+            <BoxView
+                HeightRequest="1"
+                Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                Opacity="0.5"/>
+
+            <!-- ── SEARCH BAR ───────────────────────────────────────────── -->
+            <Grid
+                Padding="20,12,20,8"
+                BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}"
+                ColumnDefinitions="*">
+
+                <Border
+                    StrokeShape="RoundRectangle 14"
+                    StrokeThickness="1"
+                    Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                    Padding="14,0">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <Label
+                            Grid.Column="0"
+                            Text="{x:Static m:MaterialOutlined.Search}"
+                            FontFamily="MaterialSymbolsOutlined"
+                            FontSize="20"
+                            VerticalOptions="Center"
+                            Margin="0,0,8,0"
+                            TextColor="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}"/>
+                        <Entry
+                            Grid.Column="1"
+                            Text="{Binding SearchQuery}"
+                            Placeholder="Search by name, amount or code"
+                            PlaceholderColor="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}"
+                            FontSize="14"
+                            HeightRequest="48"
+                            ReturnCommand="{Binding SearchCommand}"
+                            TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"
+                            BackgroundColor="Transparent"/>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- ── TYPE FILTER CHIPS ────────────────────────────────────── -->
+            <ScrollView
+                Orientation="Horizontal"
+                HorizontalScrollBarVisibility="Never"
+                Padding="20,0,20,12"
+                BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
+                <HorizontalStackLayout Spacing="8">
+
+                    <!-- All -->
+                    <Button Text="All"
+                            Command="{Binding SetTypeFilterCommand}"
+                            CommandParameter="{x:Null}"
+                            Style="{StaticResource FilterChipStyle}"
+                            x:Name="ChipAll"/>
+                    <!-- Sent -->
+                    <Button Text="Sent"
+                            Command="{Binding SetTypeFilterCommand}">
+                        <Button.CommandParameter>
+                            <models:TransactionType>SendMoney</models:TransactionType>
+                        </Button.CommandParameter>
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource FilterChipStyle}"/>
+                        </Button.Style>
+                    </Button>
+                    <!-- Received -->
+                    <Button Text="Received"
+                            Command="{Binding SetTypeFilterCommand}">
+                        <Button.CommandParameter>
+                            <models:TransactionType>ReceiveMoney</models:TransactionType>
+                        </Button.CommandParameter>
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource FilterChipStyle}"/>
+                        </Button.Style>
+                    </Button>
+                    <!-- Paybill -->
+                    <Button Text="Paybill"
+                            Command="{Binding SetTypeFilterCommand}">
+                        <Button.CommandParameter>
+                            <models:TransactionType>PayBill</models:TransactionType>
+                        </Button.CommandParameter>
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource FilterChipStyle}"/>
+                        </Button.Style>
+                    </Button>
+                    <!-- Buy Goods -->
+                    <Button Text="Buy Goods"
+                            Command="{Binding SetTypeFilterCommand}">
+                        <Button.CommandParameter>
+                            <models:TransactionType>BuyGoods</models:TransactionType>
+                        </Button.CommandParameter>
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource FilterChipStyle}"/>
+                        </Button.Style>
+                    </Button>
+                    <!-- Airtime -->
+                    <Button Text="Airtime"
+                            Command="{Binding SetTypeFilterCommand}">
+                        <Button.CommandParameter>
+                            <models:TransactionType>AirtimePurchase</models:TransactionType>
+                        </Button.CommandParameter>
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource FilterChipStyle}"/>
+                        </Button.Style>
+                    </Button>
+                    <!-- Withdraw -->
+                    <Button Text="Withdraw"
+                            Command="{Binding SetTypeFilterCommand}">
+                        <Button.CommandParameter>
+                            <models:TransactionType>Withdrawal</models:TransactionType>
+                        </Button.CommandParameter>
+                        <Button.Style>
+                            <Style TargetType="Button" BasedOn="{StaticResource FilterChipStyle}"/>
+                        </Button.Style>
+                    </Button>
+
+                </HorizontalStackLayout>
+            </ScrollView>
+
+            <!-- Hairline -->
+            <BoxView
+                HeightRequest="1"
+                Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                Opacity="0.4"/>
+
+            <!-- ── BUSY INDICATOR ───────────────────────────────────────── -->
+            <ActivityIndicator
+                IsRunning="{Binding IsBusy}"
+                IsVisible="{Binding IsBusy}"
+                Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                HorizontalOptions="Center"
+                Margin="0,24,0,0"
+                HeightRequest="40"/>
+
+            <!-- ── EMPTY STATE ───────────────────────────────────────────── -->
+            <VerticalStackLayout
+                IsVisible="{Binding IsEmpty}"
+                HorizontalOptions="Center"
+                Margin="0,60,0,0"
+                Spacing="12">
+                <Label
+                    Text="{x:Static m:MaterialOutlined.Receipt_long}"
+                    FontFamily="MaterialSymbolsOutlined"
+                    FontSize="48"
+                    HorizontalOptions="Center"
+                    TextColor="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}"/>
+                <Label
+                    Text="No transactions found"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    HorizontalOptions="Center"
+                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                <Label
+                    Text="Try adjusting your filters or date range."
+                    FontSize="13"
+                    HorizontalOptions="Center"
+                    HorizontalTextAlignment="Center"
+                    TextColor="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}"/>
+            </VerticalStackLayout>
+
+            <!-- ── GROUPED TRANSACTION LIST ─────────────────────────────── -->
+            <CollectionView
+                ItemsSource="{Binding GroupedTransactions}"
+                IsGrouped="True"
+                SelectionMode="None"
+                Margin="0,8,0,100">
+
+                <!-- Group header -->
+                <CollectionView.GroupHeaderTemplate>
+                    <DataTemplate x:DataType="vm:TransactionGroup">
+                        <Label
+                            Text="{Binding DateHeader}"
+                            FontSize="11"
+                            FontAttributes="Bold"
+                            CharacterSpacing="1"
+                            Margin="20,16,20,8"
+                            TextColor="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}"/>
+                    </DataTemplate>
+                </CollectionView.GroupHeaderTemplate>
+
+                <!-- Transaction item -->
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:Transaction">
+                        <Grid Padding="20,4,20,4">
+                            <Border
+                                StrokeShape="RoundRectangle 14"
+                                StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                                Padding="0">
+
+                                <Grid
+                                    ColumnDefinitions="56,*,Auto"
+                                    ColumnSpacing="0"
+                                    Padding="14,14">
+
+                                    <!-- Icon pill -->
+                                    <Border
+                                        Grid.Column="0"
+                                        WidthRequest="44"
+                                        HeightRequest="44"
+                                        StrokeShape="RoundRectangle 10"
+                                        StrokeThickness="0"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                                        VerticalOptions="Center">
+                                        <Label
+                                            Text="{Binding Type, Converter={StaticResource TypeToEmoji}}"
+                                            FontSize="18"
+                                            HorizontalOptions="Center"
+                                            VerticalOptions="Center"/>
+                                    </Border>
+
+                                    <!-- Counterparty + meta -->
+                                    <VerticalStackLayout
+                                        Grid.Column="1"
+                                        Spacing="3"
+                                        VerticalOptions="Center"
+                                        Margin="12,0,8,0">
+                                        <Label
+                                            Text="{Binding CounterpartyName}"
+                                            FontSize="15"
+                                            FontAttributes="Bold"
+                                            LineBreakMode="TailTruncation"
+                                            MaxLines="1"
+                                            TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                                        <HorizontalStackLayout Spacing="6">
+                                            <Label
+                                                Text="{Binding Type}"
+                                                FontSize="12"
+                                                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                                            <Label
+                                                Text="•"
+                                                FontSize="12"
+                                                TextColor="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}"/>
+                                            <Label
+                                                Text="{Binding MpesaCode}"
+                                                FontSize="11"
+                                                FontFamily="Monospace"
+                                                TextColor="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}"/>
+                                        </HorizontalStackLayout>
+                                        <Label
+                                            Text="{Binding TransactionDate, StringFormat='{0:h:mm tt}'}"
+                                            FontSize="11"
+                                            TextColor="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}"/>
+                                    </VerticalStackLayout>
+
+                                    <!-- Amount -->
+                                    <Label
+                                        Grid.Column="2"
+                                        FontSize="15"
+                                        FontAttributes="Bold"
+                                        VerticalOptions="Center"
+                                        TextColor="{Binding Type, Converter={StaticResource TypeToColor}}">
+                                        <Label.Text>
+                                            <MultiBinding StringFormat="{}{0}Ksh {1:N0}">
+                                                <Binding Path="Type" Converter="{StaticResource TypeToSign}"/>
+                                                <Binding Path="Amount"/>
+                                            </MultiBinding>
+                                        </Label.Text>
+                                    </Label>
+
+                                </Grid>
+
+                                <!-- Tap to navigate -->
+                                <Border.GestureRecognizers>
+                                    <TapGestureRecognizer
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TransactionsViewModel}}, Path=NavigateToDetailCommand}"
+                                        CommandParameter="{Binding .}"/>
+                                </Border.GestureRecognizers>
+
+                            </Border>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+
+            </CollectionView>
+
+        </VerticalStackLayout>
+    </RefreshView>
+
 </uranium:UraniumContentPage>

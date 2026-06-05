@@ -1,13 +1,403 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<uranium:UraniumContentPage x:Class="PesaLens.App.Views.Transactions.TransactionDetailPage"
-             x:DataType="uranium:UraniumContentPage"
-             xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
-             xmlns:local="clr-namespace:PesaLens.App.Views.Transactions">
-    <StackLayout>
-        <Label Text="Welcome to transaction detail page"
-            HorizontalOptions="Center"
-            VerticalOptions="Center"/>
-    </StackLayout>
+<uranium:UraniumContentPage
+    x:Class="PesaLens.App.Views.Transactions.TransactionDetailPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
+    xmlns:vm="clr-namespace:PesaLens.App.ViewModels"
+    xmlns:models="clr-namespace:PesaLens.App.Models"
+    x:DataType="vm:TransactionDetailViewModel"
+    NavigationPage.HasNavigationBar="False"
+    BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
+
+    <Grid RowDefinitions="Auto, *, Auto">
+
+        <!-- ── Top App Bar ───────────────────────────────────────────── -->
+        <Grid
+            Grid.Row="0"
+            ColumnDefinitions="Auto,*,Auto"
+            Padding="8,52,16,8"
+            BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
+
+            <ImageButton
+                Grid.Column="0"
+                Command="{Binding GoBackCommand}"
+                BackgroundColor="Transparent"
+                Padding="8"
+                WidthRequest="44"
+                HeightRequest="44">
+                <ImageButton.Source>
+                    <FontImageSource
+                        FontFamily="MaterialSymbolsOutlined"
+                        Glyph="&#xe5c4;"
+                        Color="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"
+                        Size="24" />
+                </ImageButton.Source>
+            </ImageButton>
+
+            <Label
+                Grid.Column="1"
+                Text="Transaction Details"
+                FontSize="18"
+                FontAttributes="Bold"
+                VerticalOptions="Center"
+                Margin="4,0,0,0"
+                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+
+            <Button
+                Grid.Column="2"
+                Text="Edit"
+                Command="{Binding ToggleEditCommand}"
+                BackgroundColor="Transparent"
+                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                FontSize="14"
+                FontAttributes="Bold"
+                Padding="12,6" />
+        </Grid>
+
+        <!-- ── Scrollable body ───────────────────────────────────────── -->
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="20,20,20,24" Spacing="20">
+
+                <!-- ── Hero amount card ──────────────────────────────── -->
+                <Border
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                    Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                    StrokeThickness="1"
+                    Padding="24">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="16" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                        <Label
+                            Text="{Binding TypeIcon}"
+                            FontSize="40"
+                            HorizontalOptions="Center"
+                            Margin="0,0,0,8" />
+                        <Label
+                            Text="{Binding FormattedAmount}"
+                            FontSize="34"
+                            FontAttributes="Bold"
+                            HorizontalOptions="Center"
+                            HorizontalTextAlignment="Center"
+                            TextColor="{Binding AmountColor}" />
+                        <Label
+                            Text="{Binding Transaction.CounterpartyName}"
+                            FontSize="15"
+                            HorizontalOptions="Center"
+                            HorizontalTextAlignment="Center"
+                            TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                    </VerticalStackLayout>
+                </Border>
+
+                <!-- ── Detail grid ───────────────────────────────────── -->
+                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="12">
+
+                    <!-- Transaction Code -->
+                    <Border
+                        Grid.Row="0" Grid.Column="0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                        StrokeThickness="0"
+                        Padding="14">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12" />
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="4">
+                            <Label
+                                Text="TRANSACTION CODE"
+                                FontSize="10"
+                                FontAttributes="Bold"
+                                CharacterSpacing="0.8"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                            <Label
+                                Text="{Binding Transaction.MpesaCode}"
+                                FontSize="14"
+                                FontAttributes="Bold"
+                                FontFamily="OpenSansRegular"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Status -->
+                    <Border
+                        Grid.Row="0" Grid.Column="1"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                        StrokeThickness="0"
+                        Padding="14">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12" />
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="4">
+                            <Label
+                                Text="STATUS"
+                                FontSize="10"
+                                FontAttributes="Bold"
+                                CharacterSpacing="0.8"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                            <HorizontalStackLayout Spacing="6">
+                                <Ellipse
+                                    WidthRequest="8"
+                                    HeightRequest="8"
+                                    Fill="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                    VerticalOptions="Center" />
+                                <Label
+                                    Text="Completed"
+                                    FontSize="14"
+                                    FontAttributes="Bold"
+                                    VerticalOptions="Center"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                            </HorizontalStackLayout>
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Date & Time -->
+                    <Border
+                        Grid.Row="1" Grid.Column="0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                        StrokeThickness="0"
+                        Padding="14">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12" />
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="4">
+                            <Label
+                                Text="DATE &amp; TIME"
+                                FontSize="10"
+                                FontAttributes="Bold"
+                                CharacterSpacing="0.8"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                            <Label
+                                Text="{Binding Transaction.TransactionDate, StringFormat='{0:d MMM yyyy, h:mm tt}'}"
+                                FontSize="13"
+                                FontAttributes="Bold"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Category -->
+                    <Border
+                        Grid.Row="1" Grid.Column="1"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                        StrokeThickness="0"
+                        Padding="14">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12" />
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Spacing="4">
+                            <Label
+                                Text="CATEGORY"
+                                FontSize="10"
+                                FontAttributes="Bold"
+                                CharacterSpacing="0.8"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                            <Label
+                                Text="{Binding CategoryName}"
+                                FontSize="13"
+                                FontAttributes="Bold"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"
+                                LineBreakMode="TailTruncation" />
+                        </VerticalStackLayout>
+                    </Border>
+                </Grid>
+
+                <!-- Balance After + Transaction Cost (if available) -->
+                <Border
+                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                    StrokeThickness="0"
+                    Padding="16">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+                    <Grid ColumnDefinitions="*,*">
+                        <VerticalStackLayout Grid.Column="0" Spacing="4">
+                            <Label
+                                Text="BALANCE AFTER"
+                                FontSize="10"
+                                FontAttributes="Bold"
+                                CharacterSpacing="0.8"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                            <Label
+                                Text="{Binding Transaction.BalanceAfterTransaction, StringFormat='Ksh {0:N0}'}"
+                                FontSize="15"
+                                FontAttributes="Bold"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                        </VerticalStackLayout>
+                        <VerticalStackLayout Grid.Column="1" Spacing="4">
+                            <Label
+                                Text="TYPE"
+                                FontSize="10"
+                                FontAttributes="Bold"
+                                CharacterSpacing="0.8"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                            <Label
+                                Text="{Binding Transaction.Type}"
+                                FontSize="13"
+                                FontAttributes="Bold"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                        </VerticalStackLayout>
+                    </Grid>
+                </Border>
+
+                <!-- ── Note ──────────────────────────────────────────── -->
+                <VerticalStackLayout Spacing="8">
+                    <Label
+                        Text="NOTE"
+                        FontSize="11"
+                        FontAttributes="Bold"
+                        CharacterSpacing="1.2"
+                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+
+                    <!-- View mode -->
+                    <Border
+                        IsVisible="{Binding IsEditing, Converter={StaticResource InvertedBoolConverter}}"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                        StrokeThickness="1"
+                        Padding="16">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12" />
+                        </Border.StrokeShape>
+                        <Label
+                            Text="{Binding Note}"
+                            FontSize="14"
+                            LineHeight="1.5"
+                            TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"
+                            Placeholder="No note added. Tap Edit to add one." />
+                    </Border>
+
+                    <!-- Edit mode -->
+                    <VerticalStackLayout IsVisible="{Binding IsEditing}" Spacing="8">
+                        <Border
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                            Stroke="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            StrokeThickness="2"
+                            Padding="4">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12" />
+                            </Border.StrokeShape>
+                            <Editor
+                                Text="{Binding Note}"
+                                Placeholder="Add a note about this transaction..."
+                                PlaceholderColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"
+                                BackgroundColor="Transparent"
+                                FontSize="14"
+                                AutoSize="TextChanges"
+                                MinimumHeightRequest="80"
+                                Margin="12,8" />
+                        </Border>
+                        <Button
+                            Text="Save Note"
+                            Command="{Binding SaveNoteCommand}"
+                            HorizontalOptions="End"
+                            HeightRequest="40"
+                            Padding="20,0"
+                            CornerRadius="20"
+                            FontSize="13"
+                            FontAttributes="Bold"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}" />
+                    </VerticalStackLayout>
+                </VerticalStackLayout>
+
+                <!-- ── Original SMS ───────────────────────────────────── -->
+                <VerticalStackLayout Spacing="8">
+                    <HorizontalStackLayout Spacing="6">
+                        <Label
+                            Text="💬"
+                            FontSize="14"
+                            VerticalOptions="Center" />
+                        <Label
+                            Text="ORIGINAL SMS"
+                            FontSize="11"
+                            FontAttributes="Bold"
+                            CharacterSpacing="1.2"
+                            VerticalOptions="Center"
+                            TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                    </HorizontalStackLayout>
+
+                    <Border
+                        BackgroundColor="{AppThemeBinding Light={StaticResource InverseSurface}, Dark={StaticResource SurfaceDark}}"
+                        StrokeThickness="0"
+                        Padding="16">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="14" />
+                        </Border.StrokeShape>
+                        <Grid RowDefinitions="*,Auto" RowSpacing="12">
+                            <Label
+                                Grid.Row="0"
+                                Text="{Binding Transaction.OriginalSms}"
+                                FontSize="13"
+                                LineHeight="1.5"
+                                FontFamily="OpenSansRegular"
+                                TextColor="{AppThemeBinding Light={StaticResource InverseOnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                            <Button
+                                Grid.Row="1"
+                                Text="Copy SMS Text"
+                                Command="{Binding CopySmsCommand}"
+                                HorizontalOptions="Start"
+                                HeightRequest="36"
+                                Padding="16,0"
+                                CornerRadius="18"
+                                FontSize="12"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceVariantDark}}"
+                                TextColor="{AppThemeBinding Light={StaticResource InverseSurface}, Dark={StaticResource OnSurfaceDark}}"
+                                Opacity="0.85" />
+                        </Grid>
+                    </Border>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ── Bottom action bar ─────────────────────────────────────── -->
+        <Border
+            Grid.Row="2"
+            BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+            Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+            StrokeThickness="0"
+            Padding="20,16,20,36">
+            <Border.StrokeShape>
+                <RoundRectangle CornerRadius="0" />
+            </Border.StrokeShape>
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+
+                <!-- Share / Export -->
+                <Button
+                    Grid.Column="0"
+                    Text="Share"
+                    Command="{Binding ShareCommand}"
+                    HeightRequest="50"
+                    CornerRadius="25"
+                    FontSize="14"
+                    FontAttributes="Bold"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                    TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}" />
+
+                <!-- Change Category -->
+                <Button
+                    Grid.Column="1"
+                    Text="Change Category"
+                    Command="{Binding ToggleEditCommand}"
+                    HeightRequest="50"
+                    CornerRadius="25"
+                    FontSize="13"
+                    FontAttributes="Bold"
+                    BackgroundColor="Transparent"
+                    BorderColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                    BorderWidth="1.5"
+                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+
+            </Grid>
+        </Border>
+
+    </Grid>
+
+    <uranium:UraniumContentPage.Resources>
+        <ResourceDictionary>
+            <converters:InvertedBoolConverter x:Key="InvertedBoolConverter"
+                xmlns:converters="clr-namespace:CommunityToolkit.Maui.Converters;assembly=CommunityToolkit.Maui" />
+        </ResourceDictionary>
+    </uranium:UraniumContentPage.Resources>
+
 </uranium:UraniumContentPage>

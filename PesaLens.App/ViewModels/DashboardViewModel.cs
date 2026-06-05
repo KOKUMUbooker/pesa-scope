@@ -154,7 +154,7 @@ public partial class DashboardViewModel : ObservableObject
         for (int i = 0; i < 7; i++)
         {
             var day = from.Date.AddDays(i);
-            labels[i] = day.ToString("ddd");   // Mon, Tue, Wed …
+            labels[i] = day.ToString("ddd")[..1];  // M, T, W …
             values[i] = daily.TryGetValue(day, out var amt) ? (double)amt : 0d;
         }
 

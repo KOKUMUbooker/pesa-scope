@@ -218,7 +218,7 @@ public partial class EditCategoryViewModel : ObservableObject, IQueryAttributabl
     [RelayCommand(CanExecute = nameof(CanDelete))]
     private async Task DeleteAsync()
     {
-        bool confirmed = await Shell.Current.DisplayAlert(
+        bool confirmed = await Shell.Current.DisplayAlertAsync(
             "Delete category",
             $"Delete \"{Name}\"? All transactions in this category will be moved to Uncategorized.",
             "Delete",

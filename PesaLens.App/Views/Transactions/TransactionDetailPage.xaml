@@ -16,7 +16,7 @@
         <Grid
             Grid.Row="0"
             ColumnDefinitions="Auto,*,Auto"
-            Padding="8,52,16,8"
+            Padding="5,10,5,10"
             BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
 
             <ImageButton

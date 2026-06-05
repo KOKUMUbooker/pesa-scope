@@ -108,7 +108,7 @@
                             </VerticalStackLayout>
 
                             <!-- Apply button -->
-                            <Button
+                    <Button
                             Text="Apply"
                             Command="{Binding ApplyDateRangeCommand}"
                             BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
@@ -116,15 +116,11 @@
                             FontAttributes="Bold"
                             FontSize="15"
                             CornerRadius="12"
-                            HeightRequest="52">
-                                <Button.Triggers>
-                                    <EventTrigger Event="Clicked">
-                                        <uranium:CloseBottomSheetAction BottomSheet="{x:Reference DatePickerSheet}"/>
-                                    </EventTrigger>
-                                </Button.Triggers>
-                            </Button>
+                            HeightRequest="52"/>
 
-                        </VerticalStackLayout>
+
+
+                </VerticalStackLayout>
                     </ScrollView>
         </material:BottomSheetView>
     </uranium:UraniumContentPage.Attachments>
@@ -163,7 +159,8 @@
                     TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"
                     CornerRadius="20"
                     Padding="12,6"
-                    Clicked="OnDateRangeButtonClicked"/>
+                    />
+                  <!--  Clicked="OnDateRangeButtonClicked" -->
             </Grid>
 
             <!-- Hairline -->

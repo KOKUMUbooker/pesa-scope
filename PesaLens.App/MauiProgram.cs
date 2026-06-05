@@ -5,6 +5,7 @@ using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.App.Services;
 using PesaLens.App.Services.Interfaces;
 using PesaLens.App.ViewModels;
+using PesaLens.App.ViewModels.Categories;
 using PesaLens.App.Views.Onboarding;
 using PesaLens.App.Views.Security;
 using SkiaSharp.Views.Maui.Controls.Hosting;
@@ -45,6 +46,8 @@ namespace PesaLens.App
             builder.Services.AddTransient<SettingsViewModel>();
             builder.Services.AddTransient<TransactionsViewModel>();
             builder.Services.AddTransient<TransactionDetailViewModel>();
+            builder.Services.AddTransient<CategoriesViewModel>();
+            builder.Services.AddTransient<EditCategoryViewModel>();
 
             // DatabaseService registered as singleton — App.cs resolves and inits it
             var dbPath = Path.Combine(FileSystem.AppDataDirectory, "pesalens.db");

@@ -346,8 +346,7 @@
                                 FontSize="13"
                                 FontAttributes="Bold"
                                 TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                                VerticalOptions="Center"
-                                Command="{Binding NavigateToTransactionsCommand}">
+                                VerticalOptions="Center">
                                 <!-- Label doesn't have Command; use a TapGestureRecognizer -->
                                 <Label.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding NavigateToTransactionsCommand}"/>

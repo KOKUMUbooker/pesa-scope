@@ -262,7 +262,7 @@
                             FontSize="14"
                             LineHeight="1.5"
                             TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"
-                            Placeholder="No note added. Tap Edit to add one." />
+                             />
                     </Border>
 
                     <!-- Edit mode -->
@@ -393,11 +393,6 @@
 
     </Grid>
 
-    <uranium:UraniumContentPage.Resources>
-        <ResourceDictionary>
-            <converters:InvertedBoolConverter x:Key="InvertedBoolConverter"
-                xmlns:converters="clr-namespace:CommunityToolkit.Maui.Converters;assembly=CommunityToolkit.Maui" />
-        </ResourceDictionary>
-    </uranium:UraniumContentPage.Resources>
+   
 
 </uranium:UraniumContentPage>

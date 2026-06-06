@@ -6,18 +6,16 @@ public partial class CategoriesPage : UraniumUI.Pages.UraniumContentPage
 {
     private readonly CategoriesViewModel _vm;
 
-    public CategoriesPage(CategoriesViewModel vm)
+    public CategoriesPage(CategoriesViewModel viewModel)
     {
         InitializeComponent();
-        BindingContext = _vm = vm;
+        _vm = viewModel;
+        BindingContext = _vm;
     }
 
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-
-        // Reload on every appearance so edits/creates made on EditCategoryPage
-        // are reflected immediately when the user navigates back
-        await _vm.LoadAsync();
+        await _vm.LoadCommand.ExecuteAsync(null);
     }
 }

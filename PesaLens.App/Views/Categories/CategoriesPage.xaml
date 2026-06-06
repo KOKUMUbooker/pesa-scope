@@ -1,363 +1,493 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <uranium:UraniumContentPage
     x:Class="PesaLens.App.Views.Categories.CategoriesPage"
+    x:DataType="vm:CategoriesViewModel"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
     xmlns:vm="clr-namespace:PesaLens.App.ViewModels"
-    xmlns:material="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
-    x:DataType="vm:CategoriesViewModel"
-    NavigationPage.HasNavigationBar="False"
+    xmlns:models="clr-namespace:PesaLens.App.Models"
+    xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
+    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
+    xmlns:converters="clr-namespace:PesaLens.App.Converters"
+    Shell.NavBarIsVisible="False"
     BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 
-    <Grid RowDefinitions="Auto, *">
+    <ContentPage.Resources>
+        <converters:IntIsZeroConverter    x:Key="IntIsZero"/>
+        <converters:IntIsNonZeroConverter x:Key="IntIsNonZero"/>
+        <converters:BoolToColorConverter  x:Key="BoolToColor"/>
+        <converters:InverseBoolConverter  x:Key="InverseBool"/>
+    </ContentPage.Resources>
 
-        <!-- ── Top App Bar ───────────────────────────────────────────── -->
+    <!-- ═══════════════════════════════════════════════════════════════════════
+         Root layout: top bar + tab bar + paged content
+    ════════════════════════════════════════════════════════════════════════ -->
+    <Grid RowDefinitions="Auto,Auto,*">
+
+        <!-- ── TOP APP BAR ───────────────────────────────────────────────── -->
         <Grid
             Grid.Row="0"
+            Padding="20,14,20,14"
             ColumnDefinitions="*,Auto"
-            Padding="8,52,16,8"
             BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
 
-            <Label
-                Grid.Column="0"
-                Text="Categories"
-                FontSize="20"
-                FontAttributes="Bold"
-                VerticalOptions="Center"
-                Margin="16,0,0,0"
-                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+            <VerticalStackLayout Grid.Column="0" Spacing="1">
+                <Label
+                    Text="Categories"
+                    FontSize="22"
+                    FontAttributes="Bold"
+                    TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                <Label
+                    Text="{Binding PeriodLabel}"
+                    FontSize="12"
+                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+            </VerticalStackLayout>
 
+            <!-- Refresh icon -->
             <ImageButton
                 Grid.Column="1"
-                Command="{Binding LoadCommand}"
+                Command="{Binding RefreshCommand}"
                 BackgroundColor="Transparent"
-                Padding="8"
-                WidthRequest="44"
-                HeightRequest="44">
+                HeightRequest="36"
+                WidthRequest="36">
                 <ImageButton.Source>
                     <FontImageSource
+                        Glyph="{x:Static m:MaterialOutlined.Sync}"
                         FontFamily="MaterialSymbolsOutlined"
-                        Glyph="{x:Static material:MaterialOutlined.Sync}"
-                        Color="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
-                        Size="22" />
+                        Size="22"
+                        Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
                 </ImageButton.Source>
             </ImageButton>
         </Grid>
 
-        <!-- ── Body ─────────────────────────────────────────────────── -->
-        <ScrollView Grid.Row="1">
-            <VerticalStackLayout Padding="20,16,20,100" Spacing="28">
+        <!-- Hairline -->
+        <BoxView
+            Grid.Row="0"
+            VerticalOptions="End"
+            HeightRequest="1"
+            Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+            Opacity="0.4"/>
 
-                <!-- ── Create New Category hero card ────────────────── -->
-                <Border
-                    BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                    StrokeThickness="0"
-                    Padding="20">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="16" />
-                    </Border.StrokeShape>
-                    <Border.GestureRecognizers>
-                        <TapGestureRecognizer Command="{Binding CreateCategoryCommand}" />
-                    </Border.GestureRecognizers>
-                    <Grid ColumnDefinitions="*,Auto">
-                        <VerticalStackLayout Grid.Column="0" Spacing="4" VerticalOptions="Center">
-                            <Label
-                                Text="Create New Category"
-                                FontSize="16"
-                                FontAttributes="Bold"
-                                TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}" />
-                            <Label
-                                Text="Organize your expenses your way"
-                                FontSize="12"
-                                Opacity="0.9"
-                                TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}" />
-                        </VerticalStackLayout>
+        <!-- ── TAB BAR ────────────────────────────────────────────────────── -->
+        <Grid
+            Grid.Row="1"
+            ColumnDefinitions="*,*"
+            BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
 
+            <!-- Breakdown tab -->
+            <Grid Grid.Column="0">
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SelectTabCommand}" CommandParameter="0"/>
+                </Grid.GestureRecognizers>
+                <VerticalStackLayout Spacing="0">
+                    <Label
+                        Text="Breakdown"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center"
+                        Padding="0,12">
+                        <Label.TextColor>
+                            <Binding Path="SelectedTab">
+                                <Binding.Converter>
+                                    <converters:IntEqualsToBrushConverter
+                                        TrueValue="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                        FalseValue="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                                        CompareValue="0"/>
+                                </Binding.Converter>
+                            </Binding>
+                        </Label.TextColor>
+                    </Label>
+                    <!-- Active indicator bar -->
+                    <BoxView
+                        HeightRequest="3"
+                        CornerRadius="2"
+                        Margin="20,0">
+                        <BoxView.Color>
+                            <Binding Path="SelectedTab">
+                                <Binding.Converter>
+                                    <converters:IntEqualsToBrushConverter
+                                        TrueValue="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                        FalseValue="Transparent"
+                                        CompareValue="0"/>
+                                </Binding.Converter>
+                            </Binding>
+                        </BoxView.Color>
+                    </BoxView>
+                </VerticalStackLayout>
+            </Grid>
+
+            <!-- Rules tab -->
+            <Grid Grid.Column="1">
+                <Grid.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SelectTabCommand}" CommandParameter="1"/>
+                </Grid.GestureRecognizers>
+                <VerticalStackLayout Spacing="0">
+                    <Label
+                        Text="Auto-Rules"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        HorizontalOptions="Center"
+                        Padding="0,12">
+                        <Label.TextColor>
+                            <Binding Path="SelectedTab">
+                                <Binding.Converter>
+                                    <converters:IntEqualsToBrushConverter
+                                        TrueValue="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                        FalseValue="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                                        CompareValue="1"/>
+                                </Binding.Converter>
+                            </Binding>
+                        </Label.TextColor>
+                    </Label>
+                    <BoxView
+                        HeightRequest="3"
+                        CornerRadius="2"
+                        Margin="20,0">
+                        <BoxView.Color>
+                            <Binding Path="SelectedTab">
+                                <Binding.Converter>
+                                    <converters:IntEqualsToBrushConverter
+                                        TrueValue="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                        FalseValue="Transparent"
+                                        CompareValue="1"/>
+                                </Binding.Converter>
+                            </Binding>
+                        </BoxView.Color>
+                    </BoxView>
+                </VerticalStackLayout>
+            </Grid>
+        </Grid>
+
+        <!-- ── BODY CONTENT ──────────────────────────────────────────────── -->
+        <RefreshView
+            Grid.Row="2"
+            Command="{Binding RefreshCommand}"
+            IsRefreshing="{Binding IsRefreshing}"
+            RefreshColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
+
+            <ScrollView>
+                <VerticalStackLayout Spacing="0">
+
+                    <!-- Loading spinner -->
+                    <ActivityIndicator
+                        IsRunning="{Binding IsBusy}"
+                        IsVisible="{Binding IsBusy}"
+                        Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                        HorizontalOptions="Center"
+                        Margin="0,24"
+                        HeightRequest="36"/>
+
+                    <!-- ════════════════════════════════════════════════════
+                         TAB 0: SPENDING BREAKDOWN
+                    ═════════════════════════════════════════════════════ -->
+                    <VerticalStackLayout
+                        Spacing="0"
+                        IsVisible="{Binding SelectedTab, Converter={StaticResource IntIsZero}}">
+
+                        <!-- ── Donut chart card ─────────────────────────── -->
                         <Border
-                            Grid.Column="1"
-                            WidthRequest="52"
-                            HeightRequest="52"
-                            BackgroundColor="{AppThemeBinding Light={StaticResource SecondaryContainer}, Dark={StaticResource SecondaryContainerDark}}"
-                            StrokeThickness="0"
-                            VerticalOptions="Center">
-                            <Border.StrokeShape>
-                                <Ellipse />
-                            </Border.StrokeShape>
-                            <Label
-                                Text="+"
-                                FontSize="28"
-                                FontAttributes="Bold"
-                                HorizontalOptions="Center"
-                                VerticalOptions="Center"
-                                TextColor="{AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}" />
+                            Margin="20,16,20,0"
+                            Padding="16"
+                            StrokeShape="RoundRectangle 20"
+                            StrokeThickness="1"
+                            Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
+
+                            <Grid RowDefinitions="Auto,Auto">
+
+                                <!-- Chart title row -->
+                                <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,12">
+                                    <Label
+                                        Grid.Column="0"
+                                        Text="Spending by category"
+                                        FontSize="15"
+                                        FontAttributes="Bold"
+                                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"
+                                        VerticalOptions="Center"/>
+                                    <Label
+                                        Grid.Column="1"
+                                        Text="{Binding TotalSpendLabel}"
+                                        FontSize="13"
+                                        FontAttributes="Bold"
+                                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                        VerticalOptions="Center"/>
+                                </Grid>
+
+                                <!-- Donut chart -->
+                                <lvc:PieChart
+                                    Grid.Row="1"
+                                    HeightRequest="240"
+                                    Series="{Binding DonutSeries}"
+                                    LegendPosition="Hidden"
+                                    TooltipPosition="Top"
+                                    Background="Transparent"
+                                    InitialRotation="-90"
+                                    AnimationsSpeed="00:00:00.500"/>
+
+                            </Grid>
                         </Border>
-                    </Grid>
-                </Border>
 
-                <!-- ── System Categories ─────────────────────────────── -->
-                <VerticalStackLayout Spacing="12">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <Label
-                            Grid.Column="0"
-                            Text="System Categories"
-                            FontSize="16"
-                            FontAttributes="Bold"
-                            VerticalOptions="Center"
-                            TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
-                        <Border
-                            Grid.Column="1"
-                            BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
-                            StrokeThickness="0"
-                            Padding="10,4">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="12" />
-                            </Border.StrokeShape>
+                        <!-- ── Category rows ────────────────────────────── -->
+                        <Grid
+                            Margin="20,20,20,10"
+                            ColumnDefinitions="*,Auto">
+
                             <Label
-                                Text="Default"
+                                Grid.Column="0"
+                                Text="ALL CATEGORIES"
                                 FontSize="11"
                                 FontAttributes="Bold"
-                                TextColor="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}" />
-                        </Border>
-                    </Grid>
+                                CharacterSpacing="1.2"
+                                VerticalOptions="Center"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
 
-                    <CollectionView ItemsSource="{Binding SystemCategories}">
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="vm:CategoryWithRules">
-                                <Border
-                                    BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
-                                    Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
-                                    StrokeThickness="1"
-                                    Padding="14"
-                                    Margin="0,0,0,8">
-                                    <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="14" />
-                                    </Border.StrokeShape>
-                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
+                            <Button
+                                Grid.Column="1"
+                                CornerRadius="10"
+                                HeightRequest="36"
+                                Text="+ New"
+                                Command="{Binding NavigateToAddCategoryCommand}"
+                                HorizontalOptions="End" />
 
-                                        <!-- Color dot + icon -->
-                                        <Border
-                                            Grid.Column="0"
-                                            WidthRequest="48"
-                                            HeightRequest="48"
-                                            StrokeThickness="0"
-                                            BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}">
-                                            <Border.StrokeShape>
-                                                <Ellipse />
-                                            </Border.StrokeShape>
-                                            <Label
-                                                Text="🏷️"
-                                                FontSize="20"
-                                                HorizontalOptions="Center"
-                                                VerticalOptions="Center" />
-                                        </Border>
+                        </Grid>
+                        <!-- Empty state -->
+                        <VerticalStackLayout
+                            Spacing="10"
+                            HorizontalOptions="Center"
+                            Margin="40,20"
+                            IsVisible="{Binding CategoryRows.Count, Converter={StaticResource IntIsZero}}">
+                            <Label Text="📊" FontSize="42" HorizontalOptions="Center"/>
+                            <Label
+                                Text="No spending data this month"
+                                FontSize="15"
+                                HorizontalOptions="Center"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                        </VerticalStackLayout>
 
-                                        <!-- Name + rules + system badge -->
-                                        <VerticalStackLayout
-                                            Grid.Column="1"
-                                            VerticalOptions="Center"
-                                            Spacing="3">
-                                            <HorizontalStackLayout Spacing="8">
+                        <!-- Category list via BindableLayout -->
+                        <VerticalStackLayout
+                            Margin="20,0,20,100"
+                            Spacing="10">
+                            <BindableLayout.ItemsSource>
+                                <Binding Path="CategoryRows"/>
+                            </BindableLayout.ItemsSource>
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:CategoryRowItem">
+                                    <Border
+                                        Padding="16"
+                                        StrokeShape="RoundRectangle 16"
+                                        StrokeThickness="1"
+                                        Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=SelectCategoryCommand}"
+                                                CommandParameter="{Binding .}"/>
+                                        </Border.GestureRecognizers>
+
+                                        <VerticalStackLayout Spacing="10">
+
+                                            <!-- Top row: icon + name + amount -->
+                                            <Grid ColumnDefinitions="44,*,Auto" ColumnSpacing="12">
+
+                                                <!-- Colored icon circle -->
+                                                <Border
+                                                    Grid.Column="0"
+                                                    WidthRequest="44"
+                                                    HeightRequest="44"
+                                                    StrokeShape="RoundRectangle 22"
+                                                    StrokeThickness="0"
+                                                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                                                    VerticalOptions="Center">
+                                                    <Label
+                                                        Text="{Binding Icon}"
+                                                        FontSize="20"
+                                                        HorizontalOptions="Center"
+                                                        VerticalOptions="Center"/>
+                                                </Border>
+
+                                                <!-- Name + percentage -->
+                                                <VerticalStackLayout
+                                                    Grid.Column="1"
+                                                    Spacing="2"
+                                                    VerticalOptions="Center">
+                                                    <Label
+                                                        Text="{Binding Name}"
+                                                        FontSize="15"
+                                                        FontAttributes="Bold"
+                                                        LineBreakMode="TailTruncation"
+                                                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                                                    <Label
+                                                        Text="{Binding FormattedPercentage}"
+                                                        FontSize="12"
+                                                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                                                </VerticalStackLayout>
+
+                                                <!-- Amount -->
                                                 <Label
-                                                    Text="{Binding Category.Name}"
+                                                    Grid.Column="2"
+                                                    Text="{Binding FormattedAmount}"
                                                     FontSize="15"
                                                     FontAttributes="Bold"
                                                     VerticalOptions="Center"
-                                                    TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
-                                                <Border
-                                                    BackgroundColor="Transparent"
-                                                    Stroke="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}"
-                                                    StrokeThickness="1"
-                                                    Padding="5,1"
-                                                    VerticalOptions="Center">
-                                                    <Border.StrokeShape>
-                                                        <RoundRectangle CornerRadius="4" />
-                                                    </Border.StrokeShape>
-                                                    <Label
-                                                        Text="SYSTEM"
-                                                        FontSize="9"
-                                                        FontAttributes="Bold"
-                                                        CharacterSpacing="0.8"
-                                                        TextColor="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}" />
-                                                </Border>
-                                            </HorizontalStackLayout>
+                                                    TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                                            </Grid>
 
-                                            <HorizontalStackLayout Spacing="4">
-                                                <Label
-                                                    Text="✦"
-                                                    FontSize="11"
-                                                    IsVisible="{Binding HasRules}"
-                                                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                                                <Label
-                                                    Text="{Binding RuleCountText}"
-                                                    FontSize="12"
-                                                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
-                                            </HorizontalStackLayout>
+                                            <!-- Progress bar -->
+                                            <Grid ColumnDefinitions="*" HeightRequest="6">
+                                                <!-- Track -->
+                                                <BoxView
+                                                    HeightRequest="6"
+                                                    CornerRadius="3"
+                                                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                                                    HorizontalOptions="Fill"/>
+                                                <!-- Fill — uses percentage as width ratio -->
+                                                <BoxView
+                                                    HeightRequest="6"
+                                                    CornerRadius="3"
+                                                    BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                                    HorizontalOptions="Start"
+                                                    WidthRequest="{Binding BarWidth, Converter={StaticResource DoubleToWidthConverter}}"/>
+                                            </Grid>
+
                                         </VerticalStackLayout>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
 
-                                        <!-- Chevron -->
-                                        <Label
-                                            Grid.Column="2"
-                                            Text="›"
-                                            FontSize="22"
-                                            VerticalOptions="Center"
-                                            TextColor="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}" />
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-                </VerticalStackLayout>
-
-                <!-- ── Custom Categories ──────────────────────────────── -->
-                <VerticalStackLayout Spacing="12">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <Label
-                            Grid.Column="0"
-                            Text="Custom Categories"
-                            FontSize="16"
-                            FontAttributes="Bold"
-                            VerticalOptions="Center"
-                            TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
-                        <Border
-                            Grid.Column="1"
-                            BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
-                            StrokeThickness="0"
-                            Padding="10,4">
-                            <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="12" />
-                            </Border.StrokeShape>
-                            <Label
-                                Text="Flexible"
-                                FontSize="11"
-                                FontAttributes="Bold"
-                                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                        </Border>
-                    </Grid>
-
-                    <!-- Empty state when no custom categories -->
-                    <Label
-                        IsVisible="{Binding HasCustomCategories, Converter={StaticResource InvertedBoolConverter}}"
-                        Text="You haven't created any custom categories yet. Tap the card above to get started."
-                        FontSize="13"
-                        LineHeight="1.5"
-                        HorizontalTextAlignment="Center"
-                        Margin="0,8"
-                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
-
-                    <CollectionView
-                        ItemsSource="{Binding CustomCategories}"
-                        IsVisible="{Binding HasCustomCategories}">
-                        <CollectionView.ItemTemplate>
-                            <DataTemplate x:DataType="vm:CategoryWithRules">
-                                <Border
-                                    BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
-                                    Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
-                                    StrokeThickness="1"
-                                    Padding="14"
-                                    Margin="0,0,0,8">
-                                    <Border.StrokeShape>
-                                        <RoundRectangle CornerRadius="14" />
-                                    </Border.StrokeShape>
-                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="14">
-
-                                        <!-- Icon circle -->
-                                        <Border
-                                            Grid.Column="0"
-                                            WidthRequest="48"
-                                            HeightRequest="48"
-                                            StrokeThickness="0"
-                                            BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}">
-                                            <Border.StrokeShape>
-                                                <Ellipse />
-                                            </Border.StrokeShape>
-                                            <Label
-                                                Text="🏷️"
-                                                FontSize="20"
-                                                HorizontalOptions="Center"
-                                                VerticalOptions="Center" />
-                                        </Border>
-
-                                        <!-- Name + rules -->
-                                        <VerticalStackLayout
-                                            Grid.Column="1"
-                                            VerticalOptions="Center"
-                                            Spacing="3">
-                                            <Label
-                                                Text="{Binding Category.Name}"
-                                                FontSize="15"
-                                                FontAttributes="Bold"
-                                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
-                                            <HorizontalStackLayout Spacing="4">
-                                                <Label
-                                                    Text="✦"
-                                                    FontSize="11"
-                                                    IsVisible="{Binding HasRules}"
-                                                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
-                                                <Label
-                                                    Text="{Binding RuleCountText}"
-                                                    FontSize="12"
-                                                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
-                                            </HorizontalStackLayout>
-                                        </VerticalStackLayout>
-
-                                        <!-- Edit + chevron -->
-                                        <HorizontalStackLayout Grid.Column="2" Spacing="4" VerticalOptions="Center">
-                                            <ImageButton
-                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=EditCategoryCommand}"
-                                                CommandParameter="{Binding .}"
-                                                BackgroundColor="Transparent"
-                                                WidthRequest="36"
-                                                HeightRequest="36"
-                                                Padding="6">
-                                                <ImageButton.Source>
-                                                    <FontImageSource
-                                                        FontFamily="MaterialSymbolsOutlined"
-                                                        Glyph="{x:Static material:MaterialOutlined.Edit}"
-                                                        Color="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}"
-                                                        Size="20" />
-                                                </ImageButton.Source>
-                                            </ImageButton>
-                                            <Label
-                                                Text="›"
-                                                FontSize="22"
-                                                VerticalOptions="Center"
-                                                TextColor="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}" />
-                                        </HorizontalStackLayout>
-                                    </Grid>
-                                </Border>
-                            </DataTemplate>
-                        </CollectionView.ItemTemplate>
-                    </CollectionView>
-                </VerticalStackLayout>
-
-                <!-- ── Pro tip card ───────────────────────────────────── -->
-                <Border
-                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
-                    Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
-                    StrokeThickness="1.5"
-                    StrokeDashArray="6,3"
-                    Padding="20">
-                    <Border.StrokeShape>
-                        <RoundRectangle CornerRadius="14" />
-                    </Border.StrokeShape>
-                    <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
-                        <Label
-                            Text="💡"
-                            FontSize="36"
-                            HorizontalOptions="Center" />
-                        <Label
-                            Text="Auto-rules use transaction keywords to automatically assign categories — saving you time on every import."
-                            FontSize="13"
-                            LineHeight="1.5"
-                            HorizontalTextAlignment="Center"
-                            TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
                     </VerticalStackLayout>
-                </Border>
+                    <!-- /tab 0 -->
 
-            </VerticalStackLayout>
-        </ScrollView>
+                    <!-- ════════════════════════════════════════════════════
+                         TAB 1: AUTO-CATEGORIZATION RULES
+                    ═════════════════════════════════════════════════════ -->
+                    <VerticalStackLayout
+                        Spacing="0"
+                        IsVisible="{Binding SelectedTab, Converter={StaticResource IntIsNonZero}}">
+
+                        <Label
+                            Text="Auto-categorization rules tell PesaLens how to classify new M-Pesa messages automatically."
+                            FontSize="13"
+                            Margin="20,16,20,0"
+                            TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+
+                        <!-- Empty state -->
+                        <VerticalStackLayout
+                            Spacing="10"
+                            HorizontalOptions="Center"
+                            Margin="40,24"
+                            IsVisible="{Binding RuleRows.Count, Converter={StaticResource IntIsZero}}">
+                            <Label Text="🤖" FontSize="42" HorizontalOptions="Center"/>
+                            <Label
+                                Text="No rules yet"
+                                FontSize="15"
+                                HorizontalOptions="Center"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                        </VerticalStackLayout>
+
+                        <!-- Rules list -->
+                        <VerticalStackLayout
+                            Margin="20,14,20,100"
+                            Spacing="10">
+                            <BindableLayout.ItemsSource>
+                                <Binding Path="RuleRows"/>
+                            </BindableLayout.ItemsSource>
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:RuleRowItem">
+                                    <Border
+                                        Padding="16"
+                                        StrokeShape="RoundRectangle 16"
+                                        StrokeThickness="1"
+                                        Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
+
+                                        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+
+                                            <!-- Rule info -->
+                                            <VerticalStackLayout Grid.Column="0" Spacing="4">
+                                                <HorizontalStackLayout Spacing="6">
+                                                    <!-- Type badge -->
+                                                    <Border
+                                                        StrokeShape="RoundRectangle 6"
+                                                        StrokeThickness="0"
+                                                        BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
+                                                        Padding="6,2">
+                                                        <Label
+                                                            Text="{Binding RuleTypeLabel}"
+                                                            FontSize="10"
+                                                            FontAttributes="Bold"
+                                                            CharacterSpacing="0.5"
+                                                            TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"/>
+                                                    </Border>
+                                                    <Label
+                                                        Text="{Binding MatchValue}"
+                                                        FontSize="15"
+                                                        FontAttributes="Bold"
+                                                        VerticalOptions="Center"
+                                                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                                                </HorizontalStackLayout>
+                                                <HorizontalStackLayout Spacing="4">
+                                                    <Label
+                                                        Text="→"
+                                                        FontSize="12"
+                                                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                                                    <Label
+                                                        Text="{Binding CategoryName}"
+                                                        FontSize="13"
+                                                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                                                </HorizontalStackLayout>
+                                            </VerticalStackLayout>
+
+                                            <!-- Toggle + delete -->
+                                            <HorizontalStackLayout
+                                                Grid.Column="1"
+                                                Spacing="8"
+                                                VerticalOptions="Center">
+
+                                                <Switch
+                                                    IsToggled="{Binding IsEnabled}"
+                                                    OnColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                                    ThumbColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}">
+                                                    <Switch.Behaviors>
+                                                        <!-- Propagate toggle to command -->
+                                                    </Switch.Behaviors>
+                                                    <Switch.GestureRecognizers>
+                                                        <TapGestureRecognizer
+                                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=ToggleRuleCommand}"
+                                                            CommandParameter="{Binding .}"/>
+                                                    </Switch.GestureRecognizers>
+                                                </Switch>
+
+                                                <ImageButton
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=DeleteRuleCommand}"
+                                                    CommandParameter="{Binding .}"
+                                                    BackgroundColor="Transparent"
+                                                    HeightRequest="30"
+                                                    WidthRequest="30">
+                                                    <ImageButton.Source>
+                                                        <FontImageSource
+                                                            Glyph="{x:Static m:MaterialOutlined.Delete}"
+                                                            FontFamily="MaterialSymbolsOutlined"
+                                                            Size="18"
+                                                            Color="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"/>
+                                                    </ImageButton.Source>
+                                                </ImageButton>
+
+                                            </HorizontalStackLayout>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+
+                    </VerticalStackLayout>
+                    <!-- /tab 1 -->
+
+                </VerticalStackLayout>
+            </ScrollView>
+        </RefreshView>
 
     </Grid>
-
 </uranium:UraniumContentPage>

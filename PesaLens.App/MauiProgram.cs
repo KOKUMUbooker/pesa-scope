@@ -48,6 +48,7 @@ namespace PesaLens.App
             builder.Services.AddTransient<TransactionDetailViewModel>();
             builder.Services.AddTransient<CategoriesViewModel>();
             builder.Services.AddTransient<EditCategoryViewModel>();
+            builder.Services.AddTransient<BudgetsViewModel>();
 
             // DatabaseService registered as singleton — App.cs resolves and inits it
             var dbPath = Path.Combine(FileSystem.AppDataDirectory, "pesalens.db");

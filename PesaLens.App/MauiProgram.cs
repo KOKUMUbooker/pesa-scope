@@ -8,6 +8,8 @@ using PesaLens.App.ViewModels;
 using PesaLens.App.ViewModels.Categories;
 using PesaLens.App.Views.Onboarding;
 using PesaLens.App.Views.Security;
+using PesaLens.Core.Services;
+using PesaLens.Core.Services.Interfaces;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 using UraniumUI;
 

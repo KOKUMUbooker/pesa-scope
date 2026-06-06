@@ -1,6 +1,7 @@
 ﻿using PesaLens.App.Data.Repositories.Interfaces;
-using PesaLens.App.Models;
+using PesaLens.Core.Models;
 using PesaLens.App.Services.Interfaces;
+using PesaLens.Core.Services.Interfaces;
 
 namespace PesaLens.App.Views.Onboarding;
 

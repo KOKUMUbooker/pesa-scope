@@ -1,7 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PesaLens.App.Data.Repositories.Interfaces;
-using PesaLens.App.Models;
+using PesaLens.Core.Models;
 using PesaLens.App.Views.Transactions;
 
 namespace PesaLens.App.ViewModels;

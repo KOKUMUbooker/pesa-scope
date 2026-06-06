@@ -2,7 +2,8 @@
 using CommunityToolkit.Mvvm.Input;
 using PesaLens.App.Data.Repositories;
 using PesaLens.App.Data.Repositories.Interfaces;
-using PesaLens.App.Models;
+using PesaLens.Core.Models;
+using PesaLens.Core;
 
 namespace PesaLens.App.ViewModels;
 
@@ -58,9 +59,9 @@ public partial class SettingsViewModel : ObservableObject
         var syncMeta = await _syncMetadataRepo.GetAsync();
 
         // Populate observable properties without triggering saves
-        IsDarkMode = _appSettings.Theme == PesaLens.App.Models.AppTheme.Dark;
+        IsDarkMode = _appSettings.Theme == PesaLens.Core.Models.AppTheme.Dark;
         BudgetNotificationsEnabled = _appSettings.BudgetNotificationsEnabled;
-        CurrencyDisplay = _appSettings.CurrencyDisplay == Models.CurrencyDisplay.Ksh ? "Ksh" : "KES";
+        CurrencyDisplay = _appSettings.CurrencyDisplay == PesaLens.Core.Models.CurrencyDisplay.Ksh ? "Ksh" : "KES";
         BiometricLockEnabled = _securitySettings.BiometricsEnabled;
         PinLockEnabled = _securitySettings.PinHash is not null;
 
@@ -75,7 +76,7 @@ public partial class SettingsViewModel : ObservableObject
     public async Task ToggleDarkModeAsync(bool value)
     {
         IsDarkMode = value;
-        _appSettings.Theme = value ? PesaLens.App.Models.AppTheme.Dark : PesaLens.App.Models.AppTheme.Light;
+        _appSettings.Theme = value ? PesaLens.Core.Models.AppTheme.Dark : PesaLens.Core.Models.AppTheme.Light;
 
         Application.Current!.UserAppTheme = value
             ? Microsoft.Maui.ApplicationModel.AppTheme.Dark
@@ -97,8 +98,8 @@ public partial class SettingsViewModel : ObservableObject
     {
         CurrencyDisplay = value;
         _appSettings.CurrencyDisplay = value == "Ksh"
-            ? Models.CurrencyDisplay.Ksh
-            : Models.CurrencyDisplay.KES;
+            ? PesaLens.Core.Models.CurrencyDisplay.Ksh
+            : PesaLens.Core.Models.CurrencyDisplay.KES;
         await _appSettingsRepo.UpdateAsync(_appSettings);
     }
 

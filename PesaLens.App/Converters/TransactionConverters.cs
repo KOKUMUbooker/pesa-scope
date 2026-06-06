@@ -1,5 +1,5 @@
 ﻿using System.Globalization;
-using PesaLens.App.Models;
+using PesaLens.Core.Models;
 
 namespace PesaLens.App.Converters;
 

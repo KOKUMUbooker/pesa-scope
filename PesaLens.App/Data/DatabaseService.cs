@@ -1,4 +1,4 @@
-﻿using PesaLens.App.Models;
+﻿using PesaLens.Core.Models;
 using PesaLens.App.Data.Repositories.Interfaces;
 using SQLite;
 

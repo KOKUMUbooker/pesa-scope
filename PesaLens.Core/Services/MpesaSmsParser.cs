@@ -1,8 +1,8 @@
-﻿using PesaLens.App.Models;
-using PesaLens.App.Services.Interfaces;
+﻿using PesaLens.Core.Models;
+using PesaLens.Core.Services.Interfaces;
 using System.Text.RegularExpressions;
 
-namespace PesaLens.App.Services;
+namespace PesaLens.Core.Services;
 
 /// <summary>
 /// Parses raw M-Pesa SMS messages into Transaction objects.

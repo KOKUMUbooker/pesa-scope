@@ -1,6 +1,6 @@
 ﻿using SQLite;
 
-namespace PesaLens.App.Models;
+namespace PesaLens.Core.Models;
 
 [Table("Budgets")]
 public class Budget

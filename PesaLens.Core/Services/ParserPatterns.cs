@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace PesaLens.App.Services;
+namespace PesaLens.Core.Services;
 
 public static class ParserPatterns
 {

@@ -1,6 +1,6 @@
 ﻿using SQLite;
 
-namespace PesaLens.App.Models;
+namespace PesaLens.Core.Models;
 
 /// <summary>
 /// Single-row table for user preferences. Update in place; never insert a second row.

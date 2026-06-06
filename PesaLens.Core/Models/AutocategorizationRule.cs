@@ -1,6 +1,6 @@
 ﻿using SQLite;
 
-namespace PesaLens.App.Models;
+namespace PesaLens.Core.Models;
 
 [Table("AutoCategorizationRules")]
 public class AutoCategorizationRule

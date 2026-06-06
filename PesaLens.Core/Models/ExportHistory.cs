@@ -1,6 +1,6 @@
 ﻿using SQLite;
 
-namespace PesaLens.App.Models;
+namespace PesaLens.Core.Models;
 
 [Table("ExportHistory")]
 public class ExportHistory

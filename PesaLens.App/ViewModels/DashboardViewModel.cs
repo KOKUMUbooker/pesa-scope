@@ -4,7 +4,7 @@ using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using PesaLens.App.Data.Repositories.Interfaces;
-using PesaLens.App.Models;
+using PesaLens.Core.Models;
 using SkiaSharp;
 
 namespace PesaLens.App.ViewModels;

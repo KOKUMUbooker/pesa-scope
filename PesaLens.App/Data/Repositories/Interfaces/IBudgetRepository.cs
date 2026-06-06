@@ -1,4 +1,4 @@
-﻿using PesaLens.App.Models;
+﻿using PesaLens.Core.Models;
 
 namespace PesaLens.App.Data.Repositories.Interfaces;
 

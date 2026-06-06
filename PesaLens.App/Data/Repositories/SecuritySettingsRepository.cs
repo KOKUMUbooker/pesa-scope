@@ -1,5 +1,5 @@
 ﻿using PesaLens.App.Data.Repositories.Interfaces;
-using PesaLens.App.Models;
+using PesaLens.Core.Models;
 using SQLite;
 
 namespace PesaLens.App.Data.Repositories;

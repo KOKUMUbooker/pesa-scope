@@ -2,4 +2,6 @@
   <Project Path="PesaLens.App/PesaLens.App.csproj">
     <Deploy />
   </Project>
+  <Project Path="PesaLens.Core/PesaLens.Core.csproj" Id="8b56c885-c2a0-4dc4-ad8f-1ee3c74c17ae" />
+  <Project Path="PesaLens.Tests/PesaLens.Tests.csproj" Id="ff9bcb9a-b277-4080-b58b-523c0ae99aa8" />
 </Solution>

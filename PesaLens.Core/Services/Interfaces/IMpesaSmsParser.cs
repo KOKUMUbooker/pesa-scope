@@ -1,6 +1,6 @@
-﻿using PesaLens.App.Models;
+﻿using PesaLens.Core.Models;
 
-namespace PesaLens.App.Services.Interfaces;
+namespace PesaLens.Core.Services.Interfaces;
 
 public interface IMpesaSmsParser
 {

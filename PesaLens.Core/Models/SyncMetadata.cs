@@ -1,6 +1,6 @@
 ﻿using SQLite;
 
-namespace PesaLens.App.Models;
+namespace PesaLens.Core.Models;
 
 /// <summary>
 /// Single-row table that tracks the state of the last SMS import.

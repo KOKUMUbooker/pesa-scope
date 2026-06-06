@@ -229,14 +229,28 @@
                         </Border>
 
                         <!-- ── Category rows ────────────────────────────── -->
-                        <Label
-                            Text="ALL CATEGORIES"
-                            FontSize="11"
-                            FontAttributes="Bold"
-                            CharacterSpacing="1.2"
+                        <Grid
                             Margin="20,20,20,10"
-                            TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                            ColumnDefinitions="*,Auto">
 
+                            <Label
+                                Grid.Column="0"
+                                Text="ALL CATEGORIES"
+                                FontSize="11"
+                                FontAttributes="Bold"
+                                CharacterSpacing="1.2"
+                                VerticalOptions="Center"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+
+                            <Button
+                                Grid.Column="1"
+                                CornerRadius="10"
+                                HeightRequest="36"
+                                Text="+ New"
+                                Command="{Binding NavigateToAddCategoryCommand}"
+                                HorizontalOptions="End" />
+
+                        </Grid>
                         <!-- Empty state -->
                         <VerticalStackLayout
                             Spacing="10"

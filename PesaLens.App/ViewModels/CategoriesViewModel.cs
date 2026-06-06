@@ -142,6 +142,14 @@ public partial class CategoriesViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private static async Task NavigateToAddCategoryAsync()
+    {
+        await Shell.Current.GoToAsync(
+            nameof(PesaLens.App.Views.Categories.EditCategoryPage),
+            new Dictionary<string, object> { ["CategoryId"] = 0 });
+    }
+
+    [RelayCommand]
     private void DismissCategoryDetail() => ShowCategoryDetail = false;
 
     // ── Rule toggle ───────────────────────────────────────────────────────────

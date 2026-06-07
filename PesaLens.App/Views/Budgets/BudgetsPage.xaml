@@ -5,7 +5,7 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:vm="clr-namespace:PesaLens.App.ViewModels"
-    xmlns:models="clr-namespace:PesaLens.Core.Models"
+    xmlns:models="clr-namespace:PesaLens.Core.Models;assembly=PesaLens.Core"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     xmlns:converters="clr-namespace:PesaLens.App.Converters"
     Shell.NavBarIsVisible="False"
@@ -339,7 +339,7 @@
                                                 VerticalOptions="Center">
                                                 <ImageButton.Source>
                                                     <FontImageSource
-                                                        Glyph="{x:Static m:MaterialOutlined.Delete_outline}"
+                                                        Glyph="{x:Static m:MaterialOutlined.Delete}"
                                                         FontFamily="MaterialSymbolsOutlined"
                                                         Size="18"
                                                         Color="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"/>
@@ -434,9 +434,11 @@
             </ScrollView>
         </RefreshView>
 
-        <!-- ══ BOTTOM SHEET: Overall Budget ═══════════════════════════════ -->
-        <uranium:UraniumContentPage.Attachments>
-            <material:BottomSheetView
+    </Grid>
+    
+    <!-- ══ BOTTOM SHEET: Overall Budget ═══════════════════════════════ -->
+    <uranium:UraniumContentPage.Attachments>
+        <material:BottomSheetView
             x:Name="OverallBudgetSheet"
             Grid.Row="0"
             Grid.RowSpan="2"
@@ -528,8 +530,7 @@
                         CornerRadius="12"
                         HeightRequest="50"
                         FontSize="14"
-                        FontAttributes="Bold"
-                        Clicked="OnOverallSaved_Clicked"/>
+                        FontAttributes="Bold"/>
                     </Grid>
 
                 </VerticalStackLayout>
@@ -537,153 +538,153 @@
 
         <!-- ══ BOTTOM SHEET: Add / Edit Category Budget ════════════════════ -->
         <material:BottomSheetView
-            x:Name="CategoryBudgetSheet"
-            Grid.Row="0"
-            Grid.RowSpan="2"
-            CloseOnTapOutside="True"
-            BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
-                <material:BottomSheetView.Header>
-                    <Label Text="Category Budget" FontSize="Title"/>
-                </material:BottomSheetView.Header>
+        x:Name="CategoryBudgetSheet"
+        Grid.Row="0"
+        Grid.RowSpan="2"
+        CloseOnTapOutside="True"
+        BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
+            <material:BottomSheetView.Header>
+                <Label Text="Category Budget" FontSize="Title"/>
+            </material:BottomSheetView.Header>
 
-                <VerticalStackLayout Padding="24,8,24,40" Spacing="20">
+            <VerticalStackLayout Padding="24,8,24,40" Spacing="20">
 
-                    <!-- Category picker (hidden in edit mode) -->
-                    <VerticalStackLayout
-                    Spacing="6"
-                    IsVisible="{Binding IsEditingExisting, Converter={StaticResource InverseBool}}">
-                        <Label
-                        Text="CATEGORY"
-                        FontSize="11"
-                        FontAttributes="Bold"
-                        CharacterSpacing="1.2"
-                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
-                        <Border
-                        StrokeShape="RoundRectangle 12"
-                        StrokeThickness="1"
-                        Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
-                        Padding="10,0">
-                            <Picker
-                            ItemsSource="{Binding UnbudgetedCategories}"
-                            SelectedItem="{Binding DraftCategory}"
-                            ItemDisplayBinding="{Binding Name}"
-                            HeightRequest="48"
-                            FontSize="15"
-                            TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"
-                            BackgroundColor="Transparent"
-                            Title="Select a category…"/>
-                        </Border>
-                    </VerticalStackLayout>
+                <!-- Category picker (hidden in edit mode) -->
+                <VerticalStackLayout
+                Spacing="6"
+                IsVisible="{Binding IsEditingExisting, Converter={StaticResource InverseBool}}">
+                    <Label
+                    Text="CATEGORY"
+                    FontSize="11"
+                    FontAttributes="Bold"
+                    CharacterSpacing="1.2"
+                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                    <Border
+                    StrokeShape="RoundRectangle 12"
+                    StrokeThickness="1"
+                    Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                    Padding="10,0">
+                        <Picker
+                        ItemsSource="{Binding UnbudgetedCategories}"
+                        SelectedItem="{Binding DraftCategory}"
+                        ItemDisplayBinding="{Binding Name}"
+                        HeightRequest="48"
+                        FontSize="15"
+                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"
+                        BackgroundColor="Transparent"
+                        Title="Select a category…"/>
+                    </Border>
+                </VerticalStackLayout>
 
-                    <!-- Category name label (edit mode) -->
-                    <VerticalStackLayout
-                    Spacing="4"
-                    IsVisible="{Binding IsEditingExisting}">
-                        <Label
-                        Text="CATEGORY"
-                        FontSize="11"
-                        FontAttributes="Bold"
-                        CharacterSpacing="1.2"
-                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
-                        <Label
-                        Text="{Binding DraftCategory.Name}"
+                <!-- Category name label (edit mode) -->
+                <VerticalStackLayout
+                Spacing="4"
+                IsVisible="{Binding IsEditingExisting}">
+                    <Label
+                    Text="CATEGORY"
+                    FontSize="11"
+                    FontAttributes="Bold"
+                    CharacterSpacing="1.2"
+                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                    <Label
+                    Text="{Binding DraftCategory.Name}"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                </VerticalStackLayout>
+
+                <!-- Monthly limit -->
+                <VerticalStackLayout Spacing="6">
+                    <Label
+                    Text="MONTHLY LIMIT (KSH)"
+                    FontSize="11"
+                    FontAttributes="Bold"
+                    CharacterSpacing="1.2"
+                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                    <Border
+                    StrokeShape="RoundRectangle 12"
+                    StrokeThickness="1"
+                    Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                    Padding="14,0">
+                        <Entry
+                        Text="{Binding DraftCategoryLimit}"
+                        Placeholder="e.g. 15000"
+                        Keyboard="Numeric"
+                        PlaceholderColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                        BackgroundColor="Transparent"
+                        HeightRequest="48"
                         FontSize="16"
                         FontAttributes="Bold"
                         TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
-                    </VerticalStackLayout>
+                    </Border>
+                    <Label
+                    Text="{Binding CategorySheetError}"
+                    IsVisible="{Binding CategorySheetError, Converter={StaticResource StringIsNotEmptyConverter}}"
+                    FontSize="12"
+                    TextColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"/>
+                </VerticalStackLayout>
 
-                    <!-- Monthly limit -->
-                    <VerticalStackLayout Spacing="6">
+                <!-- Warning threshold -->
+                <VerticalStackLayout Spacing="8">
+                    <Grid ColumnDefinitions="*,Auto">
                         <Label
-                        Text="MONTHLY LIMIT (KSH)"
+                        Grid.Column="0"
+                        Text="WARNING THRESHOLD"
                         FontSize="11"
                         FontAttributes="Bold"
                         CharacterSpacing="1.2"
+                        VerticalOptions="Center"
                         TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
-                        <Border
-                        StrokeShape="RoundRectangle 12"
-                        StrokeThickness="1"
-                        Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
-                        Padding="14,0">
-                            <Entry
-                            Text="{Binding DraftCategoryLimit}"
-                            Placeholder="e.g. 15000"
-                            Keyboard="Numeric"
-                            PlaceholderColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
-                            BackgroundColor="Transparent"
-                            HeightRequest="48"
-                            FontSize="16"
-                            FontAttributes="Bold"
-                            TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
-                        </Border>
                         <Label
-                        Text="{Binding CategorySheetError}"
-                        IsVisible="{Binding CategorySheetError, Converter={StaticResource StringIsNotEmptyConverter}}"
-                        FontSize="12"
-                        TextColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"/>
-                    </VerticalStackLayout>
-
-                    <!-- Warning threshold -->
-                    <VerticalStackLayout Spacing="8">
-                        <Grid ColumnDefinitions="*,Auto">
-                            <Label
-                            Grid.Column="0"
-                            Text="WARNING THRESHOLD"
-                            FontSize="11"
-                            FontAttributes="Bold"
-                            CharacterSpacing="1.2"
-                            VerticalOptions="Center"
-                            TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
-                            <Label
-                            Grid.Column="1"
-                            FontSize="14"
-                            FontAttributes="Bold"
-                            VerticalOptions="Center"
-                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
-                                <Label.Text>
-                                    <MultiBinding StringFormat="{}{0}%">
-                                        <Binding Path="DraftWarningPct"/>
-                                    </MultiBinding>
-                                </Label.Text>
-                            </Label>
-                        </Grid>
-                        <Slider
-                        Minimum="50"
-                        Maximum="100"
-                        Value="{Binding DraftWarningPct}"
-                        MinimumTrackColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                        MaximumTrackColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
-                        ThumbColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
-                        <Label
-                        Text="You'll be notified when spending reaches this percentage of your limit."
-                        FontSize="12"
-                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
-                    </VerticalStackLayout>
-
-                    <!-- Notifications toggle -->
-                    <Grid ColumnDefinitions="*,Auto">
-                        <VerticalStackLayout Grid.Column="0" Spacing="2">
-                            <Label
-                            Text="Notifications"
-                            FontSize="14"
-                            FontAttributes="Bold"
-                            TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
-                            <Label
-                            Text="Alert at threshold and when exceeded"
-                            FontSize="12"
-                            TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
-                        </VerticalStackLayout>
-                        <Switch
                         Grid.Column="1"
-                        IsToggled="{Binding DraftCategoryNotifs}"
-                        OnColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                        VerticalOptions="Center"/>
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        VerticalOptions="Center"
+                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
+                            <Label.Text>
+                                <MultiBinding StringFormat="{}{0}%">
+                                    <Binding Path="DraftWarningPct"/>
+                                </MultiBinding>
+                            </Label.Text>
+                        </Label>
                     </Grid>
+                    <Slider
+                    Minimum="50"
+                    Maximum="100"
+                    Value="{Binding DraftWarningPct}"
+                    MinimumTrackColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                    MaximumTrackColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                    ThumbColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                    <Label
+                    Text="You'll be notified when spending reaches this percentage of your limit."
+                    FontSize="12"
+                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                </VerticalStackLayout>
 
-                    <!-- Save button -->
-                    <Button
+                <!-- Notifications toggle -->
+                <Grid ColumnDefinitions="*,Auto">
+                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                        <Label
+                        Text="Notifications"
+                        FontSize="14"
+                        FontAttributes="Bold"
+                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                        <Label
+                        Text="Alert at threshold and when exceeded"
+                        FontSize="12"
+                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                    </VerticalStackLayout>
+                    <Switch
+                    Grid.Column="1"
+                    IsToggled="{Binding DraftCategoryNotifs}"
+                    OnColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                    VerticalOptions="Center"/>
+                </Grid>
+
+                <!-- Save button -->
+                <Button
                     Text="Save Budget"
                     Command="{Binding SaveCategoryBudgetCommand}"
                     BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
@@ -691,11 +692,9 @@
                     CornerRadius="12"
                     HeightRequest="50"
                     FontSize="14"
-                    FontAttributes="Bold"
-                    Clicked="OnCategorySaved_Clicked"/>
+                    FontAttributes="Bold"/>
 
-                </VerticalStackLayout>
-            </material:BottomSheetView>
-        </uranium:UraniumContentPage.Attachments>
-    </Grid>
+            </VerticalStackLayout>
+        </material:BottomSheetView>
+    </uranium:UraniumContentPage.Attachments>
 </uranium:UraniumContentPage>

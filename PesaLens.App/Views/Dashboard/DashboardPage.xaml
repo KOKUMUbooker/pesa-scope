@@ -5,7 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
     xmlns:vm="clr-namespace:PesaLens.App.ViewModels"
-    xmlns:models="clr-namespace:PesaLens.Core.Models"
+    xmlns:models="clr-namespace:PesaLens.Core.Models;assembly=PesaLens.Core"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
     xmlns:converters="clr-namespace:PesaLens.App.Converters"

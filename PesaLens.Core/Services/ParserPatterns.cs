@@ -2,6 +2,9 @@
 
 namespace PesaLens.Core.Services;
 
+// <summary>
+//   Patterns used as set as per the date - 7th June 2026
+// </summary>
 public static class ParserPatterns
 {
     // ── Compiled patterns ────────────────────────────────────────────────────
@@ -13,38 +16,82 @@ public static class ParserPatterns
         RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
     public static readonly Regex SendMoneyPattern = new(
-        @"^(?<code>[A-Z0-9]{10}) Confirmed\.\s*Ksh(?<amount>[\d,]+\.?\d*) sent to (?<name>[A-Z\s]+?) (?<phone>\d+) on (?<date>[\d/]+) at (?<time>[\d:]+\s*[APM]+)\.?\s*(New M-PESA balance is Ksh(?<balance>[\d,]+\.?\d*))?.*?(Transaction cost,?\s*Ksh(?<cost>[\d,]+\.?\d*))?",
+        @"^(?<code>[A-Z0-9]{8,12}) Confirmed\.\s*" +
+        @"Ksh(?<amount>[\d,]+\.?\d*) sent to " +
+        @"(?<name>[A-Za-z][A-Za-z\s]*?) " +
+        @"(?<phone>\d{9,12}) on " +
+        @"(?<date>[\d/]+) at (?<time>[\d:]+\s*[AP]M)\." +
+        @"\s*New M-PESA balance is Ksh(?<balance>[\d,]+\.?\d*)\." +
+        @".*?Transaction cost,?\s*Ksh(?<cost>[\d,]+\.?\d*)\.",
         RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
+
     public static readonly Regex ReceiveMoneyPattern = new(
-        @"^(?<code>[A-Z0-9]{10}) Confirmed\.\s*You have received Ksh(?<amount>[\d,]+\.?\d*) from (?<name>[A-Z\s]+?) (?<phone>\d+) on (?<date>[\d/]+) at (?<time>[\d:]+\s*[APM]+)\.?\s*(New M-PESA balance is Ksh(?<balance>[\d,]+\.?\d*))?",
+        @"^(?<code>[A-Z0-9]{8,12}) Confirmed\." +
+        @"\s*You have received Ksh(?<amount>[\d,]+\.?\d*) from " +
+        @"(?<name>[A-Za-z][A-Za-z\s]+?) " +
+        @"(?<phone>[\d\*]{7,12}) on " +
+        @"(?<date>[\d/]+) at (?<time>[\d:]+\s*[AP]M)" +
+        @"\s+New M-PESA balance is Ksh(?<balance>[\d,]+\.?\d*)\.",
         RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
     public static readonly Regex PayBillPattern = new(
-        @"^(?<code>[A-Z0-9]{10}) Confirmed\.\s*Ksh(?<amount>[\d,]+\.?\d*) sent to (?<name>[A-Z0-9\s&]+?) for account (?<account>[A-Z0-9\-\s]+?) on (?<date>[\d/]+) at (?<time>[\d:]+\s*[APM]+)\.?\s*(New M-PESA balance is Ksh(?<balance>[\d,]+\.?\d*))?.*?(Transaction cost,?\s*Ksh(?<cost>[\d,]+\.?\d*))?",
+        @"^(?<code>[A-Z0-9]{8,12}) Confirmed\.\s*" +
+        @"Ksh(?<amount>[\d,]+\.?\d*) sent to " +
+        @"(?<name>[A-Z0-9\s&'\-\.]+?) for account " +
+        @"(?<account>[A-Z0-9\-\s]+?) on " +
+        @"(?<date>[\d/]+) at (?<time>[\d:]+\s*[AP]M) " +
+        @"New M-PESA balance is Ksh(?<balance>[\d,]+\.?\d*)\." +
+        @"\s*Transaction cost,?\s*Ksh(?<cost>[\d,]+\.?\d*)\.",
         RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
     public static readonly Regex BuyGoodsPattern = new(
-        @"^(?<code>[A-Z0-9]{10}) Confirmed\.\s*Ksh(?<amount>[\d,]+\.?\d*) paid to (?<name>[A-Z0-9\s&'\-\.]+?) on (?<date>[\d/]+) at (?<time>[\d:]+\s*[APM]+)\.?\s*(New M-PESA balance is Ksh(?<balance>[\d,]+\.?\d*))?.*?(Transaction cost,?\s*Ksh(?<cost>[\d,]+\.?\d*))?",
+        @"^(?<code>[A-Z0-9]{8,12}) Confirmed\.\s*" +
+        @"Ksh(?<amount>[\d,]+\.?\d*) paid to " +
+        @"(?<name>[A-Z0-9\s&'\-\.]+?)\.\s*on " +
+        @"(?<date>[\d/]+) at (?<time>[\d:]+\s*[AP]M)\." +
+        @"New M-PESA balance is Ksh(?<balance>[\d,]+\.?\d*)\." +
+        @"\s*Transaction cost,?\s*Ksh(?<cost>[\d,]+\.?\d*)\.",
         RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
     public static readonly Regex WithdrawalPattern = new(
-        @"^(?<code>[A-Z0-9]{10}) Confirmed\.\s*You have withdrawn Ksh(?<amount>[\d,]+\.?\d*) from (?<agent>[A-Z0-9\s]+?) - (?<location>.+?) on (?<date>[\d/]+) at (?<time>[\d:]+\s*[APM]+)\.?\s*(New M-PESA balance is Ksh(?<balance>[\d,]+\.?\d*))?.*?(Transaction cost,?\s*Ksh(?<cost>[\d,]+\.?\d*))?",
+        @"^(?<code>[A-Z0-9]{8,12}) Confirmed\." +
+        @"on (?<date>[\d/]+) at (?<time>[\d:]+\s*[AP]M)" +
+        @"Withdraw Ksh(?<amount>[\d,]+\.?\d*) from " +
+        @"(?<agent>\d+) - (?<location>.+?) " +
+        @"New M-PESA balance is Ksh(?<balance>[\d,]+\.?\d*)\." +
+        @"\s*Transaction cost,?\s*Ksh(?<cost>[\d,]+\.?\d*)\.",
         RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
     public static readonly Regex AirtimePattern = new(
-        @"^(?<code>[A-Z0-9]{10}) Confirmed\.\s*You bought Ksh(?<amount>[\d,]+\.?\d*) of airtime on (?<date>[\d/]+) at (?<time>[\d:]+\s*[APM]+)\.?\s*(New M-PESA balance is Ksh(?<balance>[\d,]+\.?\d*))?",
+        @"^(?<code>[A-Z0-9]{8,12}) [Cc]onfirmed\." +
+        @"\s*You bought Ksh(?<amount>[\d,]+\.?\d*) of airtime on " +
+        @"(?<date>[\d/]+) at (?<time>[\d:]+\s*[AP]M)\." +
+        @"New M-PESA balance is Ksh(?<balance>[\d,]+\.?\d*)\." +
+        @"\s*Transaction cost,?\s*Ksh(?<cost>[\d,]+\.?\d*)\.",
         RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
     public static readonly Regex FulizaPattern = new(
-        @"^(?<code>[A-Z0-9]{10}) Confirmed\.\s*(You have fulfilled|Ksh(?<amount>[\d,]+\.?\d*) of Fuliza)",
-        RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
+       @"^(?<code>[A-Z0-9]{8,12})\s*" +
+       @"Confirmed\.\s*" +
+       @"Ksh\s*(?<amount>[\d,]+\.?\d*) from your M-PESA has been used to " +
+       @"(?<repayment_type>fully|partially) pay your outstanding Fuliza M-PESA\.\s*" +
+       @"Available Fuliza M-PESA limit is Ksh\s*(?<limit>[\d,]+\.?\d*)\.",
+       RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
     public static readonly Regex ReversalPattern = new(
-        @"^(?<code>[A-Z0-9]{10}) Confirmed\.\s*Your transaction of Ksh(?<amount>[\d,]+\.?\d*) has been reversed",
+        @"^(?<code>[A-Z0-9]{8,12}) [Cc]onfirmed\.\s*" +
+        @"Reversal of transaction (?<reversed_code>[A-Z0-9]{8,12}) has been successfully reversed\s*" +
+        @"on (?<date>[\d/]+)\s*at (?<time>[\d:]+\s*[AP]M) and " +
+        @"Ksh(?<amount>[\d,]+\.?\d*) is credited to your M-PESA account\.\s*" +
+        @"New M-PESA account balance is Ksh(?<balance>[\d,]+\.?\d*)\.",
         RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
     public static readonly Regex DepositPattern = new(
-        @"^(?<code>[A-Z0-9]{10}) Confirmed\.\s*Ksh(?<amount>[\d,]+\.?\d*) deposited to your M-PESA",
+        @"^(?<code>[A-Z0-9]{8,12}) Confirmed\.\s*" +
+        @"On (?<date>[\d/]+) at (?<time>[\d:]+\s*[AP]M) " +
+        @"Give Ksh(?<amount>[\d,]+\.?\d*) cash to " +
+        @"(?<agent>.+?) " +
+        @"New M-PESA balance is Ksh(?<balance>[\d,]+\.?\d*)\.",
         RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
 }

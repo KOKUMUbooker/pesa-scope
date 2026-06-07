@@ -8,8 +8,8 @@
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
     xmlns:icons="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     xmlns:vm="clr-namespace:PesaLens.App.ViewModels"
-    xmlns:models="clr-namespace:PesaLens.Core.Models"
-    x:DataType="vm:TransactionsViewModel"
+    xmlns:converters="clr-namespace:PesaLens.App.Converters"
+    xmlns:models="clr-namespace:PesaLens.Core.Models;assembly=PesaLens.Core"
     NavigationPage.HasNavigationBar="False"
     BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 
@@ -128,6 +128,7 @@
 
                     <!-- Type filter chips -->
                     <CollectionView
+                        x:DataType="vm:TypeFilterChip"
                         ItemsSource="{Binding TypeChips}"
                         ItemsLayout="HorizontalList"
                         SelectionMode="None">
@@ -243,7 +244,7 @@
                                 <Binding Path="Transactions" />
                             </BindableLayout.ItemsSource>
 
-                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding Transactions}" Spacing="8">
+                            <VerticalStackLayout  BindableLayout.ItemsSource="{Binding Transactions}" Spacing="8">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate x:DataType="models:Transaction">
                                         <Border
@@ -483,8 +484,7 @@
 
     <uranium:UraniumContentPage.Resources>
         <ResourceDictionary>
-            <converters:InvertedBoolConverter x:Key="InvertedBoolConverter"
-                xmlns:converters="clr-namespace:CommunityToolkit.Maui.Converters;assembly=CommunityToolkit.Maui" />
+            <converters:InverseBoolConverter x:Key="InvertedBoolConverter"/>
             <local:StringToBoolConverter x:Key="StringToBoolConverter"
                 xmlns:local="clr-namespace:PesaLens.App.Converters" />
             <local:TransactionTypeToIconConverter x:Key="TransactionTypeToIconConverter"

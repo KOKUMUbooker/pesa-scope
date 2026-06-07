@@ -6,7 +6,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
     xmlns:vm="clr-namespace:PesaLens.App.ViewModels"
-    xmlns:models="clr-namespace:PesaLens.Core.Models"
+    xmlns:models="clr-namespace:PesaLens.Core.Models;assembly=PesaLens.Core"
     xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     xmlns:converters="clr-namespace:PesaLens.App.Converters"
@@ -16,7 +16,7 @@
     <ContentPage.Resources>
         <converters:IntIsZeroConverter    x:Key="IntIsZero"/>
         <converters:IntIsNonZeroConverter x:Key="IntIsNonZero"/>
-        <converters:BoolToColorConverter  x:Key="BoolToColor"/>
+        <converters:TransactionTypeToColorConverter  x:Key="BoolToColor"/>
         <converters:InverseBoolConverter  x:Key="InverseBool"/>
     </ContentPage.Resources>
 

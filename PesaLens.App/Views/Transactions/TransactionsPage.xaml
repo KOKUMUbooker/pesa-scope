@@ -240,10 +240,6 @@
                                 TextColor="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}" />
 
                             <!-- Transactions in this group -->
-                            <BindableLayout.ItemsSource>
-                                <Binding Path="Transactions" />
-                            </BindableLayout.ItemsSource>
-
                             <VerticalStackLayout  BindableLayout.ItemsSource="{Binding Transactions}" Spacing="8">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate x:DataType="models:Transaction">

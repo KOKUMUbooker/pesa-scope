@@ -1,6 +1,7 @@
-﻿using PesaLens.App.Data.Repositories.Interfaces;
-using PesaLens.Core.Models;
+﻿using Android.Provider;
+using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.App.Services.Interfaces;
+using PesaLens.Core.Models;
 using PesaLens.Core.Services.Interfaces;
 
 namespace PesaLens.App.Views.Onboarding;
@@ -12,6 +13,15 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
     private readonly ISyncMetadataRepository _syncMetadataRepo;
     private readonly ISmsReaderService _smsReader;
     private readonly IMpesaSmsParser _mpesaSmsParser;
+
+    private bool _waitingForRestoreResult = false;
+
+    /// <summary>
+    /// Set by PermissionPage before navigating here.
+    /// True  → user set PesaLens as default; we can bulk-import history.
+    /// False → user skipped; we only capture future transactions.
+    /// </summary>
+    public bool HistoricalImportEnabled { get; set; }
 
     public ImportProgressPage(
         IAppSettingsRepository appSettingsRepo,
@@ -25,37 +35,49 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
         _appSettingsRepo = appSettingsRepo;
         _transactionRepo = transactionRepo;
         _syncMetadataRepo = syncMetadataRepo;
-        _mpesaSmsParser = mpesaSmsParser;
         _smsReader = smsReader;
+        _mpesaSmsParser = mpesaSmsParser;
     }
 
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        _ = RunImportAsync();
+
+        if (_waitingForRestoreResult)
+        {
+            // Returning from the system Default Apps settings screen
+            _waitingForRestoreResult = false;
+
+            if (!IsPesaLensStillDefault())
+            {
+                // User successfully switched back — hide the card
+                RestoreDefaultCard.IsVisible = false;
+                StatusLabel.Text = "✓ Default SMS app restored.";
+            }
+            else
+            {
+                // Still default — reset button so they can try again
+                RestoreDefaultButton.IsEnabled = true;
+                RestoreDefaultButton.Text = "Restore Default SMS App";
+            }
+        }
+        else
+        {
+            // Normal first appearance — run the import
+            _ = RunImportAsync();
+        }
     }
 
-    // ── Import ────────────────────────────────────────────────────────────────
+    // ── Main import orchestration ─────────────────────────────────────────────
 
     private async Task RunImportAsync()
     {
         try
         {
-            await SetStatusAsync("Reading messages from MPESA...");
-
-            var messages = await _smsReader.GetAllMpesaMessagesAsync();
-
-            if (messages == null || messages.Count == 0)
-            {
-                await FinishWithResultAsync(0, noMessages: true);
-                return;
-            }
-
-            await SetStatusAsync($"Found {messages.Count} M-Pesa messages. Parsing...");
-
-            int imported = await ParseAndImportAsync(messages);
-
-            await FinishWithResultAsync(imported);
+            if (HistoricalImportEnabled)
+                await RunHistoricalImportAsync();
+            else
+                await RunSkippedImportAsync();
         }
         catch (Exception ex)
         {
@@ -64,7 +86,46 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
         }
     }
 
-    private async Task<int> ParseAndImportAsync(List<PesaLens.App.Services.Interfaces.SmsMessage> messages)
+    // ── Historical import (user set PesaLens as default) ─────────────────────
+
+    private async Task RunHistoricalImportAsync()
+    {
+        await SetStatusAsync("Reading messages from MPESA...");
+
+        var messages = await _smsReader.GetAllMpesaMessagesAsync();
+
+        if (messages is null || messages.Count == 0)
+        {
+            await FinishAsync(importedCount: 0, wasHistorical: true, noMessages: true);
+            return;
+        }
+
+        await SetStatusAsync($"Found {messages.Count} M-Pesa messages. Parsing...");
+
+        int imported = await ParseAndImportAsync(messages);
+
+        await FinishAsync(importedCount: imported, wasHistorical: true);
+    }
+
+    // ── Skipped path (user chose not to set as default) ───────────────────────
+
+    private async Task RunSkippedImportAsync()
+    {
+        await SetStatusAsync("Setting up PesaLens...");
+
+        await MainThread.InvokeOnMainThreadAsync(() =>
+        {
+            ImportProgressBar.Progress = 1.0;
+            CountLabel.IsVisible = false;
+        });
+
+        await FinishAsync(importedCount: 0, wasHistorical: false);
+    }
+
+    // ── Parse + insert ────────────────────────────────────────────────────────
+
+    private async Task<int> ParseAndImportAsync(
+        List<PesaLens.App.Services.Interfaces.SmsMessage> messages)
     {
         var transactions = new List<Transaction>();
         int total = messages.Count;
@@ -107,7 +168,7 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
 
     // ── Completion ────────────────────────────────────────────────────────────
 
-    private async Task FinishWithResultAsync(int importedCount, bool noMessages = false)
+    private async Task FinishAsync(int importedCount, bool wasHistorical, bool noMessages = false)
     {
         var settings = await _appSettingsRepo.GetAsync();
         settings.OnboardingComplete = true;
@@ -121,8 +182,20 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
             {
                 StatusIcon.Text = "🤷";
                 TitleLabel.Text = "No M-Pesa Messages Found";
-                SubtitleLabel.Text = "We couldn't find any MPESA messages in your inbox. You can still explore the app — transactions will appear after your next M-Pesa activity.";
-                StatusLabel.Text = "You can sync manually from the Settings page at any time.";
+                SubtitleLabel.Text =
+                    "We couldn't find any MPESA messages in your inbox. " +
+                    "Transactions will appear automatically after your next M-Pesa activity.";
+                StatusLabel.Text = "You can also sync manually from Settings at any time.";
+                CountLabel.IsVisible = false;
+            }
+            else if (!wasHistorical)
+            {
+                StatusIcon.Text = "⚡";
+                TitleLabel.Text = "Ready to Go!";
+                SubtitleLabel.Text =
+                    "PesaLens will automatically capture new M-Pesa transactions as they arrive.";
+                StatusLabel.Text =
+                    "Tip: you can import your history later from Settings → Sync.";
                 CountLabel.IsVisible = false;
             }
             else
@@ -130,12 +203,76 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
                 StatusIcon.Text = "✅";
                 TitleLabel.Text = "Import Complete!";
                 SubtitleLabel.Text = "Your M-Pesa history is ready.";
-                StatusLabel.Text = $"Successfully imported {importedCount} transaction{(importedCount == 1 ? "" : "s")}.";
-                CountLabel.Text = $"{importedCount} transaction{(importedCount == 1 ? "" : "s")} imported";
+                StatusLabel.Text =
+                    $"Successfully imported {importedCount} " +
+                    $"transaction{(importedCount == 1 ? "" : "s")}.";
+                CountLabel.Text =
+                    $"{importedCount} transaction{(importedCount == 1 ? "" : "s")} imported";
             }
+
+            // Show restore card whenever PesaLens was set as default,
+            // even if the inbox was empty — it's still the default app.
+            if (wasHistorical)
+                RestoreDefaultCard.IsVisible = true;
 
             ShowDoneButton("Go to Dashboard");
         });
+    }
+
+    // ── Restore default SMS app ───────────────────────────────────────────────
+
+    private void OnRestoreDefaultClicked(object? sender, EventArgs e)
+    {
+        _waitingForRestoreResult = true;
+        LaunchChangeDefaultDialog();
+        RestoreDefaultButton.IsEnabled = false;
+        RestoreDefaultButton.Text = "Opening system settings…";
+    }
+
+    private void OnRestoreLaterTapped(object? sender, EventArgs e)
+    {
+        RestoreDefaultCard.IsVisible = false;
+    }
+
+    private static void LaunchChangeDefaultDialog()
+    {
+        var activity = Platform.CurrentActivity;
+        if (activity == null) return;
+
+        // API 29+: open the Default Apps settings screen so the user
+        // can pick their preferred SMS app. RoleManager has no API to
+        // release a role — you can only direct the user to do it themselves.
+        var intent = new Android.Content.Intent(
+            Android.Provider.Settings.ActionManageDefaultAppsSettings);
+
+        // Fallback for OEM ROMs that don't expose that screen
+        if (activity.PackageManager?.ResolveActivity(intent, 0) == null)
+        {
+            intent = new Android.Content.Intent(
+                Android.Provider.Settings.ActionApplicationDetailsSettings);
+            intent.SetData(Android.Net.Uri.Parse(
+                $"package:{Android.App.Application.Context.PackageName}"));
+        }
+
+        activity.StartActivity(intent);
+    }
+
+    // ── Done / navigate to dashboard ──────────────────────────────────────────
+
+    private async void OnDoneClicked(object? sender, EventArgs e)
+    {
+        if (IsPesaLensStillDefault() && RestoreDefaultCard.IsVisible)
+        {
+            await DisplayAlertAsync(
+                "Reminder",
+                "PesaLens is still your default SMS app. " +
+                "Remember to switch back to your preferred messaging app " +
+                "from Settings → Default SMS App.",
+                "OK");
+        }
+
+        if (Application.Current?.Windows.FirstOrDefault() is Window window)
+            window.Page = new AppShell();
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -149,9 +286,10 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
         DoneButton.IsVisible = true;
     }
 
-    private void OnDoneClicked(object? sender, EventArgs e)
+    private static bool IsPesaLensStillDefault()
     {
-        if (Application.Current?.Windows.FirstOrDefault() is Window window)
-            window.Page = new AppShell();
+        var defaultPkg = Telephony.Sms.GetDefaultSmsPackage(
+            Android.App.Application.Context);
+        return defaultPkg == Android.App.Application.Context.PackageName;
     }
 }

@@ -9,89 +9,144 @@
 
     <Grid RowDefinitions="*, Auto" Padding="32,64,32,48">
 
-        <!-- ── Main content (centered vertically) ─────────────────────── -->
-        <VerticalStackLayout
-            Grid.Row="0"
-            VerticalOptions="Center"
-            Spacing="0">
+        <!-- ── Main content ───────────────────────────────────────────── -->
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout VerticalOptions="Center" Spacing="0">
 
-            <!-- Icon -->
-            <Border
-                HorizontalOptions="Center"
-                WidthRequest="96"
-                HeightRequest="96"
-                BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
-                StrokeThickness="0"
-                Margin="0,0,0,32">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="28" />
-                </Border.StrokeShape>
-                <Label
-                    x:Name="StatusIcon"
-                    Text="📥"
-                    FontSize="40"
+                <!-- Icon -->
+                <Border
                     HorizontalOptions="Center"
-                    VerticalOptions="Center" />
-            </Border>
+                    WidthRequest="96" HeightRequest="96"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
+                    StrokeThickness="0"
+                    Margin="0,0,0,32">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="28" />
+                    </Border.StrokeShape>
+                    <Label
+                        x:Name="StatusIcon"
+                        Text="📥"
+                        FontSize="40"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
 
-            <!-- Title -->
-            <Label
-                x:Name="TitleLabel"
-                Text="Importing Your Transactions"
-                FontSize="24"
-                FontAttributes="Bold"
-                HorizontalTextAlignment="Center"
-                TextColor="{AppThemeBinding Light={StaticResource OnBackground}, Dark={StaticResource OnBackgroundDark}}"
-                Margin="0,0,0,12" />
-
-            <!-- Subtitle -->
-            <Label
-                x:Name="SubtitleLabel"
-                Text="This only happens once. Sit tight while we read your M-Pesa messages."
-                FontSize="14"
-                LineHeight="1.5"
-                HorizontalTextAlignment="Center"
-                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
-                Margin="0,0,0,48" />
-
-            <!-- Progress bar -->
-            <ProgressBar
-                x:Name="ImportProgressBar"
-                Progress="0"
-                ProgressColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                HeightRequest="6"
-                Margin="0,0,0,16" />
-
-            <!-- Imported count -->
-            <Label
-                x:Name="CountLabel"
-                Text="0 transactions imported"
-                FontSize="13"
-                HorizontalTextAlignment="Center"
-                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
-                Margin="0,0,0,24" />
-
-            <!-- Status message card -->
-            <Border
-                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
-                StrokeThickness="0"
-                Margin="0,0,0,0">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="12" />
-                </Border.StrokeShape>
+                <!-- Title -->
                 <Label
-                    x:Name="StatusLabel"
-                    Text="Reading messages from MPESA..."
-                    FontSize="13"
-                    LineHeight="1.4"
+                    x:Name="TitleLabel"
+                    Text="Importing Your Transactions"
+                    FontSize="24"
+                    FontAttributes="Bold"
+                    HorizontalTextAlignment="Center"
+                    TextColor="{AppThemeBinding Light={StaticResource OnBackground}, Dark={StaticResource OnBackgroundDark}}"
+                    Margin="0,0,0,12" />
+
+                <!-- Subtitle -->
+                <Label
+                    x:Name="SubtitleLabel"
+                    Text="This only happens once. Sit tight while we read your M-Pesa messages."
+                    FontSize="14" LineHeight="1.5"
                     HorizontalTextAlignment="Center"
                     TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
-                    Padding="16,12" />
-            </Border>
+                    Margin="0,0,0,48" />
 
-        </VerticalStackLayout>
+                <!-- Progress bar — hidden after import completes -->
+                <ProgressBar
+                    x:Name="ImportProgressBar"
+                    Progress="0"
+                    ProgressColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                    HeightRequest="6"
+                    Margin="0,0,0,16" />
 
-        <!-- ── Bottom: Done button (hidden until complete) ────────────── -->
+                <!-- Imported count -->
+                <Label
+                    x:Name="CountLabel"
+                    Text="0 transactions imported"
+                    FontSize="13"
+                    HorizontalTextAlignment="Center"
+                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                    Margin="0,0,0,24" />
+
+                <!-- Status message -->
+                <Border
+                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                    StrokeThickness="0"
+                    Margin="0,0,0,24">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+                    <Label
+                        x:Name="StatusLabel"
+                        Text="Reading messages from MPESA..."
+                        FontSize="13" LineHeight="1.4"
+                        HorizontalTextAlignment="Center"
+                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                        Padding="16,12" />
+                </Border>
+
+                <!-- ══════════════════════════════════════════════════════
+                     RESTORE DEFAULT SMS APP CARD
+                     Only visible after a successful historical import,
+                     i.e. when PesaLens was temporarily set as default.
+                ══════════════════════════════════════════════════════ -->
+                <Border
+                    x:Name="RestoreDefaultCard"
+                    IsVisible="False"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource SecondaryContainer}, Dark={StaticResource SecondaryContainerDark}}"
+                    StrokeThickness="0"
+                    Margin="0,0,0,0">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="16" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Padding="20" Spacing="14">
+
+                        <!-- Header -->
+                        <HorizontalStackLayout Spacing="10">
+                            <Label Text="↩️" FontSize="22" VerticalOptions="Center" />
+                            <Label
+                                Text="Switch back to your SMS app"
+                                FontSize="15" FontAttributes="Bold"
+                                VerticalOptions="Center"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}"/>
+                        </HorizontalStackLayout>
+
+                        <!-- Explanation -->
+                        <Label
+                            Text="PesaLens is still your default SMS app. Tap below to restore your preferred messaging app — PesaLens will keep receiving M-Pesa notifications in the background."
+                            FontSize="13" LineHeight="1.45"
+                            TextColor="{AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}"/>
+
+                        <!-- Restore button -->
+                        <Button
+                            x:Name="RestoreDefaultButton"
+                            Text="Restore Default SMS App"
+                            Clicked="OnRestoreDefaultClicked"
+                            HeightRequest="46"
+                            CornerRadius="10"
+                            FontSize="14" FontAttributes="Bold"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Secondary}, Dark={StaticResource SecondaryDark}}"
+                            TextColor="{AppThemeBinding Light={StaticResource OnSecondary}, Dark={StaticResource OnSecondaryDark}}"/>
+
+                        <!-- "I'll do it later" link -->
+                        <Label
+                            Text="I'll switch back later"
+                            FontSize="12"
+                            HorizontalOptions="Center"
+                            TextDecorations="Underline"
+                            TextColor="{AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}"
+                            Opacity="0.7">
+                            <Label.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnRestoreLaterTapped" />
+                            </Label.GestureRecognizers>
+                        </Label>
+
+                    </VerticalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ── Bottom: Done button (hidden until import completes) ─────── -->
         <Button
             x:Name="DoneButton"
             Grid.Row="1"
@@ -101,8 +156,7 @@
             HorizontalOptions="Fill"
             HeightRequest="52"
             CornerRadius="14"
-            FontSize="16"
-            FontAttributes="Bold"
+            FontSize="16" FontAttributes="Bold"
             BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
             TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}" />
 

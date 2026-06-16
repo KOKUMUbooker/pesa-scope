@@ -7,234 +7,320 @@
     NavigationPage.HasNavigationBar="False"
     BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 
-    <ScrollView>
-        <VerticalStackLayout
-            Padding="32,64,32,48"
-            Spacing="0">
+    <Grid RowDefinitions="*,Auto">
 
-            <!-- ── Icon placeholder ───────────────────────────────────── -->
-            <Border
-                HorizontalOptions="Center"
-                WidthRequest="100"
-                HeightRequest="100"
-                BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
-                StrokeThickness="0"
-                Margin="0,0,0,32">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="28" />
-                </Border.StrokeShape>
-                <Label
-                    Text="💬"
-                    FontSize="44"
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Padding="32,64,32,24" Spacing="0">
+
+                <!-- ── Step indicator ─────────────────────────────────── -->
+                <HorizontalStackLayout
+                    x:Name="StepIndicator"
                     HorizontalOptions="Center"
-                    VerticalOptions="Center" />
-            </Border>
-
-            <!-- ── Headline ───────────────────────────────────────────── -->
-            <Label
-                Text="One Permission Required"
-                FontSize="26"
-                FontAttributes="Bold"
-                HorizontalTextAlignment="Center"
-                TextColor="{AppThemeBinding Light={StaticResource OnBackground}, Dark={StaticResource OnBackgroundDark}}"
-                Margin="0,0,0,12" />
-
-            <Label
-                Text="To get started, PesaLens needs access to your SMS messages."
-                FontSize="15"
-                LineHeight="1.5"
-                HorizontalTextAlignment="Center"
-                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
-                Margin="0,0,0,40" />
-
-            <!-- ── Why we need it ─────────────────────────────────────── -->
-            <Label
-                Text="WHY WE NEED IT"
-                FontSize="11"
-                FontAttributes="Bold"
-                CharacterSpacing="1.2"
-                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                Margin="0,0,0,12" />
-
-            <Border
-                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
-                StrokeThickness="0"
-                Margin="0,0,0,32">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="16" />
-                </Border.StrokeShape>
-                <VerticalStackLayout Padding="20" Spacing="20">
-
-                    <Grid ColumnDefinitions="Auto,*"
-          ColumnSpacing="16">
-
-                        <Label Grid.Column="0"
-               Text="📩"
-               FontSize="22"
-               VerticalOptions="Start" />
-
-                        <VerticalStackLayout Grid.Column="1"
-                             Spacing="4">
-
-                            <Label
-                Text="Read M-Pesa messages"
-                FontSize="14"
-                FontAttributes="Bold"
-                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
-
-                            <Label
-                Text="PesaLens reads only messages from MPESA to extract your transaction history."
-                FontSize="13"
-                LineHeight="1.4"
-                LineBreakMode="WordWrap"
-                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
-                        </VerticalStackLayout>
-
-                    </Grid>
-
+                    Spacing="8"
+                    Margin="0,0,0,32">
+                    <Border
+                        x:Name="Step1Dot"
+                        WidthRequest="28" HeightRequest="28"
+                        StrokeThickness="0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
+                        <Border.StrokeShape>
+                            <Ellipse />
+                        </Border.StrokeShape>
+                        <Label Text="1" FontSize="12" FontAttributes="Bold"
+                            TextColor="White"
+                            HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
                     <BoxView
-        HeightRequest="1"
-        Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
-        Opacity="0.5" />
+                        WidthRequest="32" HeightRequest="2"
+                        VerticalOptions="Center" CornerRadius="1"
+                        Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}" />
+                    <Border
+                        x:Name="Step2Dot"
+                        WidthRequest="28" HeightRequest="28"
+                        StrokeThickness="0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}">
+                        <Border.StrokeShape>
+                            <Ellipse />
+                        </Border.StrokeShape>
+                        <Label x:Name="Step2Label" Text="2" FontSize="12" FontAttributes="Bold"
+                            TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                            HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
+                </HorizontalStackLayout>
 
-                    <Grid ColumnDefinitions="Auto,*"
-          ColumnSpacing="16">
+                <!-- ══════════════════════════════════════════════════════
+                     STEP 1 — Receive SMS permission
+                ══════════════════════════════════════════════════════ -->
+                <VerticalStackLayout x:Name="Step1View" Spacing="0">
 
-                        <Label Grid.Column="0"
-               Text="🗂️"
-               FontSize="22"
-               VerticalOptions="Start" />
-
-                        <VerticalStackLayout Grid.Column="1"
-                             Spacing="4">
-
-                            <Label
-                Text="Categorize your spending"
-                FontSize="14"
-                FontAttributes="Bold"
-                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
-
-                            <Label
-                Text="Each transaction is automatically sorted into categories like Food, Transport, and Utilities."
-                FontSize="13"
-                LineHeight="1.4"
-                LineBreakMode="WordWrap"
-                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
-                        </VerticalStackLayout>
-
-                    </Grid>
-
-                    <BoxView
-        HeightRequest="1"
-        Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
-        Opacity="0.5" />
-
-                    <Grid ColumnDefinitions="Auto,*"
-          ColumnSpacing="16">
-
-                        <Label Grid.Column="0"
-               Text="📊"
-               FontSize="22"
-               VerticalOptions="Start" />
-
-                        <VerticalStackLayout Grid.Column="1"
-                             Spacing="4">
-
-                            <Label
-                Text="Build your spending insights"
-                FontSize="14"
-                FontAttributes="Bold"
-                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
-
-                            <Label
-                Text="Your transaction history powers the dashboards, budgets, and reports you'll see in the app."
-                FontSize="13"
-                LineHeight="1.4"
-                LineBreakMode="WordWrap"
-                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
-                        </VerticalStackLayout>
-
-                    </Grid>
-
-                </VerticalStackLayout>
-            </Border>
-
-            <!-- ── Privacy assurance ──────────────────────────────────── -->
-            <Label
-                Text="YOUR PRIVACY"
-                FontSize="11"
-                FontAttributes="Bold"
-                CharacterSpacing="1.2"
-                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                Margin="0,0,0,12" />
-
-            <Border
-                BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
-                StrokeThickness="0"
-                Margin="0,0,0,40">
-                <Border.StrokeShape>
-                    <RoundRectangle CornerRadius="16" />
-                </Border.StrokeShape>
-                <VerticalStackLayout Padding="20" Spacing="14">
-
-                    <HorizontalStackLayout Spacing="12">
-                        <Label Text="🔒" FontSize="18" VerticalOptions="Center" />
-                        <Label
-                            Text="Everything stays on your device"
-                            FontSize="14"
-                            FontAttributes="Bold"
-                            VerticalOptions="Center"
-                            TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}" />
-                    </HorizontalStackLayout>
+                    <Border
+                        HorizontalOptions="Center"
+                        WidthRequest="100" HeightRequest="100"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
+                        StrokeThickness="0"
+                        Margin="0,0,0,32">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="28" />
+                        </Border.StrokeShape>
+                        <Label Text="📩" FontSize="44"
+                            HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
 
                     <Label
-                        Text="PesaLens has no servers, no accounts, and no internet connection. Your SMS messages and financial data are processed and stored entirely on your phone. Nothing is ever uploaded, shared, or sent anywhere."
-                        FontSize="13"
-                        LineHeight="1.5"
-                        TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}" />
+                        Text="Step 1 of 2 — Receive Messages"
+                        FontSize="26" FontAttributes="Bold"
+                        HorizontalTextAlignment="Center"
+                        TextColor="{AppThemeBinding Light={StaticResource OnBackground}, Dark={StaticResource OnBackgroundDark}}"
+                        Margin="0,0,0,12" />
+
+                    <Label
+                        Text="PesaLens needs permission to receive SMS so it can automatically capture new M-Pesa transactions."
+                        FontSize="15" LineHeight="1.5"
+                        HorizontalTextAlignment="Center"
+                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                        Margin="0,0,0,32" />
+
+                    <!-- Why section -->
+                    <Label Text="WHAT THIS ENABLES"
+                        FontSize="11" FontAttributes="Bold" CharacterSpacing="1.2"
+                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                        Margin="0,0,0,12" />
+
+                    <Border
+                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                        StrokeThickness="0" Margin="0,0,0,32">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="16" />
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Padding="20" Spacing="18">
+
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                                <Label Grid.Column="0" Text="⚡" FontSize="20" VerticalOptions="Start" />
+                                <VerticalStackLayout Grid.Column="1" Spacing="3">
+                                    <Label Text="Real-time transaction capture"
+                                        FontSize="14" FontAttributes="Bold"
+                                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                                    <Label Text="New M-Pesa messages are picked up and categorized the moment they arrive, even when the app is in the background."
+                                        FontSize="13" LineHeight="1.4"
+                                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                                </VerticalStackLayout>
+                            </Grid>
+
+                            <BoxView HeightRequest="1"
+                                Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                Opacity="0.5" />
+
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                                <Label Grid.Column="0" Text="🎯" FontSize="20" VerticalOptions="Start" />
+                                <VerticalStackLayout Grid.Column="1" Spacing="3">
+                                    <Label Text="Always up to date"
+                                        FontSize="14" FontAttributes="Bold"
+                                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                                    <Label Text="Your spending data stays current without needing to sync manually."
+                                        FontSize="13" LineHeight="1.4"
+                                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                                </VerticalStackLayout>
+                            </Grid>
+
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Privacy note -->
+                    <Border
+                        BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
+                        StrokeThickness="0" Margin="0,0,0,0">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="14" />
+                        </Border.StrokeShape>
+                        <HorizontalStackLayout Padding="16" Spacing="12">
+                            <Label Text="🔒" FontSize="18" VerticalOptions="Center" />
+                            <Label
+                                Text="PesaLens only reads MPESA messages. Nothing leaves your device."
+                                FontSize="13" LineHeight="1.4"
+                                TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}" />
+                        </HorizontalStackLayout>
+                    </Border>
 
                 </VerticalStackLayout>
-            </Border>
 
-            <!-- ── Grant button ───────────────────────────────────────── -->
+                <!-- ══════════════════════════════════════════════════════
+                     STEP 2 — Temporary default SMS app
+                ══════════════════════════════════════════════════════ -->
+                <VerticalStackLayout x:Name="Step2View" IsVisible="False" Spacing="0">
+
+                    <Border
+                        HorizontalOptions="Center"
+                        WidthRequest="100" HeightRequest="100"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource SecondaryContainer}, Dark={StaticResource SecondaryContainerDark}}"
+                        StrokeThickness="0"
+                        Margin="0,0,0,32">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="28" />
+                        </Border.StrokeShape>
+                        <Label Text="📥" FontSize="44"
+                            HorizontalOptions="Center" VerticalOptions="Center" />
+                    </Border>
+
+                    <Label
+                        Text="Step 2 of 2 — Import History"
+                        FontSize="26" FontAttributes="Bold"
+                        HorizontalTextAlignment="Center"
+                        TextColor="{AppThemeBinding Light={StaticResource OnBackground}, Dark={StaticResource OnBackgroundDark}}"
+                        Margin="0,0,0,12" />
+
+                    <Label
+                        Text="To import your existing M-Pesa history, PesaLens needs to temporarily become your default SMS app."
+                        FontSize="15" LineHeight="1.5"
+                        HorizontalTextAlignment="Center"
+                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                        Margin="0,0,0,32" />
+
+                    <!-- How it works -->
+                    <Label Text="HOW IT WORKS"
+                        FontSize="11" FontAttributes="Bold" CharacterSpacing="1.2"
+                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                        Margin="0,0,0,12" />
+
+                    <Border
+                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                        StrokeThickness="0" Margin="0,0,0,32">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="16" />
+                        </Border.StrokeShape>
+                        <VerticalStackLayout Padding="20" Spacing="0">
+
+                            <Grid ColumnDefinitions="32,*" ColumnSpacing="12" Margin="0,0,0,16">
+                                <Border Grid.Column="0"
+                                    WidthRequest="28" HeightRequest="28"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                    StrokeThickness="0" HorizontalOptions="Start" VerticalOptions="Start">
+                                    <Border.StrokeShape>
+                                        <Ellipse />
+                                    </Border.StrokeShape>
+                                    <Label Text="1" FontSize="12" FontAttributes="Bold"
+                                        TextColor="White"
+                                        HorizontalOptions="Center" VerticalOptions="Center" />
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                    <Label Text="Set PesaLens as default"
+                                        FontSize="14" FontAttributes="Bold"
+                                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                                    <Label Text="Android will show a system dialog — tap PesaLens to confirm."
+                                        FontSize="13" LineHeight="1.4"
+                                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                                </VerticalStackLayout>
+                            </Grid>
+
+                            <BoxView HeightRequest="1"
+                                Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                Opacity="0.4" Margin="0,0,0,16" />
+
+                            <Grid ColumnDefinitions="32,*" ColumnSpacing="12" Margin="0,0,0,16">
+                                <Border Grid.Column="0"
+                                    WidthRequest="28" HeightRequest="28"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                    StrokeThickness="0" HorizontalOptions="Start" VerticalOptions="Start">
+                                    <Border.StrokeShape>
+                                        <Ellipse />
+                                    </Border.StrokeShape>
+                                    <Label Text="2" FontSize="12" FontAttributes="Bold"
+                                        TextColor="White"
+                                        HorizontalOptions="Center" VerticalOptions="Center" />
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                    <Label Text="We import your M-Pesa history"
+                                        FontSize="14" FontAttributes="Bold"
+                                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                                    <Label Text="PesaLens reads all past MPESA messages and categorizes them."
+                                        FontSize="13" LineHeight="1.4"
+                                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                                </VerticalStackLayout>
+                            </Grid>
+
+                            <BoxView HeightRequest="1"
+                                Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                Opacity="0.4" Margin="0,0,0,16" />
+
+                            <Grid ColumnDefinitions="32,*" ColumnSpacing="12">
+                                <Border Grid.Column="0"
+                                    WidthRequest="28" HeightRequest="28"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                    StrokeThickness="0" HorizontalOptions="Start" VerticalOptions="Start">
+                                    <Border.StrokeShape>
+                                        <Ellipse />
+                                    </Border.StrokeShape>
+                                    <Label Text="3" FontSize="12" FontAttributes="Bold"
+                                        TextColor="White"
+                                        HorizontalOptions="Center" VerticalOptions="Center" />
+                                </Border>
+                                <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                    <Label Text="Switch back — we remind you"
+                                        FontSize="14" FontAttributes="Bold"
+                                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                                    <Label Text="After import, PesaLens prompts you to restore your preferred SMS app."
+                                        FontSize="13" LineHeight="1.4"
+                                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                                </VerticalStackLayout>
+                            </Grid>
+
+                        </VerticalStackLayout>
+                    </Border>
+
+                    <!-- Skip option -->
+                    <Label
+                        x:Name="SkipImportLabel"
+                        Text="Skip history import →"
+                        FontSize="13"
+                        HorizontalOptions="Center"
+                        TextDecorations="Underline"
+                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}">
+                        <Label.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnSkipImportTapped" />
+                        </Label.GestureRecognizers>
+                    </Label>
+
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ── Bottom button area ─────────────────────────────────────── -->
+        <VerticalStackLayout Grid.Row="1" Padding="32,12,32,48" Spacing="10">
+
             <Button
-                x:Name="GrantButton"
+                x:Name="PrimaryButton"
                 Text="Grant SMS Permission"
-                Clicked="OnGrantClicked"
+                Clicked="OnPrimaryButtonClicked"
                 HorizontalOptions="Fill"
-                HeightRequest="52"
-                CornerRadius="14"
-                FontSize="16"
-                FontAttributes="Bold"
+                HeightRequest="52" CornerRadius="14"
+                FontSize="16" FontAttributes="Bold"
                 BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"
-                Margin="0,0,0,16" />
+                TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}" />
 
-            <!-- Shown only after a denial ───────────────────────────── -->
+            <!-- Denial guidance — shown only after a deny -->
             <Border
                 x:Name="DeniedBanner"
                 IsVisible="False"
                 BackgroundColor="{AppThemeBinding Light={StaticResource ErrorContainer}, Dark={StaticResource ErrorContainerDark}}"
-                StrokeThickness="0"
-                Margin="0,0,0,12">
+                StrokeThickness="0">
                 <Border.StrokeShape>
                     <RoundRectangle CornerRadius="12" />
                 </Border.StrokeShape>
                 <VerticalStackLayout Padding="16" Spacing="6">
-                    <Label
+                    <Label x:Name="DeniedTitle"
                         Text="Permission denied"
-                        FontSize="14"
-                        FontAttributes="Bold"
+                        FontSize="14" FontAttributes="Bold"
                         TextColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}" />
-                    <Label
-                        Text="PesaLens cannot work without SMS access. Tap the button above to try again. If the system dialog doesn't appear, go to Settings → Apps → PesaLens → Permissions and enable SMS manually."
-                        FontSize="13"
-                        LineHeight="1.4"
+                    <Label x:Name="DeniedMessage"
+                        Text="PesaLens cannot capture new transactions without this. Tap Try Again or go to Settings → Apps → PesaLens → Permissions."
+                        FontSize="13" LineHeight="1.4"
                         TextColor="{AppThemeBinding Light={StaticResource OnErrorContainer}, Dark={StaticResource OnErrorContainerDark}}" />
                 </VerticalStackLayout>
             </Border>
 
         </VerticalStackLayout>
-    </ScrollView>
+
+    </Grid>
 
 </uranium:UraniumContentPage>
+

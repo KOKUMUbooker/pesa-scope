@@ -67,10 +67,9 @@
                             HorizontalOptions="End">
                             <ImageButton.Source>
                                 <FontImageSource
-                                    Glyph="{x:Static m:MaterialOutlined.Sync}" 
-                                    FontFamily="MaterialSymbolsOutlined"
-                                    Size="22"
-                                    Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                                    FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Sync}"
+                                    Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                    Size="22" />
                             </ImageButton.Source>
                         </ImageButton>
 

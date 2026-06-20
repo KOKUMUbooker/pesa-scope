@@ -27,8 +27,7 @@
                             <Ellipse />
                         </Border.StrokeShape>
                         <Label Text="1" FontSize="12" FontAttributes="Bold"
-                            TextColor="White"
-                            HorizontalOptions="Center" VerticalOptions="Center" />
+                             HorizontalOptions="Center" VerticalOptions="Center" />
                     </Border>
                     <BoxView
                         WidthRequest="32" HeightRequest="2"
@@ -128,17 +127,32 @@
                     <!-- Privacy note -->
                     <Border
                         BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
-                        StrokeThickness="0" Margin="0,0,0,0">
+                        StrokeThickness="0">
+
                         <Border.StrokeShape>
                             <RoundRectangle CornerRadius="14" />
                         </Border.StrokeShape>
-                        <HorizontalStackLayout Padding="16" Spacing="12">
-                            <Label Text="🔒" FontSize="18" VerticalOptions="Center" />
+
+                        <Grid
+                            Padding="16"
+                            ColumnDefinitions="Auto,*"
+                            ColumnSpacing="12">
+
                             <Label
+                                Grid.Column="0"
+                                Text="🔒"
+                                FontSize="18"
+                                VerticalOptions="Start" />
+
+                            <Label
+                                Grid.Column="1"
                                 Text="PesaLens only reads MPESA messages. Nothing leaves your device."
-                                FontSize="13" LineHeight="1.4"
+                                FontSize="13"
+                                LineHeight="1.4"
+                                LineBreakMode="WordWrap"
                                 TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}" />
-                        </HorizontalStackLayout>
+                        </Grid>
+
                     </Border>
 
                 </VerticalStackLayout>

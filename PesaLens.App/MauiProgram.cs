@@ -6,8 +6,13 @@ using PesaLens.App.Services;
 using PesaLens.App.Services.Interfaces;
 using PesaLens.App.ViewModels;
 using PesaLens.App.ViewModels.Categories;
+using PesaLens.App.Views.Budgets;
+using PesaLens.App.Views.Categories;
+using PesaLens.App.Views.Dashboard;
 using PesaLens.App.Views.Onboarding;
 using PesaLens.App.Views.Security;
+using PesaLens.App.Views.Settings;
+using PesaLens.App.Views.Transactions;
 using PesaLens.Core.Services;
 using PesaLens.Core.Services.Interfaces;
 using SkiaSharp.Views.Maui.Controls.Hosting;
@@ -41,16 +46,25 @@ namespace PesaLens.App
             builder.Services.AddTransient<WelcomePage>();
             builder.Services.AddTransient<PermissionPage>();
             builder.Services.AddTransient<ImportProgressPage>();
-            builder.Services.AddTransient<AppLockPage>();
+            builder.Services.AddTransient<TransactionDetailPage>();
+            builder.Services.AddTransient<EditCategoryPage>();
+
+            // App pages - Registered as Singleton to avoid recreation on every tab switch
+            builder.Services.AddSingleton<AppLockPage>();
+            builder.Services.AddSingleton<DashboardPage>();
+            builder.Services.AddSingleton<TransactionsPage>();
+            builder.Services.AddSingleton<CategoriesPage>();
+            builder.Services.AddSingleton<BudgetsPage>();
+            builder.Services.AddSingleton<SettingsPage>();
 
             // View models
-            builder.Services.AddTransient<DashboardViewModel>();
-            builder.Services.AddTransient<SettingsViewModel>();
-            builder.Services.AddTransient<TransactionsViewModel>();
-            builder.Services.AddTransient<TransactionDetailViewModel>();
-            builder.Services.AddTransient<CategoriesViewModel>();
-            builder.Services.AddTransient<EditCategoryViewModel>();
-            builder.Services.AddTransient<BudgetsViewModel>();
+            builder.Services.AddSingleton<DashboardViewModel>();
+            builder.Services.AddSingleton<SettingsViewModel>();
+            builder.Services.AddSingleton<TransactionsViewModel>();
+            builder.Services.AddSingleton<TransactionDetailViewModel>();
+            builder.Services.AddSingleton<CategoriesViewModel>();
+            builder.Services.AddSingleton<EditCategoryViewModel>();
+            builder.Services.AddSingleton<BudgetsViewModel>();
 
             // DatabaseService registered as singleton — App.cs resolves and inits it
             var dbPath = Path.Combine(FileSystem.AppDataDirectory, "pesalens.db");

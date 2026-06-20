@@ -5,6 +5,7 @@ namespace PesaLens.App.Views.Settings;
 public partial class SettingsPage : UraniumUI.Pages.UraniumContentPage
 {
     private readonly SettingsViewModel _vm;
+    private bool _loaded;
 
     public SettingsPage(SettingsViewModel vm)
     {
@@ -15,8 +16,10 @@ public partial class SettingsPage : UraniumUI.Pages.UraniumContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
+        if (_loaded) return;
+        _loaded = true;
         await _vm.LoadAsync();
-        SyncCurrencyButtons();
+        // SyncCurrencyButtons();
     }
 
     // ── Toggle handlers ───────────────────────────────────────────────────────
@@ -39,39 +42,39 @@ public partial class SettingsPage : UraniumUI.Pages.UraniumContentPage
 
     // ── Currency picker ───────────────────────────────────────────────────────
 
-    private async void OnKshSelected(object? sender, EventArgs e)
-    {
-        await _vm.SetCurrencyCommand.ExecuteAsync("Ksh");
-        SyncCurrencyButtons();
-    }
+    //private async void OnKshSelected(object? sender, EventArgs e)
+    //{
+    //    await _vm.SetCurrencyCommand.ExecuteAsync("Ksh");
+    //    SyncCurrencyButtons();
+    //}
 
-    private async void OnKesSelected(object? sender, EventArgs e)
-    {
-        await _vm.SetCurrencyCommand.ExecuteAsync("KES");
-        SyncCurrencyButtons();
-    }
+    //private async void OnKesSelected(object? sender, EventArgs e)
+    //{
+    //    await _vm.SetCurrencyCommand.ExecuteAsync("KES");
+    //    SyncCurrencyButtons();
+    //}
 
     /// <summary>
     /// Visually highlights the active currency button to match the VM state.
     /// </summary>
-    private void SyncCurrencyButtons()
-    {
-        bool kshActive = _vm.CurrencyDisplay == "Ksh";
+    //private void SyncCurrencyButtons()
+    //{
+    //    bool kshActive = _vm.CurrencyDisplay == "Ksh";
 
-        KshButton.BackgroundColor = kshActive
-            ? (Color)Application.Current!.Resources["PrimaryContainer"]
-            : Colors.Transparent;
-        KshButton.TextColor = kshActive
-            ? (Color)Application.Current!.Resources["Primary"]
-            : (Color)Application.Current!.Resources["OnSurfaceVariant"];
-        KshButton.FontAttributes = kshActive ? FontAttributes.Bold : FontAttributes.None;
+    //    KshButton.BackgroundColor = kshActive
+    //        ? (Color)Application.Current!.Resources["PrimaryContainer"]
+    //        : Colors.Transparent;
+    //    KshButton.TextColor = kshActive
+    //        ? (Color)Application.Current!.Resources["Primary"]
+    //        : (Color)Application.Current!.Resources["OnSurfaceVariant"];
+    //    KshButton.FontAttributes = kshActive ? FontAttributes.Bold : FontAttributes.None;
 
-        KesButton.BackgroundColor = !kshActive
-            ? (Color)Application.Current!.Resources["PrimaryContainer"]
-            : Colors.Transparent;
-        KesButton.TextColor = !kshActive
-            ? (Color)Application.Current!.Resources["Primary"]
-            : (Color)Application.Current!.Resources["OnSurfaceVariant"];
-        KesButton.FontAttributes = !kshActive ? FontAttributes.Bold : FontAttributes.None;
-    }
+    //    KesButton.BackgroundColor = !kshActive
+    //        ? (Color)Application.Current!.Resources["PrimaryContainer"]
+    //        : Colors.Transparent;
+    //    KesButton.TextColor = !kshActive
+    //        ? (Color)Application.Current!.Resources["Primary"]
+    //        : (Color)Application.Current!.Resources["OnSurfaceVariant"];
+    //    KesButton.FontAttributes = !kshActive ? FontAttributes.Bold : FontAttributes.None;
+    //}
 }

@@ -203,7 +203,12 @@ public partial class DashboardViewModel : ObservableObject
                 LabelsPaint     = labelPaint,
                 SeparatorsPaint = gridLinePaint,
                 TicksPaint      = null,
-                Labeler         = val => val == 0 ? "0" : $"Ksh {val / 1000:0}k",
+                Labeler = val => val switch
+                                {
+                                    0          => "0",
+                                    < 1000     => $"Ksh {val:0}",
+                                    _          => $"Ksh {val / 1000:0.#}k"
+                                },
             }
         ];
     }

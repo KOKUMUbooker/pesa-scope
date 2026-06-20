@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:models="clr-namespace:PesaLens.Core.Models;assembly=PesaLens.Core"
+    xmlns:converters="clr-namespace:PesaLens.App.Converters"
+    x:Class="PesaLens.App.Controls.Home.RecentTransactionsView"
+    x:Name="this">
+
+    <ContentView.Resources>
+        <converters:TransactionTypeToEmojiConverter  x:Key="TypeToEmoji"/>
+        <converters:TransactionTypeToSignConverter   x:Key="TypeToSign"/>
+        <converters:TransactionTypeToColorConverter  x:Key="TypeToColor"/>
+        <converters:IntIsZeroConverter               x:Key="IntIsZero"/>
+        <converters:IntIsNonZeroConverter            x:Key="IntIsNonZero"/>
+    </ContentView.Resources>
+
+    <VerticalStackLayout Spacing="10">
+
+        <Grid ColumnDefinitions="*,Auto">
+            <Label
+                Grid.Column="0"
+                Text="Recent transactions"
+                FontSize="16"
+                FontAttributes="Bold"
+                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+            <Label
+                Grid.Column="1"
+                Text="View all"
+                FontSize="13"
+                FontAttributes="Bold"
+                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                VerticalOptions="Center">
+                <Label.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding Source={x:Reference this}, Path=ViewAllCommand}"/>
+                </Label.GestureRecognizers>
+            </Label>
+        </Grid>
+
+        <!-- Transaction list card -->
+        <Border
+            BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+            Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+            StrokeThickness="1"
+            StrokeShape="RoundRectangle 16"
+            Padding="0"
+            IsVisible="{Binding Source={x:Reference this}, Path=Transactions.Count, Converter={StaticResource IntIsNonZero}}">
+
+            <VerticalStackLayout
+                BindableLayout.ItemsSource="{Binding Source={x:Reference this}, Path=Transactions}"
+                Spacing="0">
+                <BindableLayout.ItemTemplate>
+                    <DataTemplate x:DataType="models:Transaction">
+                        <Grid
+                            Padding="16,12"
+                            ColumnDefinitions="44,*,Auto"
+                            ColumnSpacing="12">
+
+                            <!-- Icon circle -->
+                            <Border
+                                Grid.Column="0"
+                                WidthRequest="44"
+                                HeightRequest="44"
+                                StrokeShape="RoundRectangle 10"
+                                StrokeThickness="0"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                                VerticalOptions="Center">
+                                <Label
+                                    Text="{Binding Type, Converter={StaticResource TypeToEmoji}}"
+                                    FontSize="18"
+                                    HorizontalOptions="Center"
+                                    VerticalOptions="Center"/>
+                            </Border>
+
+                            <!-- Counterparty + date -->
+                            <VerticalStackLayout
+                                Grid.Column="1"
+                                Spacing="2"
+                                VerticalOptions="Center">
+                                <Label
+                                    Text="{Binding CounterpartyName}"
+                                    FontSize="15"
+                                    FontAttributes="Bold"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"
+                                    LineBreakMode="TailTruncation"/>
+                                <Label
+                                    Text="{Binding TransactionDate, StringFormat='{0:ddd d MMM, h:mm tt}'}"
+                                    FontSize="12"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                            </VerticalStackLayout>
+
+                            <!-- Amount -->
+                            <Label
+                                Grid.Column="2"
+                                FontSize="15"
+                                FontAttributes="Bold"
+                                VerticalOptions="Center"
+                                TextColor="{Binding Type, Converter={StaticResource TypeToColor}}">
+                                <Label.Text>
+                                    <MultiBinding StringFormat="{}{0}Ksh {1:N0}">
+                                        <Binding Path="Type" Converter="{StaticResource TypeToSign}"/>
+                                        <Binding Path="Amount"/>
+                                    </MultiBinding>
+                                </Label.Text>
+                            </Label>
+
+                        </Grid>
+                    </DataTemplate>
+                </BindableLayout.ItemTemplate>
+            </VerticalStackLayout>
+        </Border>
+
+        <!-- Empty state -->
+        <Label
+            Text="No transactions yet. Pull down to sync your M-Pesa messages."
+            FontSize="14"
+            HorizontalTextAlignment="Center"
+            HorizontalOptions="Center"
+            Margin="0,8"
+            IsVisible="{Binding Source={x:Reference this}, Path=Transactions.Count, Converter={StaticResource IntIsZero}}"
+            TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+
+    </VerticalStackLayout>
+</ContentView>

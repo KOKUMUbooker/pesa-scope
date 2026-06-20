@@ -6,44 +6,47 @@
     xmlns:uraniumMaterial="clr-namespace:UraniumUI.Material.Controls;assembly=UraniumUI.Material"
     xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
-    xmlns:icons="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     xmlns:vm="clr-namespace:PesaLens.App.ViewModels"
     xmlns:converters="clr-namespace:PesaLens.App.Converters"
     xmlns:models="clr-namespace:PesaLens.Core.Models;assembly=PesaLens.Core"
-    NavigationPage.HasNavigationBar="False"
+    SafeAreaEdges="All"
+    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 
-    <Grid RowDefinitions="Auto,Auto,*">
-
-        <!-- ── Top App Bar ───────────────────────────────────────────── -->
+    <Shell.TitleView BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
         <Grid
-            Grid.Row="0"
-            ColumnDefinitions="*,Auto"
-            Padding="5,10,5,10"
-            BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
+        Grid.Row="0"
+        ColumnDefinitions="*,Auto"
+        Padding="5,10,5,10"
+        BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
             <Label
-                Grid.Column="0"
-                Text="Transactions"
-                FontSize="22"
-                FontAttributes="Bold"
-                VerticalOptions="Center"
-                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+            Grid.Column="0"
+            Text="Transactions"
+            FontSize="22"
+            FontAttributes="Bold"
+            VerticalOptions="Center"
+            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
             <ImageButton
-                Grid.Column="1"
-                Command="{Binding LoadCommand}"
-                BackgroundColor="Transparent"
-                Padding="8"
-                WidthRequest="44" HeightRequest="44">
+            Grid.Column="1"
+            Command="{Binding LoadCommand}"
+            BackgroundColor="Transparent"
+            Padding="8"
+            WidthRequest="44" HeightRequest="44">
                 <ImageButton.Source>
                     <FontImageSource
-                        FontFamily="MaterialSymbolsOutlined"
-                        Glyph="{x:Static icons:MaterialOutlined.Sync}"
-                        Color="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
-                        Size="22" />
+                      FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Sync}"
+                      Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                      Size="16" />
                 </ImageButton.Source>
             </ImageButton>
         </Grid>
 
+    </Shell.TitleView>
+
+    <Grid RowDefinitions="Auto,Auto,*">
+
+        <!-- ── Top App Bar ───────────────────────────────────────────── -->
+    
         <!-- ── Sticky search + filters ───────────────────────────────── -->
         <VerticalStackLayout
             Grid.Row="1"
@@ -60,12 +63,14 @@
                     <RoundRectangle CornerRadius="14" />
                 </Border.StrokeShape>
                 <Grid ColumnDefinitions="Auto,*,Auto" Padding="12,0">
-                    <Label
-                        Grid.Column="0"
-                        Text="🔍"
-                        FontSize="16"
-                        VerticalOptions="Center"
-                        Margin="0,0,8,0" />
+                    <Image Grid.Column="0">
+                        <Image.Source>
+                            <FontImageSource
+                               FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Search}"
+                               Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                               Size="20" />
+                        </Image.Source>
+                    </Image>
                     <Entry
                         Grid.Column="1"
                         x:Name="SearchEntry"
@@ -93,7 +98,7 @@
                 </Grid>
             </Border>
 
-            <!-- Filter row: Date button + Type chips -->
+                <!-- Filter row: Date button + Type chips -->
             <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
                 <HorizontalStackLayout Spacing="8">
 
@@ -190,48 +195,52 @@
         </VerticalStackLayout>
 
         <!-- ── Transaction list ──────────────────────────────────────── -->
-        <Grid Grid.Row="2">
+            <Grid Grid.Row="2">
 
-            <!-- Loading -->
-            <ActivityIndicator
-                IsRunning="{Binding IsLoading}"
-                IsVisible="{Binding IsLoading}"
-                Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                VerticalOptions="Center"
-                HorizontalOptions="Center" />
+                <!-- Loading -->
+                <!--  <ActivityIndicator
+                    IsRunning="{Binding IsLoading}"
+                    IsVisible="{Binding IsLoading}"
+                    Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                    VerticalOptions="Center"
+                    HorizontalOptions="Center" /> -->
 
-            <!-- Empty state -->
-            <VerticalStackLayout
+                <!-- Empty state -->
+                <VerticalStackLayout
                 IsVisible="{Binding IsEmpty}"
                 VerticalOptions="Center"
                 HorizontalOptions="Center"
                 Spacing="12"
                 Padding="40">
-                <Label Text="🔍" FontSize="48" HorizontalOptions="Center" />
-                <Label
+                    <Label Text="🔍" FontSize="48" HorizontalOptions="Center" />
+                    <Label
                     Text="No transactions found"
                     FontSize="17"
                     FontAttributes="Bold"
                     HorizontalOptions="Center"
                     TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
-                <Label
+                    <Label
                     Text="Try adjusting your filters or date range."
                     FontSize="13"
                     HorizontalTextAlignment="Center"
                     TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
-            </VerticalStackLayout>
+                </VerticalStackLayout>
 
-            <!-- Grouped transaction list -->
-            <CollectionView
+            <RefreshView
+                Command="{Binding LoadCommand}"
+                IsRefreshing="{Binding IsLoading}"
+                RefreshColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
+                <!-- Grouped transaction list -->
+                <CollectionView
                 ItemsSource="{Binding GroupedTransactions}"
                 IsVisible="{Binding IsEmpty, Converter={StaticResource InvertedBoolConverter}}"
                 Margin="0,4,0,0">
-                <CollectionView.ItemTemplate>
-                    <DataTemplate x:DataType="vm:TransactionGroup">
-                        <VerticalStackLayout Padding="20,0,20,8" Spacing="8">
+                    <CollectionView.ItemTemplate>
+                        <DataTemplate x:DataType="vm:TransactionGroup">
+                            <VerticalStackLayout Padding="20,0,20,8" Spacing="8">
 
-                            <!-- Date group header -->
-                            <Label
+                                <!-- Date group header -->
+                                <Label
                                 Text="{Binding DateLabel}"
                                 FontSize="11"
                                 FontAttributes="Bold"
@@ -239,74 +248,74 @@
                                 Margin="0,12,0,4"
                                 TextColor="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}" />
 
-                            <!-- Transactions in this group -->
-                            <VerticalStackLayout  BindableLayout.ItemsSource="{Binding Transactions}" Spacing="8">
-                                <BindableLayout.ItemTemplate>
-                                    <DataTemplate x:DataType="models:Transaction">
-                                        <Border
+                                <!-- Transactions in this group -->
+                                <VerticalStackLayout  BindableLayout.ItemsSource="{Binding Transactions}" Spacing="8">
+                                    <BindableLayout.ItemTemplate>
+                                        <DataTemplate x:DataType="models:Transaction">
+                                            <Border
                                             BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
                                             Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
                                             StrokeThickness="1"
                                             Padding="14">
-                                            <Border.StrokeShape>
-                                                <RoundRectangle CornerRadius="14" />
-                                            </Border.StrokeShape>
-                                            <Border.GestureRecognizers>
-                                                <TapGestureRecognizer
+                                                <Border.StrokeShape>
+                                                    <RoundRectangle CornerRadius="14" />
+                                                </Border.StrokeShape>
+                                                <Border.GestureRecognizers>
+                                                    <TapGestureRecognizer
                                                     Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TransactionsViewModel}}, Path=OpenTransactionCommand}"
                                                     CommandParameter="{Binding .}" />
-                                            </Border.GestureRecognizers>
+                                                </Border.GestureRecognizers>
 
-                                            <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                                <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
 
-                                                <!-- Type icon circle -->
-                                                <Border
+                                                    <!-- Type icon circle -->
+                                                    <Border
                                                     Grid.Column="0"
                                                     WidthRequest="46"
                                                     HeightRequest="46"
                                                     StrokeThickness="0"
                                                     BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}">
-                                                    <Border.StrokeShape>
-                                                        <Ellipse />
-                                                    </Border.StrokeShape>
-                                                    <Label
+                                                        <Border.StrokeShape>
+                                                            <Ellipse />
+                                                        </Border.StrokeShape>
+                                                        <Label
                                                         Text="{Binding Type, Converter={StaticResource TransactionTypeToIconConverter}}"
                                                         FontSize="20"
                                                         HorizontalOptions="Center"
                                                         VerticalOptions="Center" />
-                                                </Border>
+                                                    </Border>
 
-                                                <!-- Counterparty + type · category -->
-                                                <VerticalStackLayout
+                                                    <!-- Counterparty + type · category -->
+                                                    <VerticalStackLayout
                                                     Grid.Column="1"
                                                     VerticalOptions="Center"
                                                     Spacing="2">
-                                                    <Label
+                                                        <Label
                                                         Text="{Binding CounterpartyName}"
                                                         FontSize="15"
                                                         FontAttributes="Bold"
                                                         LineBreakMode="TailTruncation"
                                                         TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
-                                                    <Label
+                                                        <Label
                                                         FontSize="12"
                                                         TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}">
-                                                        <Label.FormattedText>
-                                                            <FormattedString>
-                                                                <Span Text="{Binding Type}" />
-                                                                <Span Text=" · " />
-                                                                <Span Text="{Binding TransactionDate, StringFormat='{0:h:mm tt}'}" />
-                                                            </FormattedString>
-                                                        </Label.FormattedText>
-                                                    </Label>
-                                                    <Label
+                                                            <Label.FormattedText>
+                                                                <FormattedString>
+                                                                    <Span Text="{Binding Type}" />
+                                                                    <Span Text=" · " />
+                                                                    <Span Text="{Binding TransactionDate, StringFormat='{0:h:mm tt}'}" />
+                                                                </FormattedString>
+                                                            </Label.FormattedText>
+                                                        </Label>
+                                                        <Label
                                                         Text="{Binding MpesaCode}"
                                                         FontSize="11"
                                                         FontFamily="OpenSansRegular"
                                                         TextColor="{AppThemeBinding Light={StaticResource Outline}, Dark={StaticResource OutlineDark}}" />
-                                                </VerticalStackLayout>
+                                                    </VerticalStackLayout>
 
-                                                <!-- Amount -->
-                                                <Label
+                                                    <!-- Amount -->
+                                                    <Label
                                                     Grid.Column="2"
                                                     Text="{Binding Amount, StringFormat='Ksh {0:N0}'}"
                                                     FontSize="14"
@@ -314,21 +323,22 @@
                                                     VerticalOptions="Center"
                                                     TextColor="{Binding Type, Converter={StaticResource TransactionTypeToColorConverter}}" />
 
-                                            </Grid>
-                                        </Border>
-                                    </DataTemplate>
-                                </BindableLayout.ItemTemplate>
+                                                </Grid>
+                                            </Border>
+                                        </DataTemplate>
+                                    </BindableLayout.ItemTemplate>
+                                </VerticalStackLayout>
+
                             </VerticalStackLayout>
+                        </DataTemplate>
+                    </CollectionView.ItemTemplate>
+                    <CollectionView.Footer>
+                        <BoxView HeightRequest="100" Color="Transparent" />
+                    </CollectionView.Footer>
+                </CollectionView>
 
-                        </VerticalStackLayout>
-                    </DataTemplate>
-                </CollectionView.ItemTemplate>
-                <CollectionView.Footer>
-                    <BoxView HeightRequest="100" Color="Transparent" />
-                </CollectionView.Footer>
-            </CollectionView>
-
-        </Grid>
+            </RefreshView>
+            </Grid>
 
     </Grid>
 
@@ -337,9 +347,29 @@
         <material:BottomSheetView
             x:Name="DateRangeSheet"
             IsPresented="False"
+            IsVisible="False"
+            CloseOnTapOutside="False"
             BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
 
             <VerticalStackLayout Padding="24,8,24,48" Spacing="20">
+                <AbsoluteLayout >
+                    <ImageButton
+                        AbsoluteLayout.LayoutBounds="1, 0.5, AutoSize, AutoSize"
+                        AbsoluteLayout.LayoutFlags="PositionProportional" 
+                        Grid.Column="1"
+                        Clicked="OnCloseBottomSheetTapped"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"
+                        Padding="4"
+                        CornerRadius="16"
+                        WidthRequest="28" HeightRequest="28">
+                        <ImageButton.Source>
+                            <FontImageSource
+                                FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Close}"
+                                Color="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"
+                                Size="20" />
+                        </ImageButton.Source>
+                    </ImageButton>
+                </AbsoluteLayout>
 
                 <Label
                     Text="Filter by Date"

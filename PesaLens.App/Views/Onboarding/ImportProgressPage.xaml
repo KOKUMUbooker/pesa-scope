@@ -7,11 +7,11 @@
     NavigationPage.HasNavigationBar="False"
     BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 
-    <Grid RowDefinitions="*, Auto" Padding="32,64,32,48">
+    <Grid RowDefinitions="*, Auto" >
 
         <!-- ── Main content ───────────────────────────────────────────── -->
-        <ScrollView Grid.Row="0">
-            <VerticalStackLayout VerticalOptions="Center" Spacing="0">
+        <ScrollView Grid.Row="0 ">
+            <VerticalStackLayout VerticalOptions="Center" Spacing="0" Padding="32,64,32,48">
 
                 <!-- Icon -->
                 <Border
@@ -147,18 +147,20 @@
         </ScrollView>
 
         <!-- ── Bottom: Done button (hidden until import completes) ─────── -->
-        <Button
-            x:Name="DoneButton"
-            Grid.Row="1"
-            Text="Go to Dashboard"
-            IsVisible="False"
-            Clicked="OnDoneClicked"
-            HorizontalOptions="Fill"
-            HeightRequest="52"
-            CornerRadius="14"
-            FontSize="16" FontAttributes="Bold"
-            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-            TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}" />
+        <VerticalStackLayout VerticalOptions="Center" Spacing="0" Padding="32,64,32,48">
+            <Button
+                x:Name="DoneButton"
+                Grid.Row="1"
+                Text="Go to Dashboard"
+                IsVisible="False"
+                Clicked="OnDoneClicked"
+                HorizontalOptions="Fill"
+                HeightRequest="52"
+                CornerRadius="14"
+                FontSize="16" FontAttributes="Bold"
+                BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}" />
+        </VerticalStackLayout>
 
     </Grid>
 

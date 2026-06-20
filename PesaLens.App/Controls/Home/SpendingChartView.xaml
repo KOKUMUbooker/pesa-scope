@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
+    x:Class="PesaLens.App.Controls.Home.SpendingChartView"
+    x:Name="this">
+
+    <Border
+        BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+        Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+        StrokeThickness="1"
+        StrokeShape="RoundRectangle 16"
+        Padding="16,16,16,8">
+
+        <VerticalStackLayout Spacing="12">
+
+            <Grid ColumnDefinitions="*,Auto">
+                <Label
+                    Grid.Column="0"
+                    Text="Weekly spending"
+                    FontSize="16"
+                    FontAttributes="Bold"
+                    TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                <Label
+                    Grid.Column="1"
+                    Text="{Binding Source={x:Reference this}, Path=PeriodLabel}"
+                    FontSize="12"
+                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                    VerticalOptions="Center"/>
+            </Grid>
+
+            <lvc:CartesianChart
+                HeightRequest="180"
+                Background="Transparent"
+                Series="{Binding Source={x:Reference this}, Path=Series}"
+                XAxes="{Binding Source={x:Reference this}, Path=XAxes}"
+                YAxes="{Binding Source={x:Reference this}, Path=YAxes}"
+                DrawMarginFrame="{x:Null}"
+                LegendPosition="Hidden"
+                TooltipPosition="Top"
+                TooltipBackgroundPaint="{x:Null}"
+                TooltipTextPaint="{x:Null}"
+                AnimationsSpeed="00:00:00.600"/>
+
+        </VerticalStackLayout>
+    </Border>
+</ContentView>

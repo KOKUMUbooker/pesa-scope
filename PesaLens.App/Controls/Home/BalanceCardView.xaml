@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+        x:Class="PesaLens.App.Controls.Home.BalanceCardView"
+        x:Name="this">
+    <Border
+        BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
+        StrokeThickness="0"
+        StrokeShape="RoundRectangle 16"
+        Padding="20">
+
+        <VerticalStackLayout Spacing="4">
+
+            <Label
+                Text="NET BALANCE"
+                FontSize="11"
+                FontAttributes="Bold"
+                CharacterSpacing="1.5"
+                TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"
+                Opacity="0.7"/>
+
+            <Label
+                Text="{Binding Source={x:Reference this}, Path=NetBalance}"
+                FontSize="34"
+                FontAttributes="Bold"
+                TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"
+                Margin="0,2,0,0"/>
+
+            <Label
+                Text="{Binding Source={x:Reference this}, Path=PeriodLabel}"
+                FontSize="13"
+                TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"
+                Opacity="0.65"
+                Margin="0,0,0,10"/>
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+
+                <Border
+                    Grid.Column="0"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource SecondaryContainer}, Dark={StaticResource SecondaryContainerDark}}"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 10"
+                    Padding="12,10"
+                    Opacity="0.6">
+                    <VerticalStackLayout Spacing="2">
+                        <HorizontalStackLayout Spacing="4">
+                            <Label
+                                Text="↓"
+                                FontSize="14"
+                                FontAttributes="Bold"
+                                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                            <Label
+                                Text="Money In"
+                                FontSize="11"
+                                TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"
+                                Opacity="0.75"/>
+                        </HorizontalStackLayout>
+                        <Label
+                            Text="{Binding Source={x:Reference this}, Path=MoneyIn}"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"/>
+                    </VerticalStackLayout>
+                </Border>
+
+                <Border
+                    Grid.Column="1"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource TertiaryContainer}, Dark={StaticResource TertiaryContainerDark}}"
+                    StrokeThickness="0"
+                    StrokeShape="RoundRectangle 10"
+                    Padding="12,10"
+                    Opacity="0.6">
+                    <VerticalStackLayout Spacing="2">
+                        <HorizontalStackLayout Spacing="4">
+                            <Label
+                                Text="↑"
+                                FontSize="14"
+                                FontAttributes="Bold"
+                                TextColor="{AppThemeBinding Light={StaticResource Tertiary}, Dark={StaticResource TertiaryDark}}"/>
+                            <Label
+                                Text="Money Out"
+                                FontSize="11"
+                                TextColor="{AppThemeBinding Light={StaticResource OnTertiaryContainer}, Dark={StaticResource OnTertiaryContainerDark}}"
+                                Opacity="0.75"/>
+                        </HorizontalStackLayout>
+                        <Label
+                            Text="{Binding Source={x:Reference this}, Path=MoneyOut}"
+                            FontSize="16"
+                            FontAttributes="Bold"
+                            TextColor="{AppThemeBinding Light={StaticResource OnTertiaryContainer}, Dark={StaticResource OnTertiaryContainerDark}}"/>
+                    </VerticalStackLayout>
+                </Border>
+
+            </Grid>
+        </VerticalStackLayout>
+    </Border>
+</ContentView>

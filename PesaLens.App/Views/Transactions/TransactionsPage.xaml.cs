@@ -8,6 +8,7 @@ public partial class TransactionsPage : UraniumUI.Pages.UraniumContentPage
     private readonly TransactionsViewModel _vm;
     private CancellationTokenSource?       _searchDebounce;
     private int?                           _activeCategoryId;
+    private bool _loaded;
 
     public TransactionsPage(TransactionsViewModel vm)
     {
@@ -18,8 +19,10 @@ public partial class TransactionsPage : UraniumUI.Pages.UraniumContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        await _vm.LoadAsync();
         BuildCategoryChips();
+        if (_loaded) return;
+        _loaded = true;
+        await _vm.LoadAsync();
     }
 
     // ── Category chips (3.6) ──────────────────────────────────────────────────
@@ -99,37 +102,49 @@ public partial class TransactionsPage : UraniumUI.Pages.UraniumContentPage
     }
 
     // ── Date range bottom sheet ───────────────────────────────────────────────
+    private void HideBottomSheet()
+    {
+        DateRangeSheet.IsPresented = false;
+        DateRangeSheet.IsVisible = false;
+    }
 
-    private void OnDateFilterTapped(object? sender, EventArgs e) =>
+    private void OnCloseBottomSheetTapped(object? sender, EventArgs e)
+    {
+        HideBottomSheet();
+    }
+
+    private void OnDateFilterTapped(object? sender, EventArgs e)  {
         DateRangeSheet.IsPresented = true;
+        DateRangeSheet.IsVisible = true;
+    }
 
     private async void OnPresetToday(object? sender, EventArgs e)
     {
         await _vm.SetPresetTodayCommand.ExecuteAsync(null);
-        DateRangeSheet.IsPresented = false;
+        HideBottomSheet();
     }
 
     private async void OnPresetWeek(object? sender, EventArgs e)
     {
         await _vm.SetPresetWeekCommand.ExecuteAsync(null);
-        DateRangeSheet.IsPresented = false;
+        HideBottomSheet();
     }
 
     private async void OnPresetThisMonth(object? sender, EventArgs e)
     {
         await _vm.SetPresetThisMonthCommand.ExecuteAsync(null);
-        DateRangeSheet.IsPresented = false;
+        HideBottomSheet();
     }
 
     private async void OnPresetLastMonth(object? sender, EventArgs e)
     {
         await _vm.SetPresetLastMonthCommand.ExecuteAsync(null);
-        DateRangeSheet.IsPresented = false;
+        HideBottomSheet();
     }
 
     private async void OnApplyCustomRange(object? sender, EventArgs e)
     {
         await _vm.ApplyCustomRangeCommand.ExecuteAsync(null);
-        DateRangeSheet.IsPresented = false;
+        HideBottomSheet();
     }
 }

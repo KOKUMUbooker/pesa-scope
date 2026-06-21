@@ -11,19 +11,40 @@ public partial class TransactionDetailViewModel : ObservableObject
     private readonly ITransactionRepository _transactionRepo;
     private readonly ICategoryRepository _categoryRepo;
 
-    // ── State ─────────────────────────────────────────────────────────────────
-
+    // ── Query property ────────────────────────────────────────────────────────
     [ObservableProperty] private string _mpesaCode = string.Empty;
+
+    // ── Data ──────────────────────────────────────────────────────────────────
     [ObservableProperty] private Transaction? _transaction;
-    [ObservableProperty] private string _categoryName = string.Empty;
-    [ObservableProperty] private string _categoryIcon = string.Empty;
-    [ObservableProperty] private string _note = string.Empty;
-    [ObservableProperty] private bool _isLoading = true;
-    [ObservableProperty] private bool _isEditing = false;
-    [ObservableProperty] private string _formattedAmount = string.Empty;
-    [ObservableProperty] private Color _amountColor = Colors.Red;
-    [ObservableProperty] private string _typeIcon = "💳";
     [ObservableProperty] private List<Category> _categories = [];
+    [ObservableProperty] private Category? _selectedCategory;
+    [ObservableProperty] private bool _isBusy;
+
+    // ── Edit state ────────────────────────────────────────────────────────────
+    [ObservableProperty] private bool _isNoteSheetOpen;
+    [ObservableProperty] private bool _isCategorySheetOpen;
+    [ObservableProperty] private string _editNote = string.Empty;
+
+    // ── Derived display properties ────────────────────────────────────────────
+    public string FormattedAmount => Transaction is null
+        ? string.Empty
+        : $"Ksh {Transaction.Amount:N0}";
+
+    public string FormattedDate => Transaction?.TransactionDate.ToLocalTime()
+        .ToString("ddd, d MMMM yyyy 'at' h:mm tt") ?? string.Empty;
+
+    public string FormattedBalance => Transaction is null
+        ? string.Empty
+        : $"Ksh {Transaction.BalanceAfterTransaction:N0}";
+
+    public bool IsCredit => Transaction?.Type is
+        TransactionType.ReceiveMoney or TransactionType.Deposit or TransactionType.Reversal;
+
+    public Color AmountColor => IsCredit
+        ? Color.FromArgb("#1A8C62")
+        : Color.FromArgb("#C0392B");
+
+    public string AmountPrefix => IsCredit ? "+" : "-";
 
     public TransactionDetailViewModel(
         ITransactionRepository transactionRepo,
@@ -38,129 +59,93 @@ public partial class TransactionDetailViewModel : ObservableObject
     partial void OnMpesaCodeChanged(string value)
     {
         if (!string.IsNullOrWhiteSpace(value))
-            _ = LoadAsync();
+            _ = LoadAsync(value);
     }
 
-    [RelayCommand]
-    public async Task LoadAsync()
+    private async Task LoadAsync(string code)
     {
-        if (string.IsNullOrWhiteSpace(MpesaCode)) return;
-
-        IsLoading = true;
-
-        // Fetch by MpesaCode — uses SearchAsync since the PK is an int
-        var matches = await _transactionRepo.SearchAsync(MpesaCode);
-        Transaction = matches.FirstOrDefault(t => t.MpesaCode == MpesaCode);
-
-        if (Transaction is null)
+        IsBusy = true;
+        try
         {
-            IsLoading = false;
-            return;
+            var txTask = _transactionRepo.GetByMpesaCodeAsync(code);
+            var catTask = _categoryRepo.GetAllActiveAsync();
+            await Task.WhenAll(txTask, catTask);
+
+            Transaction = txTask.Result;
+            Categories = catTask.Result;
+
+            if (Transaction is not null)
+            {
+                SelectedCategory = Categories.FirstOrDefault(c => c.Id == Transaction.CategoryId);
+                EditNote = Transaction.Note ?? string.Empty;
+            }
+
+            OnPropertyChanged(nameof(FormattedAmount));
+            OnPropertyChanged(nameof(FormattedDate));
+            OnPropertyChanged(nameof(FormattedBalance));
+            OnPropertyChanged(nameof(AmountColor));
+            OnPropertyChanged(nameof(AmountPrefix));
+            OnPropertyChanged(nameof(IsCredit));
         }
-
-        Note = Transaction.Note ?? string.Empty;
-
-        var category = await _categoryRepo.GetByIdAsync(Transaction.CategoryId);
-        CategoryName = category?.Name ?? "Uncategorized";
-        CategoryIcon = category?.Icon ?? "tag";
-
-        FormattedAmount = FormatAmount(Transaction);
-        AmountColor = IsOutgoing(Transaction.Type) ? Color.FromArgb("#C0392B") : Color.FromArgb("#1A8C62");
-        TypeIcon = GetTypeIcon(Transaction.Type);
-
-        Categories = await _categoryRepo.GetAllActiveAsync();
-
-        IsLoading = false;
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
-    // ── Commands ──────────────────────────────────────────────────────────────
+    // ── Category edit (3.8) ───────────────────────────────────────────────────
 
     [RelayCommand]
-    public void ToggleEdit() => IsEditing = !IsEditing;
+    public void OpenCategorySheet()
+    {
+        IsCategorySheetOpen = true;
+    }
+
+    [RelayCommand]
+    public async Task SaveCategoryAsync()
+    {
+        if (Transaction is null || SelectedCategory is null) return;
+
+        await _transactionRepo.UpdateCategoryAsync(Transaction.MpesaCode, SelectedCategory.Id);
+        Transaction.CategoryId = SelectedCategory.Id;
+        IsCategorySheetOpen = false;
+    }
+
+    // ── Note edit (3.9) ───────────────────────────────────────────────────────
+
+    [RelayCommand]
+    public void OpenNoteSheet()
+    {
+        EditNote = Transaction?.Note ?? string.Empty;
+        IsNoteSheetOpen = true;
+    }
 
     [RelayCommand]
     public async Task SaveNoteAsync()
     {
         if (Transaction is null) return;
 
-        await _transactionRepo.UpdateNoteAsync(Transaction.MpesaCode, Note);
-        IsEditing = false;
-
-        await Shell.Current.DisplayAlertAsync("Saved", "Note updated successfully.", "OK");
+        await _transactionRepo.UpdateNoteAsync(Transaction.MpesaCode, EditNote);
+        Transaction.Note = EditNote;
+        OnPropertyChanged(nameof(Transaction));
+        IsNoteSheetOpen = false;
     }
 
     [RelayCommand]
-    public async Task ChangeCategoryAsync(Category category)
+    public void CloseSheet()
     {
-        if (Transaction is null) return;
-
-        await _transactionRepo.UpdateCategoryAsync(Transaction.MpesaCode, category.Id);
-        CategoryName = category.Name;
-        CategoryIcon = category.Icon;
-
-        await Shell.Current.DisplayAlertAsync("Updated", $"Category changed to {category.Name}.", "OK");
+        IsNoteSheetOpen = false;
+        IsCategorySheetOpen = false;
     }
 
     [RelayCommand]
-    public async Task CopySmsAsync()
+    public void SelectCategoryForEdit(Category category)
     {
-        if (Transaction is null) return;
-        await Clipboard.Default.SetTextAsync(Transaction.OriginalSms);
-        await Shell.Current.DisplayAlertAsync("Copied", "SMS text copied to clipboard.", "OK");
+        SelectedCategory = category;
     }
+
+    // ── Navigation ────────────────────────────────────────────────────────────
 
     [RelayCommand]
-    public async Task ShareAsync()
-    {
-        if (Transaction is null) return;
-
-        var text = $"PesaLens Transaction\n" +
-                   $"Code: {Transaction.MpesaCode}\n" +
-                   $"Amount: {FormattedAmount}\n" +
-                   $"To/From: {Transaction.CounterpartyName}\n" +
-                   $"Date: {Transaction.TransactionDate.ToLocalTime():MMM d yyyy, h:mm tt}\n" +
-                   $"Category: {CategoryName}";
-
-        await Share.Default.RequestAsync(new ShareTextRequest
-        {
-            Text = text,
-            Title = "Share Transaction"
-        });
-    }
-
-    [RelayCommand]
-    public async Task GoBackAsync() =>
-        await Shell.Current.GoToAsync("..");
-
-    // ── Helpers ───────────────────────────────────────────────────────────────
-
-    private static bool IsOutgoing(TransactionType type) => type is
-        TransactionType.SendMoney or
-        TransactionType.PayBill or
-        TransactionType.BuyGoods or
-        TransactionType.AirtimePurchase or
-        TransactionType.Withdrawal or
-        TransactionType.Fuliza or
-        TransactionType.MShwari;
-
-    private static string FormatAmount(Transaction tx)
-    {
-        var sign = IsOutgoing(tx.Type) ? "-" : "+";
-        return $"{sign}Ksh {tx.Amount:N0}";
-    }
-
-    private static string GetTypeIcon(TransactionType type) => type switch
-    {
-        TransactionType.SendMoney => "📤",
-        TransactionType.ReceiveMoney => "📥",
-        TransactionType.PayBill => "🧾",
-        TransactionType.BuyGoods => "🛒",
-        TransactionType.AirtimePurchase => "📱",
-        TransactionType.Withdrawal => "🏧",
-        TransactionType.Deposit => "💰",
-        TransactionType.Fuliza => "⚡",
-        TransactionType.MShwari => "🏦",
-        TransactionType.Reversal => "↩️",
-        _ => "💳"
-    };
+    public async Task GoBackAsync() => await Shell.Current.GoToAsync("..");
 }

@@ -6,280 +6,270 @@ using LiveChartsCore.SkiaSharpView.Painting;
 using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.Core.Models;
 using SkiaSharp;
-using System.Collections.ObjectModel;
+using System.Data;
 
 namespace PesaLens.App.ViewModels;
 
-// ── Display models ────────────────────────────────────────────────────────────
-
-public partial class CategoryRowItem : ObservableObject
+public partial class CategorySpendRow : ObservableObject
 {
-    public int CategoryId { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string Icon { get; set; } = string.Empty;
-    public string Color { get; set; } = string.Empty;
-    public bool IsSystemCategory { get; set; }
-    public decimal Amount { get; set; }
-    public double Percentage { get; set; }
-
+    public Category Category { get; init; } = null!;
+    public decimal Amount { get; init; }
+    public double Percentage { get; init; }
     public string FormattedAmount => $"Ksh {Amount:N0}";
-    public string FormattedPercentage => $"{Percentage:F1}%";
-
-    /// <summary>Width ratio 0..1 for the progress-bar fill.</summary>
-    public double BarWidth => Percentage / 100.0;
+    public string FormattedPercentage => $"{Percentage:0.#}%";
+    public Color ChartColor { get; init; } = Colors.Gray;
 }
-
-public partial class RuleRowItem : ObservableObject
-{
-    public int RuleId { get; set; }
-    public string MatchValue { get; set; } = string.Empty;
-    public string CategoryName { get; set; } = string.Empty;
-    public RuleType RuleType { get; set; }
-    public bool IsEnabled { get; set; }
-
-    public string RuleTypeLabel => RuleType switch
-    {
-        RuleType.PaybillNumber => "Paybill",
-        RuleType.TillNumber => "Till",
-        RuleType.MerchantName => "Merchant",
-        RuleType.ContainsText => "Contains",
-        RuleType.TransactionType => "Tx Type",
-        _ => RuleType.ToString()
-    };
-}
-
-// ── ViewModel ─────────────────────────────────────────────────────────────────
 
 public partial class CategoriesViewModel : ObservableObject
 {
-    private readonly ITransactionRepository _transactions;
-    private readonly ICategoryRepository _categories;
-    private readonly IAutoCategorizationRuleRepository _rules;
+    private readonly ICategoryRepository _categoryRepo;
+    private readonly ITransactionRepository _transactionRepo;
+    private readonly IAutoCategorizationRuleRepository _rulesRepo;
 
-    // ── State ─────────────────────────────────────────────────────────────────
+    [ObservableProperty] private ISeries[] _series = [];
+    [ObservableProperty] private List<CategorySpendRow> _categoryRows = [];
+    [ObservableProperty] private List<AutoCategorizationRule> _rules = [];
     [ObservableProperty] private bool _isBusy;
-    [ObservableProperty] private bool _isRefreshing;
     [ObservableProperty] private string _periodLabel = string.Empty;
+    [ObservableProperty] private CategorySpendRow? _selectedCategory;
 
-    // ── Donut chart ───────────────────────────────────────────────────────────
-    [ObservableProperty] private ISeries[] _donutSeries = [];
-    [ObservableProperty] private string _totalSpendLabel = "Ksh 0";
+    // ── Add/Edit Category sheet state ────────────────────────────────────────
+    [ObservableProperty] private bool _isSheetOpen;
+    [ObservableProperty] private string _editName = string.Empty;
+    [ObservableProperty] private string _editIcon = "label";
+    [ObservableProperty] private string _editColor = "#1A8C62";
+    [ObservableProperty] private Category? _editingCategory;
 
-    // ── Category list ─────────────────────────────────────────────────────────
-    [ObservableProperty]
-    private ObservableCollection<CategoryRowItem> _categoryRows = [];
+    // ── Add Rule sheet state ──────────────────────────────────────────────────
+    [ObservableProperty] private bool _isRuleSheetOpen;
+    [ObservableProperty] private string _ruleMatchValue = string.Empty;
+    [ObservableProperty] private RuleType _ruleType = RuleType.ContainsText;
+    [ObservableProperty] private Category? _ruleTargetCategory;
+    [ObservableProperty] private AutoCategorizationRule? _editingRule;
 
-    // ── Selected category (for drill-down) ───────────────────────────────────
-    [ObservableProperty] private CategoryRowItem? _selectedCategory;
-    [ObservableProperty] private bool _showCategoryDetail;
+    public List<RuleType> RuleTypes { get; } = Enum.GetValues<RuleType>().ToList();
 
-    // ── Rules section ─────────────────────────────────────────────────────────
-    [ObservableProperty]
-    private ObservableCollection<RuleRowItem> _ruleRows = [];
-
-    [ObservableProperty] private bool _showRules;
-
-    // ── Tab selection (0 = Breakdown, 1 = Rules) ──────────────────────────────
-    [ObservableProperty] private int _selectedTab;
-
-    // ── Constructor ───────────────────────────────────────────────────────────
     public CategoriesViewModel(
-        ITransactionRepository transactions,
-        ICategoryRepository categories,
-        IAutoCategorizationRuleRepository rules)
+        ICategoryRepository categoryRepo,
+        ITransactionRepository transactionRepo,
+        IAutoCategorizationRuleRepository rulesRepo)
     {
-        _transactions = transactions;
-        _categories = categories;
-        _rules = rules;
+        _categoryRepo = categoryRepo;
+        _transactionRepo = transactionRepo;
+        _rulesRepo = rulesRepo;
     }
-
-    // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     [RelayCommand]
     public async Task LoadAsync()
     {
         if (IsBusy) return;
         IsBusy = true;
-        try { await RefreshAllAsync(); }
-        finally { IsBusy = false; }
+        try
+        {
+            await Task.WhenAll(LoadChartAsync(), LoadRulesAsync());
+        }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
-    [RelayCommand]
-    private async Task RefreshAsync()
+    // ── Chart + category rows ─────────────────────────────────────────────────
+
+    private async Task LoadChartAsync()
     {
-        IsRefreshing = true;
-        try { await RefreshAllAsync(); }
-        finally { IsRefreshing = false; }
-    }
+        var from = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+        var to = DateTime.Today;
+        PeriodLabel = from.ToString("MMMM yyyy");
 
-    // ── Tab switching ─────────────────────────────────────────────────────────
+        var categories = await _categoryRepo.GetAllActiveAsync();
+        var spendMap = await _transactionRepo.GetSpendingByCategoryAsync(from, to);
+        var catMap = categories.ToDictionary(c => c.Id);
 
-    [RelayCommand]
-    private async Task SelectTabAsync(string tabIndex)
-    {
-        SelectedTab = int.Parse(tabIndex);
-        if (SelectedTab == 1 && RuleRows.Count == 0)
-            await LoadRulesAsync();
-    }
-
-    // ── Category drill-down ───────────────────────────────────────────────────
-
-    [RelayCommand]
-    private async Task SelectCategoryAsync(CategoryRowItem item)
-    {
-        SelectedCategory = item;
-        ShowCategoryDetail = true;
-
-        // Navigate to filtered transactions page for this category
-        // Reuse TransactionsPage via query parameter — adjust route as needed
-        await Shell.Current.GoToAsync(
-            "TransactionsPage",
-            new Dictionary<string, object>
-            {
-                ["CategoryId"] = item.CategoryId,
-                ["CategoryName"] = item.Name
-            });
-    }
-
-    [RelayCommand]
-    private static async Task NavigateToAddCategoryAsync()
-    {
-        await Shell.Current.GoToAsync(
-            nameof(PesaLens.App.Views.Categories.EditCategoryPage),
-            new Dictionary<string, object> { ["CategoryId"] = 0 });
-    }
-
-    [RelayCommand]
-    private void DismissCategoryDetail() => ShowCategoryDetail = false;
-
-    // ── Rule toggle ───────────────────────────────────────────────────────────
-
-    [RelayCommand]
-    private async Task ToggleRuleAsync(RuleRowItem row)
-    {
-        row.IsEnabled = !row.IsEnabled;
-        // Persist via raw SQL — fastest path without a dedicated method
-        var rule = await _rules.GetByIdAsync(row.RuleId);
-        if (rule is null) return;
-        rule.IsEnabled = row.IsEnabled;
-        await _rules.UpdateAsync(rule);
-        // row.OnPropertyChanged(nameof(RuleRowItem.IsEnabled));
-    }
-
-    [RelayCommand]
-    private async Task DeleteRuleAsync(RuleRowItem row)
-    {
-        await _rules.DeleteByIdAsync(row.RuleId);
-        RuleRows.Remove(row);
-    }
-
-    // ── Core data loading ─────────────────────────────────────────────────────
-
-    private async Task RefreshAllAsync()
-    {
-        var now = DateTime.Now;
-        var monthStart = new DateTime(now.Year, now.Month, 1);
-        var monthEnd = monthStart.AddMonths(1).AddTicks(-1);
-
-        PeriodLabel = $"{monthStart:MMMM yyyy}";
-
-        await Task.WhenAll(
-            LoadBreakdownAsync(monthStart, monthEnd),
-            SelectedTab == 1 ? LoadRulesAsync() : Task.CompletedTask
-        );
-    }
-
-    private async Task LoadBreakdownAsync(DateTime from, DateTime to)
-    {
-        var spendByCategory = await _transactions.GetSpendingByCategoryAsync(from, to);
-        var allCategories = await _categories.GetAllAsync();
-
-        var catMap = allCategories.ToDictionary(c => c.Id);
-        var total = spendByCategory.Values.Sum();
-
-        TotalSpendLabel = $"Ksh {total:N0}";
-
-        // Build display rows, sorted descending
-        var rows = spendByCategory
+        var rows = spendMap
             .Where(kvp => catMap.ContainsKey(kvp.Key) && kvp.Value > 0)
             .OrderByDescending(kvp => kvp.Value)
-            .Select(kvp =>
-            {
-                var cat = catMap[kvp.Key];
-                return new CategoryRowItem
-                {
-                    CategoryId = cat.Id,
-                    Name = cat.Name,
-                    Icon = cat.Icon,
-                    Color = cat.Color,
-                    IsSystemCategory = cat.IsSystemCategory,
-                    Amount = kvp.Value,
-                    Percentage = total > 0 ? (double)(kvp.Value / total * 100) : 0,
-                };
-            })
             .ToList();
 
-        CategoryRows = new ObservableCollection<CategoryRowItem>(rows);
+        decimal total = rows.Sum(r => r.Value);
 
-        // ── Build donut series ────────────────────────────────────────────
-        var pieSeries = rows.Select(r =>
+        var pieSeries = new List<ISeries>();
+        var categoryRows = new List<CategorySpendRow>();
+
+        foreach (var (categoryId, amount) in rows)
         {
-            var fill = TryParseColor(r.Color, out var sk) ? sk : new SKColor(0x90, 0xA4, 0xAE);
-            return (ISeries)new PieSeries<double>
-            {
-                Values = [(double)r.Amount],
-                Name = r.Name,
-                Fill = new SolidColorPaint(fill),
-                Stroke = null,
-                InnerRadius = 70,
-                //MaxOuterRadius = 0.9,
-                DataLabelsPaint = null,
-            };
-        }).ToArray();
+            var cat = catMap[categoryId];
+            var color = ParseColor(cat.Color);
+            var pct = total > 0 ? (double)(amount / total) * 100 : 0;
 
-        DonutSeries = pieSeries;
+            categoryRows.Add(new CategorySpendRow
+            {
+                Category = cat,
+                Amount = amount,
+                Percentage = pct,
+                ChartColor = Color.FromArgb(cat.Color)
+            });
+
+            pieSeries.Add(new PieSeries<double>
+            {
+                Values = [(double)amount],
+                Name = cat.Name,
+                Fill = new SolidColorPaint(color),
+                Stroke = null,
+                OuterRadiusOffset = 0,
+                MaxRadialColumnWidth = 28,
+                ToolTipLabelFormatter = p => $"{cat.Name}: Ksh {amount:N0}"
+            });
+        }
+
+        Series = [.. pieSeries];
+        CategoryRows = categoryRows;
     }
+
+    // ── Rules ─────────────────────────────────────────────────────────────────
 
     private async Task LoadRulesAsync()
     {
-        var allRules = await _rules.GetEnabledOrderedByPriorityAsync();
-        var allCategories = await _categories.GetAllAsync();
-        // Also pull disabled; GetEnabledOrderedByPriorityAsync only returns enabled ones,
-        // so fetch all via base GetAllAsync on repo then filter here
-        var allRulesAll = await _rules.GetAllAsync();
-        var catMap = allCategories.ToDictionary(c => c.Id);
+        Rules = await _rulesRepo.GetEnabledOrderedByPriorityAsync();
+    }
 
-        var rows = allRulesAll
-            .OrderByDescending(r => r.Priority)
-            .Select(r => new RuleRowItem
+    // ── Category tap (4.2) ────────────────────────────────────────────────────
+
+    [RelayCommand]
+    public async Task SelectCategoryAsync(CategorySpendRow row)
+    {
+        SelectedCategory = row;
+        await Shell.Current.GoToAsync(
+            $"TransactionsPage?categoryId={row.Category.Id}");
+    }
+
+    // ── Add / Edit category (4.4, 4.5) ───────────────────────────────────────
+
+    [RelayCommand]
+    public void OpenAddCategory()
+    {
+        EditingCategory = null;
+        EditName = string.Empty;
+        EditIcon = "label";
+        EditColor = "#1A8C62";
+        IsSheetOpen = true;
+    }
+
+    [RelayCommand]
+    public void OpenEditCategory(CategorySpendRow row)
+    {
+        EditingCategory = row.Category;
+        EditName = row.Category.Name;
+        EditIcon = row.Category.Icon;
+        EditColor = row.Category.Color;
+        IsSheetOpen = true;
+    }
+
+    [RelayCommand]
+    public async Task SaveCategoryAsync()
+    {
+        if (string.IsNullOrWhiteSpace(EditName)) return;
+
+        if (EditingCategory is null)
+        {
+            await _categoryRepo.InsertAsync(new Category
             {
-                RuleId = r.Id,
-                MatchValue = r.MatchValue,
-                CategoryName = catMap.TryGetValue(r.CategoryId, out var c) ? c.Name : "Unknown",
-                RuleType = r.RuleType,
-                IsEnabled = r.IsEnabled,
-            })
-            .ToList();
+                Name = EditName.Trim(),
+                Icon = EditIcon,
+                Color = EditColor,
+                IsSystemCategory = false,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+        else
+        {
+            EditingCategory.Name = EditName.Trim();
+            EditingCategory.Icon = EditIcon;
+            EditingCategory.Color = EditColor;
+            await _categoryRepo.UpdateAsync(EditingCategory);
+        }
 
-        RuleRows = new ObservableCollection<RuleRowItem>(rows);
+        IsSheetOpen = false;
+        await LoadAsync();
+    }
+
+    [RelayCommand]
+    public async Task DeleteCategoryAsync(CategorySpendRow row)
+    {
+        if (row.Category.IsSystemCategory) return;
+        await _categoryRepo.DeleteAndReassignAsync(row.Category.Id);
+        await LoadAsync();
+    }
+
+    // ── Add / Edit rule (4.6) ─────────────────────────────────────────────────
+
+    [RelayCommand]
+    public void OpenAddRule()
+    {
+        EditingRule = null;
+        RuleMatchValue = string.Empty;
+        RuleType = RuleType.ContainsText;
+        RuleTargetCategory = null;
+        IsRuleSheetOpen = true;
+    }
+
+    [RelayCommand]
+    public void OpenEditRule(AutoCategorizationRule rule)
+    {
+        EditingRule = rule;
+        RuleMatchValue = rule.MatchValue;
+        RuleType = rule.RuleType;
+        IsRuleSheetOpen = true;
+    }
+
+    [RelayCommand]
+    public async Task SaveRuleAsync()
+    {
+        if (string.IsNullOrWhiteSpace(RuleMatchValue) || RuleTargetCategory is null) return;
+
+        if (EditingRule is null)
+        {
+            await _rulesRepo.InsertAsync(new AutoCategorizationRule
+            {
+                RuleType = RuleType,
+                MatchValue = RuleMatchValue.Trim(),
+                CategoryId = RuleTargetCategory.Id,
+                Priority = 5,
+                IsEnabled = true,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+        else
+        {
+            EditingRule.RuleType = RuleType;
+            EditingRule.MatchValue = RuleMatchValue.Trim();
+            EditingRule.CategoryId = RuleTargetCategory!.Id;
+            await _rulesRepo.UpdateAsync(EditingRule);
+        }
+
+        IsRuleSheetOpen = false;
+        await LoadRulesAsync();
+    }
+
+    [RelayCommand]
+    public async Task DeleteRuleAsync(AutoCategorizationRule rule)
+    {
+        await _rulesRepo.DeleteAsync(rule);
+        await LoadRulesAsync();
+    }
+
+    [RelayCommand]
+    public void CloseSheet()
+    {
+        IsSheetOpen = false;
+        IsRuleSheetOpen = false;
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    private static bool TryParseColor(string hex, out SKColor color)
+    private static SKColor ParseColor(string hex)
     {
-        color = SKColor.Empty;
-        if (string.IsNullOrWhiteSpace(hex)) return false;
-        hex = hex.TrimStart('#');
-        if (hex.Length == 6 &&
-            uint.TryParse(hex, System.Globalization.NumberStyles.HexNumber, null, out var val))
-        {
-            color = new SKColor(
-                (byte)((val >> 16) & 0xFF),
-                (byte)((val >> 8) & 0xFF),
-                (byte)(val & 0xFF));
-            return true;
-        }
-        return false;
+        try { return SKColor.Parse(hex); }
+        catch { return SKColor.Parse("#90A4AE"); }
     }
 }

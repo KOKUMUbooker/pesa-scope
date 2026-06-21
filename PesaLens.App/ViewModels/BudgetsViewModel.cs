@@ -2,364 +2,260 @@
 using CommunityToolkit.Mvvm.Input;
 using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.Core.Models;
-using System.Collections.ObjectModel;
 
 namespace PesaLens.App.ViewModels;
 
-// ── Display model ─────────────────────────────────────────────────────────────
-
-public partial class BudgetRowItem : ObservableObject
+public partial class BudgetRow : ObservableObject
 {
-    public int BudgetId { get; set; }
-    public int CategoryId { get; set; }
-    public string CategoryName { get; set; } = string.Empty;
-    public string CategoryIcon { get; set; } = string.Empty;
-    public string CategoryColor { get; set; } = string.Empty;
-    public decimal MonthlyLimit { get; set; }
-    public decimal Spent { get; set; }
-    public decimal LastMonthSpent { get; set; }
-    public bool NotificationsEnabled { get; set; }
-    public int WarningThreshold { get; set; } = 80;
+    public Category Category { get; init; } = null!;
+    public Budget? Budget { get; init; }
+    public decimal Spent { get; init; }
+    public decimal SpentLastMonth { get; init; }
+    public decimal Limit => Budget?.MonthlyLimit ?? 0;
 
-    // ── Derived ───────────────────────────────────────────────────────────────
-    public double Progress => MonthlyLimit > 0 ? Math.Min((double)(Spent / MonthlyLimit), 1.0) : 0;
+    public double Progress => Limit > 0 ? Math.Min((double)(Spent / Limit), 1.0) : 0;
     public string FormattedSpent => $"Ksh {Spent:N0}";
-    public string FormattedLimit => $"Ksh {MonthlyLimit:N0}";
-    public string FormattedRemaining
-    {
-        get
-        {
-            var rem = MonthlyLimit - Spent;
-            return rem >= 0 ? $"Ksh {rem:N0} left" : $"Ksh {Math.Abs(rem):N0} over";
-        }
-    }
-    public bool IsOverBudget => Spent > MonthlyLimit;
-    public bool IsWarning => !IsOverBudget && MonthlyLimit > 0 &&
-                                        (double)(Spent / MonthlyLimit) * 100 >= WarningThreshold;
+    public string FormattedLimit => $"Ksh {Limit:N0}";
+    public string FormattedLastMonth => $"Ksh {SpentLastMonth:N0}";
+    public bool HasBudget => Budget is not null;
+    public bool IsOverBudget => Limit > 0 && Spent > Limit;
+    public bool IsWarning => Limit > 0 && !IsOverBudget &&
+                             (double)(Spent / Limit) * 100 >= (Budget?.WarningThresholdPercent ?? 80);
 
-    /// <summary>Month-over-month delta. Positive = spent more than last month.</summary>
-    public decimal MomDelta => Spent - LastMonthSpent;
-    public string MomLabel
-    {
-        get
-        {
-            if (LastMonthSpent == 0) return "No data last month";
-            var delta = MomDelta;
-            return delta == 0
-                ? "Same as last month"
-                : $"{(delta > 0 ? "+" : "")}Ksh {delta:N0} vs last month";
-        }
-    }
-    public bool MomIsHigher => MomDelta > 0;
+    public Color ProgressColor => IsOverBudget
+        ? Color.FromArgb("#C0392B")
+        : IsWarning
+            ? Color.FromArgb("#C98A00")
+            : Color.FromArgb("#1A8C62");
 
-    /// Percentage bar color key — "over", "warn", or "ok"
-    public string StatusKey => IsOverBudget ? "over" : IsWarning ? "warn" : "ok";
+    public string StatusLabel => IsOverBudget
+        ? $"Over by Ksh {Spent - Limit:N0}"
+        : IsWarning
+            ? $"{(double)(Spent / Limit) * 100:0}% used"
+            : $"Ksh {Limit - Spent:N0} remaining";
+
+    public decimal LastMonthDelta => Spent - SpentLastMonth;
+    public string LastMonthLabel => SpentLastMonth == 0
+        ? "No data last month"
+        : LastMonthDelta > 0
+            ? $"↑ Ksh {LastMonthDelta:N0} more than last month"
+            : LastMonthDelta < 0
+                ? $"↓ Ksh {Math.Abs(LastMonthDelta):N0} less than last month"
+                : "Same as last month";
+
+    public Color LastMonthColor => LastMonthDelta > 0
+        ? Color.FromArgb("#C0392B")
+        : Color.FromArgb("#1A8C62");
 }
-
-// ── ViewModel ─────────────────────────────────────────────────────────────────
 
 public partial class BudgetsViewModel : ObservableObject
 {
-    private readonly IBudgetRepository _budgets;
-    private readonly IOverallBudgetRepository _overallBudget;
-    private readonly ITransactionRepository _transactions;
-    private readonly ICategoryRepository _categories;
+    private readonly IBudgetRepository _budgetRepo;
+    private readonly ICategoryRepository _categoryRepo;
+    private readonly ITransactionRepository _transactionRepo;
+    private readonly IOverallBudgetRepository _overallBudgetRepo;
 
-    // ── State ─────────────────────────────────────────────────────────────────
+    // ── Page state ────────────────────────────────────────────────────────────
     [ObservableProperty] private bool _isBusy;
-    [ObservableProperty] private bool _isRefreshing;
     [ObservableProperty] private string _periodLabel = string.Empty;
+    [ObservableProperty] private List<BudgetRow> _budgetRows = [];
 
     // ── Overall budget ────────────────────────────────────────────────────────
-    [ObservableProperty] private bool _hasOverallBudget;
     [ObservableProperty] private decimal _overallLimit;
     [ObservableProperty] private decimal _overallSpent;
-    [ObservableProperty] private decimal _overallLastMonthSpent;
     [ObservableProperty] private double _overallProgress;
-    [ObservableProperty] private string _overallFormattedLimit = "—";
-    [ObservableProperty] private string _overallFormattedSpent = "Ksh 0";
-    [ObservableProperty] private string _overallFormattedRemaining = string.Empty;
-    [ObservableProperty] private bool _overallIsOverBudget;
-    [ObservableProperty] private bool _overallIsWarning;
-    [ObservableProperty] private string _overallMomLabel = string.Empty;
-    [ObservableProperty] private bool _overallMomIsHigher;
+    [ObservableProperty] private string _formattedOverallSpent = "Ksh 0";
+    [ObservableProperty] private string _formattedOverallLimit = "Ksh 0";
+    [ObservableProperty] private bool _hasOverallBudget;
+    [ObservableProperty] private Color _overallProgressColor = Color.FromArgb("#1A8C62");
+    [ObservableProperty] private string _overallStatusLabel = string.Empty;
 
-    // ── Category budgets ──────────────────────────────────────────────────────
-    [ObservableProperty]
-    private ObservableCollection<BudgetRowItem> _budgetRows = [];
+    // ── Add/Edit Budget sheet ─────────────────────────────────────────────────
+    [ObservableProperty] private bool _isSheetOpen;
+    [ObservableProperty] private BudgetRow? _editingRow;
+    [ObservableProperty] private string _editLimitText = string.Empty;
+    [ObservableProperty] private bool _editNotificationsEnabled = true;
+    [ObservableProperty] private int _editWarningThreshold = 80;
 
-    // ── Categories without a budget (for the Add sheet picker) ───────────────
-    [ObservableProperty]
-    private ObservableCollection<Category> _unbudgetedCategories = [];
+    // ── Overall budget sheet ──────────────────────────────────────────────────
+    [ObservableProperty] private bool _isOverallSheetOpen;
+    [ObservableProperty] private string _editOverallLimitText = string.Empty;
 
-    // ── Bottom-sheet: overall budget ──────────────────────────────────────────
-    [ObservableProperty] private string _draftOverallLimit = string.Empty;
-    [ObservableProperty] private bool _draftOverallNotifs = true;
-
-    // ── Bottom-sheet: category budget ─────────────────────────────────────────
-    [ObservableProperty] private Category? _draftCategory;
-    [ObservableProperty] private string _draftCategoryLimit = string.Empty;
-    [ObservableProperty] private bool _draftCategoryNotifs = true;
-    [ObservableProperty] private int _draftWarningPct = 80;
-    [ObservableProperty] private bool _isEditingExisting;   // true = edit, false = new
-    [ObservableProperty] private int _editingBudgetId;
-
-    // ── Validation ────────────────────────────────────────────────────────────
-    [ObservableProperty] private string _overallSheetError = string.Empty;
-    [ObservableProperty] private string _categorySheetError = string.Empty;
-
-    // ── Constructor ───────────────────────────────────────────────────────────
     public BudgetsViewModel(
-        IBudgetRepository budgets,
-        IOverallBudgetRepository overallBudget,
-        ITransactionRepository transactions,
-        ICategoryRepository categories)
+        IBudgetRepository budgetRepo,
+        ICategoryRepository categoryRepo,
+        ITransactionRepository transactionRepo,
+        IOverallBudgetRepository overallBudgetRepo)
     {
-        _budgets = budgets;
-        _overallBudget = overallBudget;
-        _transactions = transactions;
-        _categories = categories;
+        _budgetRepo = budgetRepo;
+        _categoryRepo = categoryRepo;
+        _transactionRepo = transactionRepo;
+        _overallBudgetRepo = overallBudgetRepo;
     }
 
-    // ── Lifecycle ─────────────────────────────────────────────────────────────
+    // ── Load ──────────────────────────────────────────────────────────────────
 
     [RelayCommand]
     public async Task LoadAsync()
     {
         if (IsBusy) return;
         IsBusy = true;
-        try { await RefreshAllAsync(); }
-        finally { IsBusy = false; }
-    }
-
-    [RelayCommand]
-    private async Task RefreshAsync()
-    {
-        IsRefreshing = true;
-        try { await RefreshAllAsync(); }
-        finally { IsRefreshing = false; }
-    }
-
-    // ── Open sheets: seed draft values ────────────────────────────────────────
-
-    [RelayCommand]
-    private void OpenOverallSheet()
-    {
-        OverallSheetError = string.Empty;
-        DraftOverallLimit = HasOverallBudget ? OverallLimit.ToString("0") : string.Empty;
-        DraftOverallNotifs = true;
-    }
-
-    [RelayCommand]
-    private async Task OpenAddCategorySheetAsync()
-    {
-        CategorySheetError = string.Empty;
-        IsEditingExisting = false;
-        EditingBudgetId = 0;
-        DraftCategory = null;
-        DraftCategoryLimit = string.Empty;
-        DraftCategoryNotifs = true;
-        DraftWarningPct = 80;
-        await RefreshUnbudgetedCategoriesAsync();
-    }
-
-    [RelayCommand]
-    private async Task OpenEditCategorySheetAsync(BudgetRowItem row)
-    {
-        CategorySheetError = string.Empty;
-        IsEditingExisting = true;
-        EditingBudgetId = row.BudgetId;
-        DraftCategoryLimit = row.MonthlyLimit.ToString("0");
-        DraftCategoryNotifs = row.NotificationsEnabled;
-        DraftWarningPct = row.WarningThreshold;
-
-        // Seed the selected category
-        var cat = await _categories.GetByIdAsync(row.CategoryId);
-        DraftCategory = cat;
-        await RefreshUnbudgetedCategoriesAsync();
-    }
-
-    // ── Save: overall budget ──────────────────────────────────────────────────
-
-    [RelayCommand]
-    private async Task SaveOverallBudgetAsync()
-    {
-        if (!decimal.TryParse(DraftOverallLimit, out var limit) || limit <= 0)
+        try
         {
-            OverallSheetError = "Please enter a valid amount greater than 0.";
-            return;
+            await Task.WhenAll(LoadBudgetRowsAsync(), LoadOverallBudgetAsync());
         }
-
-        var record = new OverallBudget
+        finally
         {
-            MonthlyLimit = limit,
-            NotificationsEnabled = DraftOverallNotifs,
-            CreatedAt = DateTime.UtcNow,
-        };
-        await _overallBudget.UpsertAsync(record);
-        await RefreshAllAsync();
-    }
-
-    [RelayCommand]
-    private async Task DeleteOverallBudgetAsync()
-    {
-        await _overallBudget.DeleteAsync();
-        HasOverallBudget = false;
-        OverallFormattedLimit = "—";
-        OverallFormattedRemaining = string.Empty;
-        OverallProgress = 0;
-    }
-
-    // ── Save: category budget ─────────────────────────────────────────────────
-
-    [RelayCommand]
-    private async Task SaveCategoryBudgetAsync()
-    {
-        if (DraftCategory is null && !IsEditingExisting)
-        {
-            CategorySheetError = "Please select a category.";
-            return;
+            IsBusy = false;
         }
-        if (!decimal.TryParse(DraftCategoryLimit, out var limit) || limit <= 0)
-        {
-            CategorySheetError = "Please enter a valid amount greater than 0.";
-            return;
-        }
-
-        int catId = IsEditingExisting
-            ? (await _budgets.GetByIdAsync(EditingBudgetId))!.CategoryId
-            : DraftCategory!.Id;
-
-        var budget = new Budget
-        {
-            CategoryId = catId,
-            MonthlyLimit = limit,
-            NotificationsEnabled = DraftCategoryNotifs,
-            WarningThresholdPercent = DraftWarningPct,
-            CreatedAt = DateTime.UtcNow,
-        };
-
-        if (IsEditingExisting) budget.Id = EditingBudgetId;
-
-        await _budgets.UpsertAsync(budget);
-        await RefreshAllAsync();
     }
 
-    [RelayCommand]
-    private async Task DeleteCategoryBudgetAsync(BudgetRowItem row)
+    private async Task LoadBudgetRowsAsync()
     {
-        bool confirmed = await Shell.Current.DisplayAlertAsync(
-            "Remove budget",
-            $"Remove the budget for \"{row.CategoryName}\"?",
-            "Remove", "Cancel");
-        if (!confirmed) return;
+        var (thisFrom, thisTo) = CurrentMonthRange();
+        var (lastFrom, lastTo) = LastMonthRange();
 
-        await _budgets.DeleteByIdAsync(row.BudgetId);
-        BudgetRows.Remove(row);
-    }
+        PeriodLabel = thisFrom.ToString("MMMM yyyy");
 
-    // ── Core data refresh ─────────────────────────────────────────────────────
+        var categories = await _categoryRepo.GetAllActiveAsync();
+        var budgets = await _budgetRepo.GetAllWithCategoryAsync();
+        var spendThis = await _transactionRepo.GetSpendingByCategoryAsync(thisFrom, thisTo);
+        var spendLast = await _transactionRepo.GetSpendingByCategoryAsync(lastFrom, lastTo);
+        var budgetMap = budgets.ToDictionary(b => b.CategoryId);
 
-    private async Task RefreshAllAsync()
-    {
-        var now = DateTime.Now;
-        var monthStart = new DateTime(now.Year, now.Month, 1);
-        var monthEnd = monthStart.AddMonths(1).AddTicks(-1);
-        var lastStart = monthStart.AddMonths(-1);
-        var lastEnd = monthStart.AddTicks(-1);
-
-        PeriodLabel = $"{monthStart:MMMM yyyy}";
-
-        await Task.WhenAll(
-            LoadOverallAsync(monthStart, monthEnd, lastStart, lastEnd),
-            LoadCategoryBudgetsAsync(monthStart, monthEnd, lastStart, lastEnd)
-        );
-
-        await RefreshUnbudgetedCategoriesAsync();
-    }
-
-    private async Task LoadOverallAsync(
-        DateTime from, DateTime to, DateTime lastFrom, DateTime lastTo)
-    {
-        var overall = await _overallBudget.GetAsync();
-        HasOverallBudget = overall is not null;
-
-        var spent = await _transactions.GetTotalSpentAsync(from, to);
-        var lastSpent = await _transactions.GetTotalSpentAsync(lastFrom, lastTo);
-
-        OverallSpent = spent;
-        OverallLastMonthSpent = lastSpent;
-
-        if (overall is not null)
-        {
-            OverallLimit = overall.MonthlyLimit;
-            OverallFormattedLimit = $"Ksh {overall.MonthlyLimit:N0}";
-            OverallProgress = overall.MonthlyLimit > 0
-                ? Math.Min((double)(spent / overall.MonthlyLimit), 1.0)
-                : 0;
-            var rem = overall.MonthlyLimit - spent;
-            OverallFormattedRemaining = rem >= 0
-                ? $"Ksh {rem:N0} remaining"
-                : $"Ksh {Math.Abs(rem):N0} over budget";
-            OverallIsOverBudget = spent > overall.MonthlyLimit;
-            OverallIsWarning = !OverallIsOverBudget && overall.MonthlyLimit > 0 &&
-                                  (double)(spent / overall.MonthlyLimit) * 100 >= 80;
-        }
-
-        OverallFormattedSpent = $"Ksh {spent:N0}";
-        var delta = spent - lastSpent;
-        OverallMomIsHigher = delta > 0;
-        OverallMomLabel = lastSpent == 0
-            ? "No data last month"
-            : $"{(delta > 0 ? "+" : "")}Ksh {delta:N0} vs last month";
-    }
-
-    private async Task LoadCategoryBudgetsAsync(
-        DateTime from, DateTime to, DateTime lastFrom, DateTime lastTo)
-    {
-        var allBudgets = await _budgets.GetAllWithCategoryAsync();
-        var allCategories = await _categories.GetAllAsync();
-        var catMap = allCategories.ToDictionary(c => c.Id);
-        var spendThis = await _transactions.GetSpendingByCategoryAsync(from, to);
-        var spendLast = await _transactions.GetSpendingByCategoryAsync(lastFrom, lastTo);
-
-        var rows = allBudgets.Select(b =>
-        {
-            catMap.TryGetValue(b.CategoryId, out var cat);
-            spendThis.TryGetValue(b.CategoryId, out var spent);
-            spendLast.TryGetValue(b.CategoryId, out var lastSpent);
-
-            return new BudgetRowItem
+        BudgetRows = categories
+            .Where(c => c.Name != "Uncategorized")
+            .OrderByDescending(c => budgetMap.ContainsKey(c.Id))
+            .ThenBy(c => c.Name)
+            .Select(c => new BudgetRow
             {
-                BudgetId = b.Id,
-                CategoryId = b.CategoryId,
-                CategoryName = cat?.Name ?? "Unknown",
-                CategoryIcon = cat?.Icon ?? "help",
-                CategoryColor = cat?.Color ?? "#90A4AE",
-                MonthlyLimit = b.MonthlyLimit,
-                Spent = spent,
-                LastMonthSpent = lastSpent,
-                NotificationsEnabled = b.NotificationsEnabled,
-                WarningThreshold = b.WarningThresholdPercent,
-            };
-        })
-        .OrderByDescending(r => r.Progress)
-        .ToList();
-
-        BudgetRows = new ObservableCollection<BudgetRowItem>(rows);
+                Category = c,
+                Budget = budgetMap.GetValueOrDefault(c.Id),
+                Spent = spendThis.GetValueOrDefault(c.Id),
+                SpentLastMonth = spendLast.GetValueOrDefault(c.Id)
+            })
+            .ToList();
     }
 
-    private async Task RefreshUnbudgetedCategoriesAsync()
+    private async Task LoadOverallBudgetAsync()
     {
-        var allCats = await _categories.GetAllAsync();
-        var allBudgets = await _budgets.GetAllWithCategoryAsync();
-        var budgetedIds = allBudgets.Select(b => b.CategoryId).ToHashSet();
+        var overall = await _overallBudgetRepo.GetAsync();
+        var (from, to) = CurrentMonthRange();
+        OverallSpent = await _transactionRepo.GetTotalSpentAsync(from, to);
 
-        // In edit mode also include the current category so it stays in the picker
-        if (IsEditingExisting && DraftCategory is not null)
-            budgetedIds.Remove(DraftCategory.Id);
+        HasOverallBudget = overall is not null;
+        OverallLimit = overall?.MonthlyLimit ?? 0;
+        FormattedOverallSpent = $"Ksh {OverallSpent:N0}";
+        FormattedOverallLimit = overall is not null ? $"Ksh {OverallLimit:N0}" : "Not set";
 
-        UnbudgetedCategories = new ObservableCollection<Category>(
-            allCats.Where(c => !budgetedIds.Contains(c.Id)));
+        if (overall is not null && OverallLimit > 0)
+        {
+            OverallProgress = Math.Min((double)(OverallSpent / OverallLimit), 1.0);
+            bool isOver = OverallSpent > OverallLimit;
+            bool isWarn = !isOver && (double)(OverallSpent / OverallLimit) * 100 >= 80;
+
+            OverallProgressColor = isOver
+                ? Color.FromArgb("#C0392B")
+                : isWarn
+                    ? Color.FromArgb("#C98A00")
+                    : Color.FromArgb("#1A8C62");
+
+            OverallStatusLabel = isOver
+                ? $"Over by Ksh {OverallSpent - OverallLimit:N0}"
+                : $"Ksh {OverallLimit - OverallSpent:N0} remaining";
+        }
+        else
+        {
+            OverallProgress = 0;
+            OverallStatusLabel = string.Empty;
+        }
+    }
+
+    // ── Category budget sheet ─────────────────────────────────────────────────
+
+    [RelayCommand]
+    public void OpenEditBudget(BudgetRow row)
+    {
+        EditingRow = row;
+        EditLimitText = row.Budget?.MonthlyLimit.ToString("0") ?? string.Empty;
+        EditNotificationsEnabled = row.Budget?.NotificationsEnabled ?? true;
+        EditWarningThreshold = row.Budget?.WarningThresholdPercent ?? 80;
+        IsSheetOpen = true;
+    }
+
+    [RelayCommand]
+    public async Task SaveBudgetAsync()
+    {
+        if (EditingRow is null) return;
+        if (!decimal.TryParse(EditLimitText, out var limit) || limit <= 0) return;
+
+        await _budgetRepo.UpsertAsync(new Budget
+        {
+            CategoryId = EditingRow.Category.Id,
+            MonthlyLimit = limit,
+            NotificationsEnabled = EditNotificationsEnabled,
+            WarningThresholdPercent = EditWarningThreshold,
+            CreatedAt = DateTime.UtcNow
+        });
+
+        IsSheetOpen = false;
+        await LoadAsync();
+    }
+
+    [RelayCommand]
+    public async Task DeleteBudgetAsync(BudgetRow row)
+    {
+        if (row.Budget is null) return;
+        await _budgetRepo.DeleteAsync(row.Budget);
+        await LoadAsync();
+    }
+
+    // ── Overall budget sheet ──────────────────────────────────────────────────
+
+    [RelayCommand]
+    public void OpenOverallBudget()
+    {
+        EditOverallLimitText = OverallLimit > 0 ? OverallLimit.ToString("0") : string.Empty;
+        IsOverallSheetOpen = true;
+    }
+
+    [RelayCommand]
+    public async Task SaveOverallBudgetAsync()
+    {
+        if (!decimal.TryParse(EditOverallLimitText, out var limit) || limit <= 0) return;
+
+        await _overallBudgetRepo.UpsertAsync(new OverallBudget
+        {
+            MonthlyLimit = limit,
+            //UpdatedAt = DateTime.UtcNow,
+        });
+
+        IsOverallSheetOpen = false;
+        await LoadOverallBudgetAsync();
+    }
+
+    [RelayCommand]
+    public void CloseSheet()
+    {
+        IsSheetOpen = false;
+        IsOverallSheetOpen = false;
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+
+    private static (DateTime from, DateTime to) CurrentMonthRange()
+    {
+        var today = DateTime.Today;
+        var from = new DateTime(today.Year, today.Month, 1);
+        var to = today;
+        return (from, to);
+    }
+
+    private static (DateTime from, DateTime to) LastMonthRange()
+    {
+        var today = DateTime.Today;
+        var from = new DateTime(today.Year, today.Month, 1).AddMonths(-1);
+        var to = from.AddMonths(1).AddDays(-1);
+        return (from, to);
     }
 }

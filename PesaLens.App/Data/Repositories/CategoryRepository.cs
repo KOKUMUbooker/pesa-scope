@@ -50,18 +50,18 @@ public class CategoryRepository(DatabaseService databaseService)
     {
         var defaultCategories = new List<Category>
         {
-            new() { Name = "Food & Groceries",  Icon = "shopping-cart",  Color = "#D4522A", IsSystemCategory = true },
-            new() { Name = "Transport",         Icon = "car",            Color = "#1A8C62", IsSystemCategory = true },
-            new() { Name = "Utilities",         Icon = "bolt",           Color = "#C98A00", IsSystemCategory = true },
-            new() { Name = "Airtime & Data",    Icon = "device-mobile",  Color = "#5C6BC0", IsSystemCategory = true },
-            new() { Name = "Entertainment",     Icon = "movie",          Color = "#AB47BC", IsSystemCategory = true },
-            new() { Name = "Health",            Icon = "heart",          Color = "#EF5350", IsSystemCategory = true },
-            new() { Name = "Education",         Icon = "school",         Color = "#42A5F5", IsSystemCategory = true },
-            new() { Name = "Shopping",          Icon = "tag",            Color = "#EC407A", IsSystemCategory = true },
-            new() { Name = "Rent & Housing",    Icon = "home",           Color = "#8D6E63", IsSystemCategory = true },
-            new() { Name = "Savings & Goals",   Icon = "piggy-bank",     Color = "#26A69A", IsSystemCategory = true },
-            new() { Name = "Income",            Icon = "arrow-down",     Color = "#1A8C62", IsSystemCategory = true },
-            new() { Name = "Uncategorized",     Icon = "help",           Color = "#90A4AE", IsSystemCategory = true },
+            new() { Name = "Food & Groceries",  Icon = "Shopping_cart", Color = "#D4522A", IsSystemCategory = true },
+            new() { Name = "Transport",         Icon = "Directions_car", Color = "#1A8C62", IsSystemCategory = true },
+            new() { Name = "Utilities",         Icon = "Bolt",          Color = "#C98A00", IsSystemCategory = true },
+            new() { Name = "Airtime & Data",    Icon = "Phone_android", Color = "#5C6BC0", IsSystemCategory = true },
+            new() { Name = "Entertainment",     Icon = "Movie",         Color = "#AB47BC", IsSystemCategory = true },
+            new() { Name = "Health",            Icon = "Favorite",      Color = "#EF5350", IsSystemCategory = true },
+            new() { Name = "Education",         Icon = "School",        Color = "#42A5F5", IsSystemCategory = true },
+            new() { Name = "Shopping",          Icon = "Sell",          Color = "#EC407A", IsSystemCategory = true },
+            new() { Name = "Rent & Housing",    Icon = "Home",          Color = "#8D6E63", IsSystemCategory = true },
+            new() { Name = "Savings & Goals",   Icon = "Savings",       Color = "#26A69A", IsSystemCategory = true },
+            new() { Name = "Income",            Icon = "South",         Color = "#1A8C62", IsSystemCategory = true },
+            new() { Name = "Uncategorized",     Icon = "Help",          Color = "#90A4AE", IsSystemCategory = true },
         };
 
         foreach (var category in defaultCategories)

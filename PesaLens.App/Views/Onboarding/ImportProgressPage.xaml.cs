@@ -13,6 +13,7 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
     private readonly ISyncMetadataRepository _syncMetadataRepo;
     private readonly ISmsReaderService _smsReader;
     private readonly IMpesaSmsParser _mpesaSmsParser;
+    private readonly IAutoCategorizationService _autoCategorizationService;
 
     private bool _waitingForRestoreResult = false;
 
@@ -28,7 +29,8 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
         ITransactionRepository transactionRepo,
         ISyncMetadataRepository syncMetadataRepo,
         ISmsReaderService smsReader,
-        IMpesaSmsParser mpesaSmsParser)
+        IMpesaSmsParser mpesaSmsParser,
+        IAutoCategorizationService autoCategorizationService)
     {
         InitializeComponent();
 
@@ -37,6 +39,7 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
         _syncMetadataRepo = syncMetadataRepo;
         _smsReader = smsReader;
         _mpesaSmsParser = mpesaSmsParser;
+        _autoCategorizationService = autoCategorizationService;
     }
 
     protected override void OnAppearing()
@@ -156,6 +159,10 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
         await SetStatusAsync("Saving to your device...");
 
         int inserted = await _transactionRepo.InsertManyAsync(transactions);
+
+        // ── Auto-categorize after bulk insert ────────────────────────────
+        await SetStatusAsync("Categorizing transactions...");
+        await _autoCategorizationService.CategorizeAsync(transactions);
 
         if (messages.Count > 0)
         {

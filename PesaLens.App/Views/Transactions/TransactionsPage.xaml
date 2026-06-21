@@ -133,7 +133,6 @@
 
                     <!-- Type filter chips -->
                     <CollectionView
-                        x:DataType="vm:TypeFilterChip"
                         ItemsSource="{Binding TypeChips}"
                         ItemsLayout="HorizontalList"
                         SelectionMode="None">
@@ -187,7 +186,7 @@
 
             <!-- Category filter chips (3.6) -->
             <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
-                <HorizontalStackLayout Spacing="8" x:Name="CategoryChipsLayout">
+                <HorizontalStackLayout Spacing="8" x:Name="CategoryChipsLayout" HeightRequest="44">
                     <!-- Built in code-behind from Categories list -->
                 </HorizontalStackLayout>
             </ScrollView>

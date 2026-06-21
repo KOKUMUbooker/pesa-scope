@@ -19,10 +19,10 @@ public partial class TransactionsPage : UraniumUI.Pages.UraniumContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        BuildCategoryChips();
         if (_loaded) return;
         _loaded = true;
         await _vm.LoadAsync();
+        BuildCategoryChips();
     }
 
     // ── Category chips (3.6) ──────────────────────────────────────────────────
@@ -52,7 +52,8 @@ public partial class TransactionsPage : UraniumUI.Pages.UraniumContentPage
                 ? (Color)Application.Current!.Resources["Primary"]
                 : (Color)Application.Current!.Resources["SurfaceVariant"],
             StrokeShape = new Microsoft.Maui.Controls.Shapes.RoundRectangle { CornerRadius = 20 },
-            Margin = new Thickness(0, 0, 6, 0)
+            Margin = new Thickness(0, 0, 6, 0),
+            HeightRequest = 40
         };
 
         chip.Content = new Label

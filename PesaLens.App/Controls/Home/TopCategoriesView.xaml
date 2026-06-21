@@ -10,6 +10,7 @@
     <ContentView.Resources>
         <converters:IntIsZeroConverter    x:Key="IntIsZero"/>
         <converters:IntIsNonZeroConverter x:Key="IntIsNonZero"/>
+        <converters:IconNameToGlyphConverter x:Key="IconNameToGlyph"/>
     </ContentView.Resources>
 
     <VerticalStackLayout Spacing="10">
@@ -44,11 +45,16 @@
                                     StrokeShape="RoundRectangle 20"
                                     StrokeThickness="0"
                                     BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}">
-                                    <Label
-                                        Text="{Binding Icon}"
-                                        FontSize="18"
-                                        HorizontalOptions="Center"
-                                        VerticalOptions="Center"/>
+                                    <Image HorizontalOptions="Center" VerticalOptions="Center"
+                                        WidthRequest="20" HeightRequest="20">
+                                        <Image.Source>
+                                            <FontImageSource
+                                                FontFamily="MaterialSharp"
+                                                Glyph="{Binding Icon, Converter={StaticResource IconNameToGlyph}}"
+                                                Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                                Size="20"/>
+                                        </Image.Source>
+                                    </Image>
                                 </Border>
 
                                 <VerticalStackLayout Spacing="2">

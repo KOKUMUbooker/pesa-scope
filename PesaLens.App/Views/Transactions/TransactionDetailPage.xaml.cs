@@ -9,12 +9,7 @@ public partial class TransactionDetailPage : UraniumUI.Pages.UraniumContentPage
     public TransactionDetailPage(TransactionDetailViewModel vm)
     {
         InitializeComponent();
-        BindingContext = _vm = vm;
-    }
-
-    protected override async void OnAppearing()
-    {
-        base.OnAppearing();
-        await _vm.LoadAsync();
+        _vm = vm;
+        BindingContext = _vm;
     }
 }

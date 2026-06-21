@@ -1,5 +1,4 @@
-﻿using PesaLens.App.Views.Categories;
-using PesaLens.App.Views.Transactions;
+﻿using PesaLens.App.Views.Transactions;
 
 namespace PesaLens.App
 {
@@ -13,7 +12,6 @@ namespace PesaLens.App
             // These are pushed on top of a tab's navigation stack via
             // Shell.Current.GoToAsync("TransactionDetailPage?code=RG84XY1234")
             Routing.RegisterRoute(nameof(TransactionDetailPage), typeof(TransactionDetailPage));
-            Routing.RegisterRoute(nameof(EditCategoryPage), typeof(EditCategoryPage));
         }
     }
 }

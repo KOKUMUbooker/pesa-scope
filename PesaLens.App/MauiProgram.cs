@@ -47,7 +47,6 @@ namespace PesaLens.App
             builder.Services.AddTransient<PermissionPage>();
             builder.Services.AddTransient<ImportProgressPage>();
             builder.Services.AddTransient<TransactionDetailPage>();
-            builder.Services.AddTransient<EditCategoryPage>();
 
             // App pages - Registered as Singleton to avoid recreation on every tab switch
             builder.Services.AddSingleton<AppLockPage>();
@@ -61,10 +60,11 @@ namespace PesaLens.App
             builder.Services.AddSingleton<DashboardViewModel>();
             builder.Services.AddSingleton<SettingsViewModel>();
             builder.Services.AddSingleton<TransactionsViewModel>();
-            builder.Services.AddSingleton<TransactionDetailViewModel>();
             builder.Services.AddSingleton<CategoriesViewModel>();
-            builder.Services.AddSingleton<EditCategoryViewModel>();
             builder.Services.AddSingleton<BudgetsViewModel>();
+
+            // It's page will get pushed and popped after use
+            builder.Services.AddTransient<TransactionDetailViewModel>();
 
             // DatabaseService registered as singleton — App.cs resolves and inits it
             var dbPath = Path.Combine(FileSystem.AppDataDirectory, "pesalens.db");
@@ -80,6 +80,7 @@ namespace PesaLens.App
             builder.Services.AddSingleton<IExportHistoryRepository, ExportHistoryRepository>();
             builder.Services.AddSingleton<ISmsReaderService,SmsReaderService>();
             builder.Services.AddSingleton<IMpesaSmsParser,MpesaSmsParser>();
+            builder.Services.AddSingleton<IAutoCategorizationService, AutoCategorizationService>();
             builder.Services.AddSingleton<DatabaseSeeder>();
 
             return builder.Build();

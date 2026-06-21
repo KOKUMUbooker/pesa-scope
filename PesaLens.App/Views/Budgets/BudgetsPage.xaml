@@ -1,700 +1,345 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <uranium:UraniumContentPage
     x:Class="PesaLens.App.Views.Budgets.BudgetsPage"
-    x:DataType="vm:BudgetsViewModel"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:vm="clr-namespace:PesaLens.App.ViewModels"
-    xmlns:models="clr-namespace:PesaLens.Core.Models;assembly=PesaLens.Core"
-    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
-    xmlns:converters="clr-namespace:PesaLens.App.Converters"
-    Shell.NavBarIsVisible="False"
     xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+    xmlns:vm="clr-namespace:PesaLens.App.ViewModels"
+    xmlns:converters="clr-namespace:PesaLens.App.Converters"
+    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
+    x:DataType="vm:BudgetsViewModel"
+    SafeAreaEdges="All"
     BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 
-    <ContentPage.Resources>
-        <converters:InverseBoolConverter        x:Key="InverseBool"/>
-        <converters:IntIsZeroConverter          x:Key="IntIsZero"/>
-        <converters:HexToColorConverter         x:Key="HexToColor"/>
-        <converters:BudgetStatusToColorConverter x:Key="StatusToColor"/>
-    </ContentPage.Resources>
+    <uranium:UraniumContentPage.Resources>
+        <converters:InverseBoolConverter x:Key="InvertedBool"/>
+        <converters:IntIsZeroConverter x:Key="IntIsZero"/>
+    </uranium:UraniumContentPage.Resources>
 
-    <!-- ═══════════════════════════════════════════════════════════════════════
-         Root Grid — content + two overlaid bottom sheets
-    ════════════════════════════════════════════════════════════════════════ -->
-    <Grid RowDefinitions="Auto,*">
-
-        <!-- ── TOP APP BAR ───────────────────────────────────────────────── -->
-        <Grid
-            Grid.Row="0"
-            Padding="5,10,5,10"
-            ColumnDefinitions="*,Auto"
-            BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
-
-            <VerticalStackLayout Grid.Column="0" Spacing="1">
-                <Label
-                    Text="Budgets"
-                    FontSize="22"
-                    FontAttributes="Bold"
-                    TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
-                <Label
-                    Text="{Binding PeriodLabel}"
-                    FontSize="12"
-                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
-            </VerticalStackLayout>
-
-            <ImageButton
-                Grid.Column="1"
-                Command="{Binding RefreshCommand}"
-                BackgroundColor="Transparent"
-                HeightRequest="36"
-                WidthRequest="36">
+    <!-- ── Title bar ─────────────────────────────────────────────────────── -->
+    <Shell.TitleView>
+        <Grid ColumnDefinitions="*,Auto" Padding="5,10"
+              BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
+            <Label Grid.Column="0" Text="Budgets" FontSize="22" FontAttributes="Bold"
+                   VerticalOptions="Center"
+                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+            <ImageButton Grid.Column="1" Command="{Binding OpenOverallBudgetCommand}"
+                         BackgroundColor="Transparent" Padding="8" WidthRequest="44" HeightRequest="44"
+                         ToolTipProperties.Text="Set overall budget">
                 <ImageButton.Source>
-                    <FontImageSource
-                        Glyph="{x:Static m:MaterialOutlined.Sync}"
-                        FontFamily="MaterialSymbolsOutlined"
-                        Size="22"
-                        Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                    <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Tune}"
+                        Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                        Size="20"/>
                 </ImageButton.Source>
             </ImageButton>
         </Grid>
+    </Shell.TitleView>
 
-        <!-- Hairline -->
-        <BoxView
-            Grid.Row="0"
-            VerticalOptions="End"
-            HeightRequest="1"
-            Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
-            Opacity="0.4"/>
-
-        <!-- ── SCROLLABLE BODY ────────────────────────────────────────────── -->
-        <RefreshView
-            Grid.Row="1"
-            Command="{Binding RefreshCommand}"
-            IsRefreshing="{Binding IsRefreshing}"
-            RefreshColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
-
-            <ScrollView>
-                <VerticalStackLayout Padding="20,16,20,120" Spacing="16">
-
-                    <!-- Loading spinner -->
-                    <ActivityIndicator
-                        IsRunning="{Binding IsBusy}"
-                        IsVisible="{Binding IsBusy}"
-                        Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                        HorizontalOptions="Center"
-                        Margin="0,16"
-                        HeightRequest="36"/>
-
-                    <!-- ══ OVERALL BUDGET CARD ═════════════════════════════ -->
-                    <Border
-                        Padding="20"
-                        StrokeShape="RoundRectangle 20"
-                        StrokeThickness="0"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}">
-
-                        <VerticalStackLayout Spacing="14">
-
-                            <!-- Header row -->
-                            <Grid ColumnDefinitions="*,Auto">
-                                <VerticalStackLayout Grid.Column="0" Spacing="2">
-                                    <Label
-                                        Text="OVERALL BUDGET"
-                                        FontSize="11"
-                                        FontAttributes="Bold"
-                                        CharacterSpacing="1.2"
-                                        TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"
-                                        Opacity="0.75"/>
-                                    <Label
-                                        Text="{Binding OverallFormattedSpent}"
-                                        FontSize="28"
-                                        FontAttributes="Bold"
-                                        TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"/>
-                                </VerticalStackLayout>
-
-                                <!-- Edit / Set button -->
-                                <Border
-                                    Grid.Column="1"
-                                    StrokeShape="RoundRectangle 12"
-                                    StrokeThickness="0"
-                                    BackgroundColor="#20FFFFFF"
-                                    Padding="12,8"
-                                    VerticalOptions="Start">
-                                    <Border.GestureRecognizers>
-                                        <TapGestureRecognizer Command="{Binding OpenOverallSheetCommand}"/>
-                                    </Border.GestureRecognizers>
-                                    <HorizontalStackLayout Spacing="4">
-                                        <Label
-                                            Text="{x:Static m:MaterialOutlined.Edit}"
-                                            FontFamily="MaterialSymbolsOutlined"
-                                            FontSize="14"
-                                            TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"
-                                            VerticalOptions="Center"/>
-                                        <Label
-                                            Text="{Binding HasOverallBudget, Converter={StaticResource BoolToStringConverter}, ConverterParameter='Edit|Set budget'}"
-                                            FontSize="13"
-                                            FontAttributes="Bold"
-                                            TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"
-                                            VerticalOptions="Center"/>
-                                    </HorizontalStackLayout>
-                                </Border>
-                            </Grid>
-
-                            <!-- Progress bar (only when budget is set) -->
-                            <VerticalStackLayout Spacing="6" IsVisible="{Binding HasOverallBudget}">
-                                <Grid ColumnDefinitions="*,Auto">
-                                    <Label
-                                        Grid.Column="0"
-                                        Text="{Binding OverallFormattedRemaining}"
-                                        FontSize="13"
-                                        TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"
-                                        Opacity="0.8"/>
-                                    <Label
-                                        Grid.Column="1"
-                                        Text="{Binding OverallFormattedLimit}"
-                                        FontSize="13"
-                                        FontAttributes="Bold"
-                                        TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"/>
-                                </Grid>
-                                <ProgressBar
-                                    Progress="{Binding OverallProgress}"
-                                    HeightRequest="8"
-                                    ProgressColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"
-                                    BackgroundColor="#30FFFFFF"/>
-                            </VerticalStackLayout>
-
-                            <!-- No budget set placeholder -->
-                            <Label
-                                IsVisible="{Binding HasOverallBudget, Converter={StaticResource InverseBool}}"
-                                Text="Tap 'Set budget' to add a monthly spending limit."
-                                FontSize="13"
-                                TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"
-                                Opacity="0.7"/>
-
-                            <!-- Month-over-month chip -->
-                            <Border
-                                StrokeShape="RoundRectangle 8"
-                                StrokeThickness="0"
-                                BackgroundColor="#20FFFFFF"
-                                Padding="10,5"
-                                HorizontalOptions="Start">
-                                <HorizontalStackLayout Spacing="5">
-                                    <Label
-                                        Text="{Binding OverallMomIsHigher, Converter={StaticResource BoolToStringConverter}, ConverterParameter='↑|↓'}"
-                                        FontSize="13"
-                                        FontAttributes="Bold"
-                                        VerticalOptions="Center"
-                                        TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"/>
-                                    <Label
-                                        Text="{Binding OverallMomLabel}"
-                                        FontSize="12"
-                                        VerticalOptions="Center"
-                                        TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"
-                                        Opacity="0.8"/>
-                                </HorizontalStackLayout>
-                            </Border>
-
-                        </VerticalStackLayout>
-                    </Border>
-
-                    <!-- ══ SECTION HEADER: category budgets ════════════════ -->
-                    <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
-                        <Label
-                            Grid.Column="0"
-                            Text="CATEGORY BUDGETS"
-                            FontSize="11"
-                            FontAttributes="Bold"
-                            CharacterSpacing="1.2"
-                            VerticalOptions="Center"
-                            TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
-
-                        <!-- Add category budget button -->
-                        <Border
-                            Grid.Column="1"
-                            StrokeShape="RoundRectangle 10"
-                            StrokeThickness="0"
-                            BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
-                            Padding="10,6">
-                            <Border.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding OpenAddCategorySheetCommand}"/>
-                            </Border.GestureRecognizers>
-                            <HorizontalStackLayout Spacing="4">
-                                <Label
-                                    Text="{x:Static m:MaterialOutlined.Add}"
-                                    FontFamily="MaterialSymbolsOutlined"
-                                    FontSize="14"
-                                    TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"
-                                    VerticalOptions="Center"/>
-                                <Label
-                                    Text="Add"
-                                    FontSize="13"
-                                    FontAttributes="Bold"
-                                    TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"
-                                    VerticalOptions="Center"/>
-                            </HorizontalStackLayout>
-                        </Border>
-                    </Grid>
-
-                    <!-- Empty state: no category budgets -->
-                    <VerticalStackLayout
-                        Spacing="10"
-                        HorizontalOptions="Center"
-                        Margin="20,16"
-                        IsVisible="{Binding BudgetRows.Count, Converter={StaticResource IntIsZero}}">
-                        <Label Text="💰" FontSize="42" HorizontalOptions="Center"/>
-                        <Label
-                            Text="No category budgets yet"
-                            FontSize="15"
-                            FontAttributes="Bold"
-                            HorizontalOptions="Center"
-                            TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
-                        <Label
-                            Text="Tap 'Add' above to set a spending limit per category."
-                            FontSize="13"
-                            HorizontalTextAlignment="Center"
-                            TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
-                    </VerticalStackLayout>
-
-                    <!-- ══ CATEGORY BUDGET CARDS ═══════════════════════════ -->
-                    <VerticalStackLayout Spacing="12">
-                        <BindableLayout.ItemsSource>
-                            <Binding Path="BudgetRows"/>
-                        </BindableLayout.ItemsSource>
-                        <BindableLayout.ItemTemplate>
-                            <DataTemplate x:DataType="vm:BudgetRowItem">
-                                <Border
-                                    Padding="16"
-                                    StrokeShape="RoundRectangle 18"
-                                    StrokeThickness="1"
-                                    Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
-                                    BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
-
-                                    <VerticalStackLayout Spacing="12">
-
-                                        <!-- Row 1: icon + name + edit + delete -->
-                                        <Grid ColumnDefinitions="44,*,Auto,Auto" ColumnSpacing="10">
-
-                                            <!-- Category icon circle -->
-                                            <Border
-                                                Grid.Column="0"
-                                                WidthRequest="44"
-                                                HeightRequest="44"
-                                                StrokeShape="RoundRectangle 22"
-                                                StrokeThickness="0"
-                                                BackgroundColor="{Binding CategoryColor, Converter={StaticResource HexToColor}}"
-                                                VerticalOptions="Center">
-                                                <Label
-                                                    Text="{Binding CategoryIcon}"
-                                                    FontFamily="MaterialSymbolsOutlined"
-                                                    FontSize="20"
-                                                    TextColor="White"
-                                                    HorizontalOptions="Center"
-                                                    VerticalOptions="Center"/>
-                                            </Border>
-
-                                            <!-- Name + remaining -->
-                                            <VerticalStackLayout
-                                                Grid.Column="1"
-                                                Spacing="2"
-                                                VerticalOptions="Center">
-                                                <Label
-                                                    Text="{Binding CategoryName}"
-                                                    FontSize="15"
-                                                    FontAttributes="Bold"
-                                                    LineBreakMode="TailTruncation"
-                                                    TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
-                                                <Label
-                                                    Text="{Binding FormattedRemaining}"
-                                                    FontSize="12"
-                                                    TextColor="{Binding StatusKey, Converter={StaticResource StatusToColor}}"/>
-                                            </VerticalStackLayout>
-
-                                            <!-- Edit -->
-                                            <ImageButton
-                                                Grid.Column="2"
-                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:BudgetsViewModel}}, Path=OpenEditCategorySheetCommand}"
-                                                CommandParameter="{Binding .}"
-                                                BackgroundColor="Transparent"
-                                                HeightRequest="36"
-                                                WidthRequest="36"
-                                                VerticalOptions="Center">
-                                                <ImageButton.Source>
-                                                    <FontImageSource
-                                                        Glyph="{x:Static m:MaterialOutlined.Edit}"
-                                                        FontFamily="MaterialSymbolsOutlined"
-                                                        Size="18"
-                                                        Color="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
-                                                </ImageButton.Source>
-                                            </ImageButton>
-
-                                            <!-- Delete -->
-                                            <ImageButton
-                                                Grid.Column="3"
-                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:BudgetsViewModel}}, Path=DeleteCategoryBudgetCommand}"
-                                                CommandParameter="{Binding .}"
-                                                BackgroundColor="Transparent"
-                                                HeightRequest="36"
-                                                WidthRequest="36"
-                                                VerticalOptions="Center">
-                                                <ImageButton.Source>
-                                                    <FontImageSource
-                                                        Glyph="{x:Static m:MaterialOutlined.Delete}"
-                                                        FontFamily="MaterialSymbolsOutlined"
-                                                        Size="18"
-                                                        Color="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"/>
-                                                </ImageButton.Source>
-                                            </ImageButton>
-                                        </Grid>
-
-                                        <!-- Row 2: spend vs limit labels -->
-                                        <Grid ColumnDefinitions="*,Auto">
-                                            <Label
-                                                Grid.Column="0"
-                                                Text="{Binding FormattedSpent}"
-                                                FontSize="14"
-                                                FontAttributes="Bold"
-                                                TextColor="{Binding StatusKey, Converter={StaticResource StatusToColor}}"/>
-                                            <Label
-                                                Grid.Column="1"
-                                                Text="{Binding FormattedLimit}"
-                                                FontSize="13"
-                                                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
-                                        </Grid>
-
-                                        <!-- Row 3: progress bar -->
-                                        <ProgressBar
-                                            Progress="{Binding Progress}"
-                                            HeightRequest="8"
-                                            ProgressColor="{Binding StatusKey, Converter={StaticResource StatusToColor}}"
-                                            BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"/>
-
-                                        <!-- Row 4: over-budget badge + MoM chip -->
-                                        <Grid ColumnDefinitions="Auto,*,Auto">
-
-                                            <!-- Over budget badge -->
-                                            <Border
-                                                Grid.Column="0"
-                                                IsVisible="{Binding IsOverBudget}"
-                                                StrokeShape="RoundRectangle 6"
-                                                StrokeThickness="0"
-                                                BackgroundColor="{AppThemeBinding Light={StaticResource ErrorContainer}, Dark={StaticResource ErrorContainerDark}}"
-                                                Padding="8,3">
-                                                <HorizontalStackLayout Spacing="3">
-                                                    <Label
-                                                        Text="{x:Static m:MaterialOutlined.Warning}"
-                                                        FontFamily="MaterialSymbolsOutlined"
-                                                        FontSize="12"
-                                                        TextColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"
-                                                        VerticalOptions="Center"/>
-                                                    <Label
-                                                        Text="Over budget"
-                                                        FontSize="11"
-                                                        FontAttributes="Bold"
-                                                        TextColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"/>
-                                                </HorizontalStackLayout>
-                                            </Border>
-
-                                            <!-- Warning badge -->
-                                            <Border
-                                                Grid.Column="0"
-                                                IsVisible="{Binding IsWarning}"
-                                                StrokeShape="RoundRectangle 6"
-                                                StrokeThickness="0"
-                                                BackgroundColor="{AppThemeBinding Light={StaticResource SecondaryContainer}, Dark={StaticResource SecondaryContainerDark}}"
-                                                Padding="8,3">
-                                                <Label
-                                                    Text="⚠ Near limit"
-                                                    FontSize="11"
-                                                    FontAttributes="Bold"
-                                                    TextColor="{AppThemeBinding Light={StaticResource Secondary}, Dark={StaticResource SecondaryDark}}"/>
-                                            </Border>
-
-                                            <!-- MoM chip -->
-                                            <Border
-                                                Grid.Column="2"
-                                                StrokeShape="RoundRectangle 6"
-                                                StrokeThickness="0"
-                                                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
-                                                Padding="8,3">
-                                                <Label
-                                                    Text="{Binding MomLabel}"
-                                                    FontSize="11"
-                                                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
-                                            </Border>
-                                        </Grid>
-
-                                    </VerticalStackLayout>
-                                </Border>
-                            </DataTemplate>
-                        </BindableLayout.ItemTemplate>
-                    </VerticalStackLayout>
-
-                </VerticalStackLayout>
-            </ScrollView>
-        </RefreshView>
-
-    </Grid>
-    
-    <!-- ══ BOTTOM SHEET: Overall Budget ═══════════════════════════════ -->
+    <!-- ── Bottom sheets ─────────────────────────────────────────────────── -->
     <uranium:UraniumContentPage.Attachments>
+
+        <!-- Category budget sheet -->
         <material:BottomSheetView
-            x:Name="OverallBudgetSheet"
-            Grid.Row="0"
-            Grid.RowSpan="2"
-            CloseOnTapOutside="True"
+            x:Name="BudgetSheet"
+            IsPresented="{Binding IsSheetOpen}"
+            IsVisible="{Binding IsSheetOpen}"
+            CloseOnTapOutside="False"
             BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
-                <material:BottomSheetView.Header>
-                    <Label Text="Overall Monthly Budget" FontSize="Title"/>
-                </material:BottomSheetView.Header>
 
-                <VerticalStackLayout Padding="24,8,24,40" Spacing="20">
+            <VerticalStackLayout Padding="24,12,24,48" Spacing="20">
 
-                    <Label
-                    Text="Set a total monthly spending cap across all categories."
-                    FontSize="13"
-                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
-
-                    <!-- Amount input -->
-                    <VerticalStackLayout Spacing="6">
-                        <Label
-                        Text="MONTHLY LIMIT (KSH)"
-                        FontSize="11"
-                        FontAttributes="Bold"
-                        CharacterSpacing="1.2"
-                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
-                        <Border
-                        StrokeShape="RoundRectangle 12"
-                        StrokeThickness="1"
-                        Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
-                        Padding="14,0">
-                            <Entry
-                            Text="{Binding DraftOverallLimit}"
-                            Placeholder="e.g. 50000"
-                            Keyboard="Numeric"
-                            PlaceholderColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
-                            BackgroundColor="Transparent"
-                            HeightRequest="48"
-                            FontSize="16"
-                            FontAttributes="Bold"
-                            TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
-                        </Border>
-                        <Label
-                        Text="{Binding OverallSheetError}"
-                        IsVisible="{Binding OverallSheetError, Converter={StaticResource StringIsNotEmptyConverter}}"
-                        FontSize="12"
-                        TextColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"/>
-                    </VerticalStackLayout>
-
-                    <!-- Notifications toggle -->
-                    <Grid ColumnDefinitions="*,Auto">
-                        <VerticalStackLayout Grid.Column="0" Spacing="2">
-                            <Label
-                            Text="Notifications"
-                            FontSize="14"
-                            FontAttributes="Bold"
-                            TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
-                            <Label
-                            Text="Alert when you hit 80% and 100%"
-                            FontSize="12"
-                            TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
-                        </VerticalStackLayout>
-                        <Switch
-                        Grid.Column="1"
-                        IsToggled="{Binding DraftOverallNotifs}"
-                        OnColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                        VerticalOptions="Center"/>
-                    </Grid>
-
-                    <!-- Buttons -->
-                    <Grid ColumnDefinitions="*,*" ColumnSpacing="10">
-                        <Button
-                        Grid.Column="0"
-                        Text="Remove"
-                        Command="{Binding DeleteOverallBudgetCommand}"
-                        IsVisible="{Binding HasOverallBudget}"
-                        BackgroundColor="Transparent"
-                        BorderWidth="1"
-                        BorderColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"
-                        TextColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"
-                        CornerRadius="12"
-                        HeightRequest="50"
-                        FontSize="14"/>
-                        <Button
-                        Grid.Column="1"
-                        Text="Save"
-                        Command="{Binding SaveOverallBudgetCommand}"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                        TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"
-                        CornerRadius="12"
-                        HeightRequest="50"
-                        FontSize="14"
-                        FontAttributes="Bold"/>
-                    </Grid>
-
-                </VerticalStackLayout>
-            </material:BottomSheetView>
-
-        <!-- ══ BOTTOM SHEET: Add / Edit Category Budget ════════════════════ -->
-        <material:BottomSheetView
-        x:Name="CategoryBudgetSheet"
-        Grid.Row="0"
-        Grid.RowSpan="2"
-        CloseOnTapOutside="True"
-        BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
-            <material:BottomSheetView.Header>
-                <Label Text="Category Budget" FontSize="Title"/>
-            </material:BottomSheetView.Header>
-
-            <VerticalStackLayout Padding="24,8,24,40" Spacing="20">
-
-                <!-- Category picker (hidden in edit mode) -->
-                <VerticalStackLayout
-                Spacing="6"
-                IsVisible="{Binding IsEditingExisting, Converter={StaticResource InverseBool}}">
-                    <Label
-                    Text="CATEGORY"
-                    FontSize="11"
-                    FontAttributes="Bold"
-                    CharacterSpacing="1.2"
-                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
-                    <Border
-                    StrokeShape="RoundRectangle 12"
-                    StrokeThickness="1"
-                    Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
-                    Padding="10,0">
-                        <Picker
-                        ItemsSource="{Binding UnbudgetedCategories}"
-                        SelectedItem="{Binding DraftCategory}"
-                        ItemDisplayBinding="{Binding Name}"
-                        HeightRequest="48"
-                        FontSize="15"
-                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"
-                        BackgroundColor="Transparent"
-                        Title="Select a category…"/>
-                    </Border>
-                </VerticalStackLayout>
-
-                <!-- Category name label (edit mode) -->
-                <VerticalStackLayout
-                Spacing="4"
-                IsVisible="{Binding IsEditingExisting}">
-                    <Label
-                    Text="CATEGORY"
-                    FontSize="11"
-                    FontAttributes="Bold"
-                    CharacterSpacing="1.2"
-                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
-                    <Label
-                    Text="{Binding DraftCategory.Name}"
-                    FontSize="16"
-                    FontAttributes="Bold"
-                    TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
-                </VerticalStackLayout>
+                <Label FontSize="18" FontAttributes="Bold" HorizontalOptions="Center"
+                       TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}">
+                    <Label.Text>
+                        <MultiBinding StringFormat="{}{0} Budget">
+                            <Binding Path="EditingRow.Category.Name"/>
+                        </MultiBinding>
+                    </Label.Text>
+                </Label>
 
                 <!-- Monthly limit -->
                 <VerticalStackLayout Spacing="6">
-                    <Label
-                    Text="MONTHLY LIMIT (KSH)"
-                    FontSize="11"
-                    FontAttributes="Bold"
-                    CharacterSpacing="1.2"
-                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
-                    <Border
-                    StrokeShape="RoundRectangle 12"
-                    StrokeThickness="1"
-                    Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
-                    Padding="14,0">
-                        <Entry
-                        Text="{Binding DraftCategoryLimit}"
-                        Placeholder="e.g. 15000"
-                        Keyboard="Numeric"
-                        PlaceholderColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
-                        BackgroundColor="Transparent"
-                        HeightRequest="48"
-                        FontSize="16"
-                        FontAttributes="Bold"
-                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                    <Label Text="MONTHLY LIMIT (KSH)" FontSize="11" FontAttributes="Bold"
+                           CharacterSpacing="1.2"
+                           TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                            StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14,0">
+                        <Entry Text="{Binding EditLimitText}"
+                               Keyboard="Numeric"
+                               Placeholder="e.g. 5000"
+                               FontSize="16" HeightRequest="52"
+                               BackgroundColor="Transparent"
+                               PlaceholderColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                               TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
                     </Border>
-                    <Label
-                    Text="{Binding CategorySheetError}"
-                    IsVisible="{Binding CategorySheetError, Converter={StaticResource StringIsNotEmptyConverter}}"
-                    FontSize="12"
-                    TextColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"/>
                 </VerticalStackLayout>
 
                 <!-- Warning threshold -->
                 <VerticalStackLayout Spacing="8">
                     <Grid ColumnDefinitions="*,Auto">
-                        <Label
-                        Grid.Column="0"
-                        Text="WARNING THRESHOLD"
-                        FontSize="11"
-                        FontAttributes="Bold"
-                        CharacterSpacing="1.2"
-                        VerticalOptions="Center"
-                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
-                        <Label
-                        Grid.Column="1"
-                        FontSize="14"
-                        FontAttributes="Bold"
-                        VerticalOptions="Center"
-                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
+                        <Label Grid.Column="0" Text="WARNING THRESHOLD" FontSize="11"
+                               FontAttributes="Bold" CharacterSpacing="1.2"
+                               TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                        <Label Grid.Column="1" FontSize="13" FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource Secondary}, Dark={StaticResource SecondaryDark}}">
                             <Label.Text>
                                 <MultiBinding StringFormat="{}{0}%">
-                                    <Binding Path="DraftWarningPct"/>
+                                    <Binding Path="EditWarningThreshold"/>
                                 </MultiBinding>
                             </Label.Text>
                         </Label>
                     </Grid>
-                    <Slider
-                    Minimum="50"
-                    Maximum="100"
-                    Value="{Binding DraftWarningPct}"
-                    MinimumTrackColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                    MaximumTrackColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
-                    ThumbColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
-                    <Label
-                    Text="You'll be notified when spending reaches this percentage of your limit."
-                    FontSize="12"
-                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                    <Slider Minimum="50" Maximum="95" Value="{Binding EditWarningThreshold}"
+                            MinimumTrackColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            MaximumTrackColor="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                            ThumbColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
                 </VerticalStackLayout>
 
                 <!-- Notifications toggle -->
                 <Grid ColumnDefinitions="*,Auto">
                     <VerticalStackLayout Grid.Column="0" Spacing="2">
-                        <Label
-                        Text="Notifications"
-                        FontSize="14"
-                        FontAttributes="Bold"
-                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
-                        <Label
-                        Text="Alert at threshold and when exceeded"
-                        FontSize="12"
-                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                        <Label Text="Notifications" FontSize="15"
+                               TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                        <Label Text="Alert me when I approach this limit"
+                               FontSize="12"
+                               TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
                     </VerticalStackLayout>
-                    <Switch
-                    Grid.Column="1"
-                    IsToggled="{Binding DraftCategoryNotifs}"
-                    OnColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                    VerticalOptions="Center"/>
+                    <Switch Grid.Column="1"
+                            IsToggled="{Binding EditNotificationsEnabled}"
+                            OnColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            VerticalOptions="Center"/>
                 </Grid>
 
-                <!-- Save button -->
-                <Button
-                    Text="Save Budget"
-                    Command="{Binding SaveCategoryBudgetCommand}"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                    TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"
-                    CornerRadius="12"
-                    HeightRequest="50"
-                    FontSize="14"
-                    FontAttributes="Bold"/>
-
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <Button Grid.Column="0" Text="Cancel" Command="{Binding CloseSheetCommand}"
+                            HeightRequest="50" CornerRadius="25" FontSize="15" FontAttributes="Bold"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                            TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                    <Button Grid.Column="1" Text="Save" Command="{Binding SaveBudgetCommand}"
+                            HeightRequest="50" CornerRadius="25" FontSize="15" FontAttributes="Bold"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"/>
+                </Grid>
             </VerticalStackLayout>
         </material:BottomSheetView>
+
+        <!-- Overall budget sheet -->
+        <material:BottomSheetView
+            x:Name="OverallSheet"
+            IsPresented="{Binding IsOverallSheetOpen}"
+            IsVisible="{Binding IsOverallSheetOpen}"
+            CloseOnTapOutside="False"
+            BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
+
+            <VerticalStackLayout Padding="24,12,24,48" Spacing="20">
+                <Label Text="Overall Monthly Budget" FontSize="18" FontAttributes="Bold"
+                       HorizontalOptions="Center"
+                       TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                <Label Text="Set a total spending limit across all categories for the month."
+                       FontSize="13" HorizontalTextAlignment="Center"
+                       TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="MONTHLY LIMIT (KSH)" FontSize="11" FontAttributes="Bold"
+                           CharacterSpacing="1.2"
+                           TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                            StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14,0">
+                        <Entry Text="{Binding EditOverallLimitText}"
+                               Keyboard="Numeric"
+                               Placeholder="e.g. 30000"
+                               FontSize="16" HeightRequest="52"
+                               BackgroundColor="Transparent"
+                               PlaceholderColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                               TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <Button Grid.Column="0" Text="Cancel" Command="{Binding CloseSheetCommand}"
+                            HeightRequest="50" CornerRadius="25" FontSize="15" FontAttributes="Bold"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                            TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                    <Button Grid.Column="1" Text="Save" Command="{Binding SaveOverallBudgetCommand}"
+                            HeightRequest="50" CornerRadius="25" FontSize="15" FontAttributes="Bold"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"/>
+                </Grid>
+            </VerticalStackLayout>
+        </material:BottomSheetView>
+
     </uranium:UraniumContentPage.Attachments>
+
+    <!-- ── Main content ───────────────────────────────────────────────────── -->
+    <ScrollView>
+        <VerticalStackLayout Spacing="24" Padding="20,16,20,40">
+
+            <!-- ── Overall budget card (5.5) ────────────────────────────── -->
+            <Border
+                BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="20">
+                <VerticalStackLayout Spacing="12">
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="Overall budget"
+                                   FontSize="16" FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                            <Label Text="{Binding PeriodLabel}" FontSize="12"
+                                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                        </VerticalStackLayout>
+                        <Border Grid.Column="1"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
+                                StrokeThickness="0" StrokeShape="RoundRectangle 20"
+                                Padding="14,8" VerticalOptions="Center">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenOverallBudgetCommand}"/>
+                            </Border.GestureRecognizers>
+                            <Label Text="{Binding HasOverallBudget, Converter={StaticResource BoolToStringConverter},
+                                   ConverterParameter='Edit|Set budget'}"
+                                   FontSize="13" FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                        </Border>
+                    </Grid>
+
+                    <!-- Spent vs limit numbers -->
+                    <Grid ColumnDefinitions="*,Auto">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="{Binding FormattedOverallSpent}"
+                                   FontSize="28" FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                            <Label FontSize="13"
+                                   TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}">
+                                <Label.Text>
+                                    <MultiBinding StringFormat="of {0} budget">
+                                        <Binding Path="FormattedOverallLimit"/>
+                                    </MultiBinding>
+                                </Label.Text>
+                            </Label>
+                        </VerticalStackLayout>
+                        <Label Grid.Column="1"
+                               Text="{Binding OverallStatusLabel}"
+                               FontSize="13" FontAttributes="Bold"
+                               VerticalOptions="Center"
+                               TextColor="{Binding OverallProgressColor}"/>
+                    </Grid>
+
+                    <!-- Progress bar -->
+                    <ProgressBar Progress="{Binding OverallProgress}"
+                                 ProgressColor="{Binding OverallProgressColor}"
+                                 BackgroundColor="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                 HeightRequest="8"/>
+
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ── Category budgets (5.1, 5.2, 5.7) ─────────────────────── -->
+            <VerticalStackLayout Spacing="10">
+
+                <Label Text="Category budgets" FontSize="16" FontAttributes="Bold"
+                       TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+
+                <VerticalStackLayout BindableLayout.ItemsSource="{Binding BudgetRows}" Spacing="12">
+                    <BindableLayout.ItemTemplate>
+                        <DataTemplate x:DataType="vm:BudgetRow">
+                            <Border
+                                BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                                Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="16">
+                                <VerticalStackLayout Spacing="10">
+
+                                    <!-- Category header row -->
+                                    <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
+
+                                        <Label Grid.Column="0"
+                                               Text="{Binding Category.Name}"
+                                               FontSize="15" FontAttributes="Bold"
+                                               VerticalOptions="Center"
+                                               TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+
+                                        <!-- Delete budget button (only if budget exists) -->
+                                        <ImageButton Grid.Column="1"
+                                            BackgroundColor="Transparent"
+                                            WidthRequest="36" HeightRequest="36"
+                                            IsVisible="{Binding HasBudget}"
+                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:BudgetsViewModel}}, Path=DeleteBudgetCommand}"
+                                            CommandParameter="{Binding .}">
+                                            <ImageButton.Source>
+                                                <FontImageSource FontFamily="MaterialSharp"
+                                                    Glyph="{x:Static m:MaterialSharp.Delete}"
+                                                    Color="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"
+                                                    Size="16"/>
+                                            </ImageButton.Source>
+                                        </ImageButton>
+
+                                        <!-- Set / Edit budget button -->
+                                        <Border Grid.Column="2"
+                                                StrokeThickness="0" StrokeShape="RoundRectangle 16"
+                                                Padding="12,6" VerticalOptions="Center"
+                                                BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}">
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:BudgetsViewModel}}, Path=OpenEditBudgetCommand}"
+                                                    CommandParameter="{Binding .}"/>
+                                            </Border.GestureRecognizers>
+                                            <Label FontSize="12" FontAttributes="Bold"
+                                                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                                   Text="{Binding HasBudget, Converter={StaticResource BoolToStringConverter},
+                                                          ConverterParameter='Edit|Set limit'}"/>
+                                        </Border>
+                                    </Grid>
+
+                                    <!-- Progress section — only shown when budget is set -->
+                                    <VerticalStackLayout Spacing="6" IsVisible="{Binding HasBudget}">
+
+                                        <!-- Spent / limit -->
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <Label Grid.Column="0" FontSize="13"
+                                                   Text="{Binding EditingRow.Category.Name, StringFormat='{0} Budget'}"
+                                                   TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}">
+                                            </Label>
+                                            <Label Grid.Column="1" FontSize="13"
+                                                   Text="{Binding FormattedLimit, StringFormat='of {0}'}" 
+                                                   TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}">
+                                            </Label>
+                                        </Grid>
+
+                                        <!-- Progress bar (5.2) -->
+                                        <ProgressBar Progress="{Binding Progress}"
+                                                     ProgressColor="{Binding ProgressColor}"
+                                                     BackgroundColor="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                                     HeightRequest="8"/>
+
+                                        <!-- Status + last month comparison (5.7) -->
+                                        <Grid ColumnDefinitions="*,Auto">
+                                            <Label Grid.Column="0"
+                                                   Text="{Binding StatusLabel}"
+                                                   FontSize="12" FontAttributes="Bold"
+                                                   TextColor="{Binding ProgressColor}"/>
+                                            <Label Grid.Column="1"
+                                                   Text="{Binding LastMonthLabel}"
+                                                   FontSize="11"
+                                                   TextColor="{Binding LastMonthColor}"/>
+                                        </Grid>
+
+                                    </VerticalStackLayout>
+
+                                    <!-- No budget set state -->
+                                    <Label Text="No limit set — tap 'Set limit' to add one."
+                                           FontSize="12"
+                                           IsVisible="{Binding HasBudget, Converter={StaticResource InvertedBool}}"
+                                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+
+                                </VerticalStackLayout>
+                            </Border>
+                        </DataTemplate>
+                    </BindableLayout.ItemTemplate>
+                </VerticalStackLayout>
+
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+
 </uranium:UraniumContentPage>

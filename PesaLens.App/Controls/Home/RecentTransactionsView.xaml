@@ -8,7 +8,7 @@
     x:Name="this">
 
     <ContentView.Resources>
-        <converters:TransactionTypeToEmojiConverter  x:Key="TypeToEmoji"/>
+        <converters:TransactionTypeToIconConverter x:Key="TypeToEmoji" />
         <converters:TransactionTypeToSignConverter   x:Key="TypeToSign"/>
         <converters:TransactionTypeToColorConverter  x:Key="TypeToColor"/>
         <converters:IntIsZeroConverter               x:Key="IntIsZero"/>

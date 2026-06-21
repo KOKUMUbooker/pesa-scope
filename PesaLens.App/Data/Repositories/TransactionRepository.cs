@@ -190,4 +190,9 @@ public class TransactionRepository(DatabaseService databaseService)
            .Where(t => t.SmsId > lastSmsId)
            .OrderBy(t => t.SmsId)
            .ToListAsync();
+
+    public Task<Transaction?> GetByMpesaCodeAsync(string code) =>
+        _db.Table<Transaction?>()
+           .Where(t => t!.MpesaCode == code)
+           .FirstOrDefaultAsync();
 }

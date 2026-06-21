@@ -85,6 +85,11 @@ public interface ITransactionRepository : IRepository<Transaction>
     Task<List<Transaction>> GetRecentAsync(int count = 5);
 
     /// <summary>
+    /// Returns transaction by its code
+    /// </summary>
+    Task<Transaction?> GetByMpesaCodeAsync(string code);
+
+    /// <summary>
     /// Returns all transactions with an Android SmsId greater than the given value.
     /// Used for incremental sync.
     /// </summary>

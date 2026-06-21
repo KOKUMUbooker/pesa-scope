@@ -164,6 +164,21 @@ public class TransactionRepository(DatabaseService databaseService)
         return await _db.UpdateAsync(tx);
     }
 
+    public async Task<int> UpdateManyAsync(IEnumerable<Transaction> transactions)
+    {
+        int updated = 0;
+
+        await _db.RunInTransactionAsync(conn =>
+        {
+            foreach (var tx in transactions)
+            {
+                updated += conn.Update(tx);
+            }
+        });
+
+        return updated;
+    }
+
     public Task<List<Transaction>> GetRecentAsync(int count = 5) =>
         _db.Table<Transaction>()
            .OrderByDescending(t => t.TransactionDate)

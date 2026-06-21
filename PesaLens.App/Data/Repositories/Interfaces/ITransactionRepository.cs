@@ -89,4 +89,9 @@ public interface ITransactionRepository : IRepository<Transaction>
     /// Used for incremental sync.
     /// </summary>
     Task<List<Transaction>> GetAfterSmsIdAsync(long lastSmsId);
+
+    /// <summary>
+    /// Updates list of transactions passed as argument
+    /// </summary>
+    Task<int> UpdateManyAsync(IEnumerable<Transaction> transactions);
 }

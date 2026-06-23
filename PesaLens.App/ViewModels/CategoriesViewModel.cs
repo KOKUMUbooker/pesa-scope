@@ -30,6 +30,12 @@ public partial class CategoriesViewModel : ObservableObject
     [ObservableProperty] private List<CategorySpendRow> _categoryRows = [];
     [ObservableProperty] private List<AutoCategorizationRule> _rules = [];
     [ObservableProperty] private bool _isBusy;
+
+    // Individual loading states for each section
+    [ObservableProperty] private bool _isChartLoading;
+    [ObservableProperty] private bool _isCategoriesLoading;
+    [ObservableProperty] private bool _isRulesLoading;
+
     [ObservableProperty] private string _periodLabel = string.Empty;
     [ObservableProperty] private CategorySpendRow? _selectedCategory;
 
@@ -66,7 +72,12 @@ public partial class CategoriesViewModel : ObservableObject
         IsBusy = true;
         try
         {
-            await Task.WhenAll(LoadChartAsync(), LoadRulesAsync());
+            // Load all sections in parallel with individual loading states
+            var chartTask = LoadChartAsync();
+            var categoriesTask = LoadCategoriesAsync();
+            var rulesTask = LoadRulesAsync();
+
+            await Task.WhenAll(chartTask, categoriesTask, rulesTask);
         }
         finally
         {
@@ -74,63 +85,97 @@ public partial class CategoriesViewModel : ObservableObject
         }
     }
 
-    // ── Chart + category rows ─────────────────────────────────────────────────
+    // ── Chart loading ─────────────────────────────────────────────────────────
 
     private async Task LoadChartAsync()
     {
-        var from = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-        var to = DateTime.Today;
-        PeriodLabel = from.ToString("MMMM yyyy");
-
-        var categories = await _categoryRepo.GetAllActiveAsync();
-        var spendMap = await _transactionRepo.GetSpendingByCategoryAsync(from, to);
-        var catMap = categories.ToDictionary(c => c.Id);
-
-        var rows = spendMap
-            .Where(kvp => catMap.ContainsKey(kvp.Key) && kvp.Value > 0)
-            .OrderByDescending(kvp => kvp.Value)
-            .ToList();
-
-        decimal total = rows.Sum(r => r.Value);
-
-        var pieSeries = new List<ISeries>();
-        var categoryRows = new List<CategorySpendRow>();
-
-        foreach (var (categoryId, amount) in rows)
+        IsChartLoading = true;
+        try
         {
-            var cat = catMap[categoryId];
-            var color = ParseColor(cat.Color);
-            var pct = total > 0 ? (double)(amount / total) * 100 : 0;
+            var from = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+            var to = DateTime.Today;
+            PeriodLabel = from.ToString("MMMM yyyy");
 
-            categoryRows.Add(new CategorySpendRow
-            {
-                Category = cat,
-                Amount = amount,
-                Percentage = pct,
-                ChartColor = Color.FromArgb(cat.Color)
-            });
+            var categories = await _categoryRepo.GetAllActiveAsync();
+            var spendMap = await _transactionRepo.GetSpendingByCategoryAsync(from, to);
+            var catMap = categories.ToDictionary(c => c.Id);
 
-            pieSeries.Add(new PieSeries<double>
+            var rows = spendMap
+                .Where(kvp => catMap.ContainsKey(kvp.Key) && kvp.Value > 0)
+                .OrderByDescending(kvp => kvp.Value)
+                .ToList();
+
+            decimal total = rows.Sum(r => r.Value);
+
+            var pieSeries = new List<ISeries>();
+            var categoryRows = new List<CategorySpendRow>();
+
+            foreach (var (categoryId, amount) in rows)
             {
-                Values = [(double)amount],
-                Name = cat.Name,
-                Fill = new SolidColorPaint(color),
-                Stroke = null,
-                OuterRadiusOffset = 0,
-                MaxRadialColumnWidth = 28,
-                ToolTipLabelFormatter = p => $"{cat.Name}: Ksh {amount:N0}"
-            });
+                var cat = catMap[categoryId];
+                var color = ParseColor(cat.Color);
+                var pct = total > 0 ? (double)(amount / total) * 100 : 0;
+
+                categoryRows.Add(new CategorySpendRow
+                {
+                    Category = cat,
+                    Amount = amount,
+                    Percentage = pct,
+                    ChartColor = Color.FromArgb(cat.Color)
+                });
+
+                pieSeries.Add(new PieSeries<double>
+                {
+                    Values = [(double)amount],
+                    Name = cat.Name,
+                    Fill = new SolidColorPaint(color),
+                    Stroke = null,
+                    OuterRadiusOffset = 0,
+                    MaxRadialColumnWidth = 28,
+                    ToolTipLabelFormatter = p => $"{cat.Name}: Ksh {amount:N0}"
+                });
+            }
+
+            Series = [.. pieSeries];
+            CategoryRows = categoryRows;
         }
-
-        Series = [.. pieSeries];
-        CategoryRows = categoryRows;
+        finally
+        {
+            IsChartLoading = false;
+        }
     }
 
-    // ── Rules ─────────────────────────────────────────────────────────────────
+    // ── Categories loading (separate from chart) ─────────────────────────────
+
+    private async Task LoadCategoriesAsync()
+    {
+        IsCategoriesLoading = true;
+        try
+        {
+            // If you want to load categories separately from the chart data
+            // This could fetch additional category data if needed
+            // Currently, categories are loaded in LoadChartAsync, but we keep this for separation
+            await Task.CompletedTask; // Placeholder for future category-specific loading
+        }
+        finally
+        {
+            IsCategoriesLoading = false;
+        }
+    }
+
+    // ── Rules loading ─────────────────────────────────────────────────────────
 
     private async Task LoadRulesAsync()
     {
-        Rules = await _rulesRepo.GetEnabledOrderedByPriorityAsync();
+        IsRulesLoading = true;
+        try
+        {
+            Rules = await _rulesRepo.GetEnabledOrderedByPriorityAsync();
+        }
+        finally
+        {
+            IsRulesLoading = false;
+        }
     }
 
     // ── Category tap (4.2) ────────────────────────────────────────────────────

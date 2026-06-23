@@ -24,7 +24,7 @@ public class MpesaSmsParser : IMpesaSmsParser
         // Normalize: collapse whitespace and strip newlines
         var body = NormalizeSms(smsBody);
 
-        return TryParseSendMoney(body, smsId, smsTimestamp)
+        var transaction = TryParseSendMoney(body, smsId, smsTimestamp)
             ?? TryParseReceiveMoney(body, smsId, smsTimestamp)
             ?? TryParsePayBill(body, smsId, smsTimestamp)
             ?? TryParseBuyGoods(body, smsId, smsTimestamp)
@@ -33,6 +33,10 @@ public class MpesaSmsParser : IMpesaSmsParser
             ?? TryParseReversal(body, smsId, smsTimestamp)
             ?? TryParseDeposit(body, smsId, smsTimestamp)
             ?? TryParseFuliza(body, smsId, smsTimestamp);
+
+        if (transaction is not null) transaction.OriginalSms = smsBody;
+
+        return transaction;
     }
 
     // ── Parsers ──────────────────────────────────────────────────────────────
@@ -147,7 +151,7 @@ public class MpesaSmsParser : IMpesaSmsParser
             SmsId = smsId,
             SmsTimestamp = smsTimestamp,
             ImportedAt = DateTime.UtcNow,
-            IsEdited = false
+            IsEdited = false,
         };
     }
 

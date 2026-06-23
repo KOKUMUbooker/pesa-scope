@@ -174,13 +174,11 @@
                         HeightRequest="220"
                         Background="Transparent"
                         Series="{Binding Series}"
-                        DrawMarginFrame="{x:Null}"
                         LegendPosition="Hidden"
                         TooltipPosition="Top"
                         TooltipBackgroundPaint="{x:Null}"
                         TooltipTextPaint="{x:Null}"
-                        AnimationsSpeed="00:00:00.500"
-                        IsClipToBoundsEnabled="False"/>
+                        AnimationsSpeed="00:00:00.500" />
                 </VerticalStackLayout>
             </Border>
 

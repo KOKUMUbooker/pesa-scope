@@ -28,8 +28,16 @@ public partial class CategoriesPage : UraniumUI.Pages.UraniumContentPage
         base.OnAppearing();
         if (_loaded) return;
         _loaded = true;
-        await _vm.LoadAsync();
-        PopulateRuleCategoryPicker();
+
+        try
+        {
+            await _vm.LoadAsync();
+        }
+        finally
+        {
+            // Populate picker regardless, even if load partially failed
+            PopulateRuleCategoryPicker();
+        }
     }
 
     // ── Color picker ──────────────────────────────────────────────────────────

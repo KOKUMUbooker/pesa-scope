@@ -11,6 +11,7 @@
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     x:DataType="vm:TransactionDetailViewModel"
     Shell.TabBarIsVisible="False"
+    x:Name="NTransactionDetailPage"
     SafeAreaEdges="All"
     BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 
@@ -103,7 +104,7 @@
                                     </Border.Triggers>
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer
-                                            Command="{Binding Source={RelativeSource AncestorType={x:Type vm:TransactionDetailViewModel}}, Path=SelectCategoryForEditCommand}"
+                                            Command="{Binding BindingContext.SelectCategoryForEditCommand, Source={x:Reference NTransactionDetailPage}}"
                                             CommandParameter="{Binding .}"/>
                                     </Border.GestureRecognizers>
                                     <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
@@ -113,10 +114,10 @@
                                           StrokeShape="RoundRectangle 20"
                                           StrokeThickness="0"
                                           BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}">
-                                                                                <Image HorizontalOptions="Center" VerticalOptions="Center"
-                                              WidthRequest="20" HeightRequest="20">
-                                                                                    <Image.Source>
-                                                                                        <FontImageSource
+                                            <Image HorizontalOptions="Center" VerticalOptions="Center"
+                                                WidthRequest="20" HeightRequest="20">
+                                                <Image.Source>
+                                                    <FontImageSource
                                                       FontFamily="MaterialSharp"
                                                       Glyph="{Binding Icon, Converter={StaticResource IconNameToGlyph}}"
                                                       Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
@@ -129,9 +130,9 @@
                                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
                                         <Image Grid.Column="2" VerticalOptions="Center"
                                                IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:TransactionDetailViewModel}},
-                                                           Path=SelectedCategory.Id,
-                                                           Converter={StaticResource IsEqualConverter},
-                                                           ConverterParameter={Binding Id}}">
+                                                Path=SelectedCategory.Id,
+                                                Converter={StaticResource IsEqualConverter},
+                                                ConverterParameter={Binding Id}}">
                                             <Image.Source>
                                                 <FontImageSource FontFamily="MaterialSharp"
                                                     Glyph="{x:Static m:MaterialSharp.Check_circle}"

@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.Core.Models;
+using System.Collections.ObjectModel;
 
 namespace PesaLens.App.ViewModels;
 
@@ -16,7 +17,7 @@ public partial class TransactionDetailViewModel : ObservableObject
 
     // ── Data ──────────────────────────────────────────────────────────────────
     [ObservableProperty] private Transaction? _transaction;
-    [ObservableProperty] private List<Category> _categories = [];
+    [ObservableProperty] private ObservableCollection<Category> _categories = [];
     [ObservableProperty] private Category? _selectedCategory;
     [ObservableProperty] private bool _isBusy;
 
@@ -72,7 +73,7 @@ public partial class TransactionDetailViewModel : ObservableObject
             await Task.WhenAll(txTask, catTask);
 
             Transaction = txTask.Result;
-            Categories = catTask.Result;
+            Categories = new ObservableCollection<Category>(catTask.Result);
 
             if (Transaction is not null)
             {

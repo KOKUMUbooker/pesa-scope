@@ -9,6 +9,7 @@
     xmlns:converters="clr-namespace:PesaLens.App.Converters"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     x:DataType="vm:BudgetsViewModel"
+    x:Name="NBudgetsPage"
     SafeAreaEdges="All"
     BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 
@@ -287,35 +288,35 @@
                                     <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
 
                                         <Label Grid.Column="0"
-                                   Text="{Binding Category.Name}"
-                                   FontSize="15" FontAttributes="Bold"
-                                   VerticalOptions="Center"
-                                   TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                                           Text="{Binding Category.Name}"
+                                           FontSize="15" FontAttributes="Bold"
+                                           VerticalOptions="Center"
+                                           TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
 
                                         <!-- Delete budget button (only if budget exists) -->
                                         <ImageButton Grid.Column="1"
-                                BackgroundColor="Transparent"
-                                WidthRequest="36" HeightRequest="36"
-                                IsVisible="{Binding HasBudget}"
-                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:BudgetsViewModel}}, Path=DeleteBudgetCommand}"
-                                CommandParameter="{Binding .}">
+                                            BackgroundColor="Transparent"
+                                            WidthRequest="36" HeightRequest="36"
+                                            IsVisible="{Binding HasBudget}"
+                                            Command="{Binding BindingContext.DeleteBudgetCommand, Source={x:Reference NBudgetsPage}}"
+                                            CommandParameter="{Binding .}">
                                             <ImageButton.Source>
                                                 <FontImageSource FontFamily="MaterialSharp"
-                                        Glyph="{x:Static m:MaterialSharp.Delete}"
-                                        Color="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"
-                                        Size="16"/>
+                                                    Glyph="{x:Static m:MaterialSharp.Delete}"
+                                                    Color="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"
+                                                    Size="16"/>     
                                             </ImageButton.Source>
                                         </ImageButton>
 
                                         <!-- Set / Edit budget button -->
                                         <Border Grid.Column="2"
-                                    StrokeThickness="0" StrokeShape="RoundRectangle 16"
-                                    Padding="12,6" VerticalOptions="Center"
-                                    BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}">
+                                                StrokeThickness="0" StrokeShape="RoundRectangle 16"
+                                                Padding="12,6" VerticalOptions="Center"
+                                                BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}">
                                             <Border.GestureRecognizers>
                                                 <TapGestureRecognizer
-                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:BudgetsViewModel}}, Path=OpenEditBudgetCommand}"
-                                        CommandParameter="{Binding .}"/>
+                                                    Command="{Binding BindingContext.OpenEditBudgetCommand, Source={x:Reference NBudgetsPage}}"
+                                                    CommandParameter="{Binding .}"/>    
                                             </Border.GestureRecognizers>
                                             <Label FontSize="12" FontAttributes="Bold"
                                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"

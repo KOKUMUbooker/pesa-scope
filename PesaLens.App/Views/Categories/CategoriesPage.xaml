@@ -11,7 +11,7 @@
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     xmlns:converters="clr-namespace:PesaLens.App.Converters"
     x:DataType="vm:CategoriesViewModel"
-    x:Name="CategoriesPageContainer"
+    x:Name="NCategoriesPage"
     SafeAreaEdges="All"
     BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 
@@ -216,7 +216,7 @@
                                     <Grid Padding="16,14" ColumnDefinitions="Auto,*,Auto,Auto" ColumnSpacing="12">
                                         <Grid.GestureRecognizers>
                                             <TapGestureRecognizer
-                                                Command="{Binding BindingContext.SelectCategoryCommand, Source={x:Reference CategoriesPageContainer}}"
+                                                Command="{Binding BindingContext.SelectCategoryCommand, Source={x:Reference NCategoriesPage}}"
                                                 CommandParameter="{Binding .}"/>
                                         </Grid.GestureRecognizers>
 
@@ -252,7 +252,7 @@
                                                 BackgroundColor="Transparent"
                                                 WidthRequest="32" HeightRequest="32"
                                                 IsVisible="{Binding Category.IsSystemCategory, Converter={StaticResource InvertedBoolConverter}}"
-                                                Command="{Binding BindingContext.OpenEditCategoryCommand, Source={x:Reference CategoriesPageContainer}}"
+                                                Command="{Binding BindingContext.OpenEditCategoryCommand, Source={x:Reference NCategoriesPage}}"
                                                 CommandParameter="{Binding .}">
 
                                                 <ImageButton.Source>
@@ -326,7 +326,7 @@
                                         <ImageButton Grid.Column="1"
                                             BackgroundColor="Transparent"
                                             WidthRequest="36" HeightRequest="36"
-                                            Command="{Binding BindingContext.OpenEditRuleCommand, Source={x:Reference CategoriesPageContainer}}"
+                                            Command="{Binding BindingContext.OpenEditRuleCommand, Source={x:Reference NCategoriesPage}}"
                                             CommandParameter="{Binding .}">
 
                                             <ImageButton.Source>
@@ -341,7 +341,7 @@
                                         <ImageButton Grid.Column="2"
                                             BackgroundColor="Transparent"
                                             WidthRequest="36" HeightRequest="36"
-                                            Command="{Binding BindingContext.DeleteRuleCommand, Source={x:Reference CategoriesPageContainer}}"
+                                            Command="{Binding BindingContext.DeleteRuleCommand, Source={x:Reference NCategoriesPage}}"
                                             CommandParameter="{Binding .}">
 
                                             <ImageButton.Source>

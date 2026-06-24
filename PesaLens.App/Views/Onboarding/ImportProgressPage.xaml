@@ -5,6 +5,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
     NavigationPage.HasNavigationBar="False"
+    xmlns:v="clr-namespace:PesaLens.App.Views.Onboarding"
+    x:DataType="v:ImportProgressPage"
     BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 
     <Grid RowDefinitions="*, Auto" >

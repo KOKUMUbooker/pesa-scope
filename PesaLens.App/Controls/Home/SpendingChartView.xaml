@@ -4,6 +4,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
     x:Class="PesaLens.App.Controls.Home.SpendingChartView"
+    xmlns:controls="clr-namespace:PesaLens.App.Controls.Home"
+    x:DataType="controls:SpendingChartView"
     x:Name="this">
 
     <Border

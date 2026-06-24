@@ -54,9 +54,9 @@ public partial class SettingsPage : UraniumUI.Pages.UraniumContentPage
     //    SyncCurrencyButtons();
     //}
 
-    /// <summary>
-    /// Visually highlights the active currency button to match the VM state.
-    /// </summary>
+    // <summary>
+    // Visually highlights the active currency button to match the VM state.
+    // </summary>
     //private void SyncCurrencyButtons()
     //{
     //    bool kshActive = _vm.CurrencyDisplay == "Ksh";

@@ -2,6 +2,8 @@
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
         xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
         x:Class="PesaLens.App.Controls.Home.BalanceCardView"
+        xmlns:controls="clr-namespace:PesaLens.App.Controls.Home"
+        x:DataType="controls:BalanceCardView"
         x:Name="this">
     <Border
         BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"

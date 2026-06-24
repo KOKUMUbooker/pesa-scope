@@ -78,16 +78,16 @@ public class HexToColorConverter : IValueConverter
         throw new NotSupportedException();
 }
 
-/// <summary>
-/// Maps a <see cref="BudgetRowItem.StatusKey"/> string to a MAUI Color,
-/// reading live values from the application's resource dictionary so that
-/// light/dark theming is respected automatically.
-///
-/// StatusKey values:
-///   "over"  → Error   (red)
-///   "warn"  → Secondary (amber)
-///   "ok"    → Primary (green)
-/// </summary>
+// <summary>
+// Maps a <see cref="BudgetRowItem.StatusKey"/> string to a MAUI Color,
+// reading live values from the application's resource dictionary so that
+// light/dark theming is respected automatically.
+//
+// StatusKey values:
+//   "over"  → Error   (red)
+//   "warn"  → Secondary (amber)
+//   "ok"    → Primary (green)
+// </summary>
 public class BudgetStatusToColorConverter : IValueConverter
 {
     // Resource key pairs: [light-key, dark-key]

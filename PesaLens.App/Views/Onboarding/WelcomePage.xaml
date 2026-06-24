@@ -5,6 +5,8 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
     xmlns:local="clr-namespace:PesaLens.App.Views.Onboarding"
+    xmlns:v="clr-namespace:PesaLens.App.Views.Onboarding"
+    x:DataType="v:WelcomePage"
     NavigationPage.HasNavigationBar="False"
     BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 

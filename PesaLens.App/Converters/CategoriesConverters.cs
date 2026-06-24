@@ -2,17 +2,17 @@
 
 namespace PesaLens.App.Converters;
 
-/// <summary>
-/// Compares the bound integer value against <see cref="CompareValue"/> and
-/// returns <see cref="TrueValue"/> when equal, <see cref="FalseValue"/> otherwise.
-///
-/// Used by the Categories tab bar to colour the active tab label and indicator:
-///
-///   <converters:IntEqualsToBrushConverter
-///       TrueValue="{AppThemeBinding ...Primary}"
-///       FalseValue="{AppThemeBinding ...OnSurfaceVariant}"
-///       CompareValue="0"/>
-/// </summary>
+// <summary>
+// Compares the bound integer value against <see cref="CompareValue"/> and
+// returns <see cref="TrueValue"/> when equal, <see cref="FalseValue"/> otherwise.
+//
+// Used by the Categories tab bar to colour the active tab label and indicator:
+//
+//   <converters:IntEqualsToBrushConverter
+//       TrueValue="{AppThemeBinding ...Primary}"
+//       FalseValue="{AppThemeBinding ...OnSurfaceVariant}"
+//       CompareValue="0"/>
+// </summary>
 public class IntEqualsToBrushConverter : IValueConverter
 {
     /// <summary>The integer to compare the binding value against.</summary>

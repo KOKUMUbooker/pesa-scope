@@ -10,6 +10,7 @@
     xmlns:converters="clr-namespace:PesaLens.App.Converters"
     xmlns:models="clr-namespace:PesaLens.Core.Models;assembly=PesaLens.Core"
     SafeAreaEdges="All"
+    x:DataType="vm:TransactionsViewModel"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 

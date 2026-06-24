@@ -5,6 +5,8 @@
     xmlns:models="clr-namespace:PesaLens.Core.Models;assembly=PesaLens.Core"
     xmlns:converters="clr-namespace:PesaLens.App.Converters"
     x:Class="PesaLens.App.Controls.Home.RecentTransactionsView"
+    xmlns:controls="clr-namespace:PesaLens.App.Controls.Home"
+    x:DataType="controls:RecentTransactionsView"
     x:Name="this">
 
     <ContentView.Resources>

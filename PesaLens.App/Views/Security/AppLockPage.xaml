@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <uranium:UraniumContentPage x:Class="PesaLens.App.Views.Security.AppLockPage"
-             x:DataType="uranium:UraniumContentPage"
              xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
+             xmlns:v="clr-namespace:PesaLens.App.Views.Security"
+             x:DataType="v:AppLockPage"
              xmlns:local="clr-namespace:PesaLens.App.Views.Security">
     <StackLayout>
         <Label Text="Welcome to app lock page"

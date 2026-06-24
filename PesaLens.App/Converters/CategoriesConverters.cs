@@ -84,3 +84,18 @@ public class InvertedBoolConverter : IValueConverter
         return false;
     }
 }
+
+public class NullToStringConverter : IValueConverter
+{
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        var parts = (parameter as string)?.Split('|');
+        if (parts is not { Length: 2 })
+            return value;
+
+        return value is null ? parts[1] : parts[0];
+    }
+
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotImplementedException();
+}

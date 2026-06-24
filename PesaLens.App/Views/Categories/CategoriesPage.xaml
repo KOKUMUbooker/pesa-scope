@@ -15,9 +15,8 @@
     BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 
     <!-- ── Title bar ─────────────────────────────────────────────────────── -->
-    <Shell.TitleView>
-        <Grid ColumnDefinitions="*,Auto,Auto" Padding="5,10"
-              BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
+    <Shell.TitleView  BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
+        <Grid ColumnDefinitions="*,Auto,Auto" Padding="5,10" >
             <Label Grid.Column="0" Text="Categories" FontSize="22" FontAttributes="Bold"
                    VerticalOptions="Center"
                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>

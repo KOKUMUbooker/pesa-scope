@@ -13,7 +13,7 @@
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 
-    <Shell.TitleView BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
+    <Shell.TitleView>
         <Grid
         Grid.Row="0"
         ColumnDefinitions="*,Auto"

@@ -6,6 +6,7 @@ using LiveChartsCore.SkiaSharpView.Painting;
 using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.Core.Models;
 using SkiaSharp;
+using System.Collections.ObjectModel;
 using System.Data;
 
 namespace PesaLens.App.ViewModels;
@@ -28,7 +29,8 @@ public partial class CategoriesViewModel : ObservableObject
 
     [ObservableProperty] private ISeries[] _series = [];
     [ObservableProperty] private List<CategorySpendRow> _categoryRows = [];
-    [ObservableProperty] private List<AutoCategorizationRule> _rules = [];
+    // [ObservableProperty] private List<AutoCategorizationRule> _rules = [];
+    [ObservableProperty] private ObservableCollection<AutoCategorizationRule> _rules = [];
     [ObservableProperty] private bool _isBusy;
 
     // Individual loading states for each section
@@ -170,7 +172,9 @@ public partial class CategoriesViewModel : ObservableObject
         IsRulesLoading = true;
         try
         {
-            Rules = await _rulesRepo.GetEnabledOrderedByPriorityAsync();
+            //Rules = await _rulesRepo.GetEnabledOrderedByPriorityAsync();
+            var result = await _rulesRepo.GetEnabledOrderedByPriorityAsync();
+            Rules = new ObservableCollection<AutoCategorizationRule>(result);
         }
         finally
         {

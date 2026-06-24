@@ -21,7 +21,7 @@
     </uranium:UraniumContentPage.Resources>
 
     <!-- ── Title bar ─────────────────────────────────────────────────────── -->
-    <Shell.TitleView  BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
+    <Shell.TitleView>
         <HorizontalStackLayout Padding="0,10" >
            
             <Label Text="Transaction detail" FontSize="20" FontAttributes="Bold"

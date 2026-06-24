@@ -19,7 +19,7 @@
     </uranium:UraniumContentPage.Resources>
 
     <!-- ── Title bar ─────────────────────────────────────────────────────── -->
-    <Shell.TitleView  BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
+    <Shell.TitleView>
         <Grid ColumnDefinitions="*,Auto" Padding="5,10" >
             <Label Grid.Column="0" Text="Budgets" FontSize="22" FontAttributes="Bold"
                    VerticalOptions="Center"

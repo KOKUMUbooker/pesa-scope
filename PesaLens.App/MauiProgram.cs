@@ -5,7 +5,6 @@ using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.App.Services;
 using PesaLens.App.Services.Interfaces;
 using PesaLens.App.ViewModels;
-using PesaLens.App.ViewModels.Categories;
 using PesaLens.App.Views.Budgets;
 using PesaLens.App.Views.Categories;
 using PesaLens.App.Views.Dashboard;
@@ -39,6 +38,12 @@ namespace PesaLens.App
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
 
                     fonts.AddMaterialSymbolsFonts();
+                })
+                .ConfigureMauiHandlers(handlers =>
+                {
+#if ANDROID
+                    handlers.AddHandler(typeof(Shell), typeof(PesaLens.App.Platforms.Android.PesaLensShellHandler));
+#endif
                 });
             builder.Services.AddMopupsDialogs();
 

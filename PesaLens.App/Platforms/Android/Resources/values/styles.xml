@@ -1,0 +1,10 @@
+﻿<resources>
+	<style name="Maui.MainTheme" parent="Theme.MaterialComponents.DayNight">
+		<item name="colorSurface">#F7FAF8</item>
+		<item name="colorOnSurface">#1A2E26</item>
+		<item name="colorPrimary">#1A8C62</item>
+		<item name="colorSecondary">#C98A00</item>
+		<item name="android:navigationBarColor">#F7FAF8</item>
+		<item name="android:windowBackground">#F7FAF8</item>
+	</style>
+</resources>

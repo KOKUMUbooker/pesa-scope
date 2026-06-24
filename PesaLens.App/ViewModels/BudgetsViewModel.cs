@@ -81,6 +81,10 @@ public partial class BudgetsViewModel : ObservableObject
     [ObservableProperty] private bool _isOverallSheetOpen;
     [ObservableProperty] private string _editOverallLimitText = string.Empty;
 
+    // Load states
+    [ObservableProperty] private bool _isOverallBudgetLoading = true;
+    [ObservableProperty] private bool _isCategoryBudgetsLoading = true;
+
     public BudgetsViewModel(
         IBudgetRepository budgetRepo,
         ICategoryRepository categoryRepo,
@@ -112,65 +116,80 @@ public partial class BudgetsViewModel : ObservableObject
 
     private async Task LoadBudgetRowsAsync()
     {
-        var (thisFrom, thisTo) = CurrentMonthRange();
-        var (lastFrom, lastTo) = LastMonthRange();
+        IsCategoryBudgetsLoading = true;
+        try
+        {
+            var (thisFrom, thisTo) = CurrentMonthRange();
+            var (lastFrom, lastTo) = LastMonthRange();
 
-        PeriodLabel = thisFrom.ToString("MMMM yyyy");
+            PeriodLabel = thisFrom.ToString("MMMM yyyy");
 
-        var categories = await _categoryRepo.GetAllActiveAsync();
-        var budgets = await _budgetRepo.GetAllWithCategoryAsync();
-        var spendThis = await _transactionRepo.GetSpendingByCategoryAsync(thisFrom, thisTo);
-        var spendLast = await _transactionRepo.GetSpendingByCategoryAsync(lastFrom, lastTo);
-        var budgetMap = budgets.ToDictionary(b => b.CategoryId);
+            var categories = await _categoryRepo.GetAllActiveAsync();
+            var budgets = await _budgetRepo.GetAllWithCategoryAsync();
+            var spendThis = await _transactionRepo.GetSpendingByCategoryAsync(thisFrom, thisTo);
+            var spendLast = await _transactionRepo.GetSpendingByCategoryAsync(lastFrom, lastTo);
+            var budgetMap = budgets.ToDictionary(b => b.CategoryId);
 
-        BudgetRows = categories
-            .Where(c => c.Name != "Uncategorized")
-            .OrderByDescending(c => budgetMap.ContainsKey(c.Id))
-            .ThenBy(c => c.Name)
-            .Select(c => new BudgetRow
-            {
-                Category = c,
-                Budget = budgetMap.GetValueOrDefault(c.Id),
-                Spent = spendThis.GetValueOrDefault(c.Id),
-                SpentLastMonth = spendLast.GetValueOrDefault(c.Id)
-            })
-            .ToList();
+            BudgetRows = categories
+                .Where(c => c.Name != "Uncategorized")
+                .OrderByDescending(c => budgetMap.ContainsKey(c.Id))
+                .ThenBy(c => c.Name)
+                .Select(c => new BudgetRow
+                {
+                    Category = c,
+                    Budget = budgetMap.GetValueOrDefault(c.Id),
+                    Spent = spendThis.GetValueOrDefault(c.Id),
+                    SpentLastMonth = spendLast.GetValueOrDefault(c.Id)
+                })
+                .ToList();
+        }
+        finally
+        {
+            IsCategoryBudgetsLoading = false;
+        }
     }
 
     private async Task LoadOverallBudgetAsync()
     {
-        var overall = await _overallBudgetRepo.GetAsync();
-        var (from, to) = CurrentMonthRange();
-        OverallSpent = await _transactionRepo.GetTotalSpentAsync(from, to);
-
-        HasOverallBudget = overall is not null;
-        OverallLimit = overall?.MonthlyLimit ?? 0;
-        FormattedOverallSpent = $"Ksh {OverallSpent:N0}";
-        FormattedOverallLimit = overall is not null ? $"Ksh {OverallLimit:N0}" : "Not set";
-
-        if (overall is not null && OverallLimit > 0)
+        IsOverallBudgetLoading = true;
+        try
         {
-            OverallProgress = Math.Min((double)(OverallSpent / OverallLimit), 1.0);
-            bool isOver = OverallSpent > OverallLimit;
-            bool isWarn = !isOver && (double)(OverallSpent / OverallLimit) * 100 >= 80;
+            var overall = await _overallBudgetRepo.GetAsync();
+            var (from, to) = CurrentMonthRange();
+            OverallSpent = await _transactionRepo.GetTotalSpentAsync(from, to);
 
-            OverallProgressColor = isOver
-                ? Color.FromArgb("#C0392B")
-                : isWarn
-                    ? Color.FromArgb("#C98A00")
-                    : Color.FromArgb("#1A8C62");
+            HasOverallBudget = overall is not null;
+            OverallLimit = overall?.MonthlyLimit ?? 0;
+            FormattedOverallSpent = $"Ksh {OverallSpent:N0}";
+            FormattedOverallLimit = overall is not null ? $"Ksh {OverallLimit:N0}" : "Not set";
 
-            OverallStatusLabel = isOver
-                ? $"Over by Ksh {OverallSpent - OverallLimit:N0}"
-                : $"Ksh {OverallLimit - OverallSpent:N0} remaining";
+            if (overall is not null && OverallLimit > 0)
+            {
+                OverallProgress = Math.Min((double)(OverallSpent / OverallLimit), 1.0);
+                bool isOver = OverallSpent > OverallLimit;
+                bool isWarn = !isOver && (double)(OverallSpent / OverallLimit) * 100 >= 80;
+
+                OverallProgressColor = isOver
+                    ? Color.FromArgb("#C0392B")
+                    : isWarn
+                        ? Color.FromArgb("#C98A00")
+                        : Color.FromArgb("#1A8C62");
+
+                OverallStatusLabel = isOver
+                    ? $"Over by Ksh {OverallSpent - OverallLimit:N0}"
+                    : $"Ksh {OverallLimit - OverallSpent:N0} remaining";
+            }
+            else
+            {
+                OverallProgress = 0;
+                OverallStatusLabel = string.Empty;
+            }
         }
-        else
+        finally
         {
-            OverallProgress = 0;
-            OverallStatusLabel = string.Empty;
+            IsOverallBudgetLoading = false;
         }
     }
-
     // ── Category budget sheet ─────────────────────────────────────────────────
 
     [RelayCommand]

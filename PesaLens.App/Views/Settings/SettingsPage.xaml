@@ -15,8 +15,7 @@
         <Grid
           Grid.Row="0"
           ColumnDefinitions="*,Auto"
-          Padding="5,10,5,10"
-          BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
+          Padding="5,10,5,10">
             <Label
               Grid.Column="0"
               Text="Settings"

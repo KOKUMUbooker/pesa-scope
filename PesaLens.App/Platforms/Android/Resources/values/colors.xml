@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#52D681</color>
-    <color name="colorPrimaryDark">#00AD7C</color>
-    <color name="colorAccent">#52D681</color>
+    <color name="colorPrimary">#1A8C62</color>
+    <color name="colorPrimaryDark">#111F19</color>
+    <color name="colorAccent">#1A8C62</color>
+    <!-- This is what Android uses for BottomNavigationView background -->
+    <color name="bottom_nav_background">#111F19</color>
 </resources>

@@ -190,8 +190,8 @@
                                  Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
                                  WidthRequest="36" HeightRequest="36"/>
                             <Label Text="Loading overall budget..."
-                       FontSize="14"
-                       TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                               FontSize="14"
+                               TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
                         </VerticalStackLayout>
                     </Grid>
 
@@ -201,15 +201,15 @@
                         <Grid ColumnDefinitions="*,Auto">
                             <VerticalStackLayout Grid.Column="0" Spacing="2">
                                 <Label Text="Overall budget"
-                           FontSize="16" FontAttributes="Bold"
-                           TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                                   FontSize="16" FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
                                 <Label Text="{Binding PeriodLabel}" FontSize="12"
-                           TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
                             </VerticalStackLayout>
                             <Border Grid.Column="1"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
-                        StrokeThickness="0" StrokeShape="RoundRectangle 20"
-                        Padding="14,8" VerticalOptions="Center">
+                                BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
+                                StrokeThickness="0" StrokeShape="RoundRectangle 20"
+                                Padding="14,8" VerticalOptions="Center">
                                 <Border.GestureRecognizers>
                                     <TapGestureRecognizer Command="{Binding OpenOverallBudgetCommand}"/>
                                 </Border.GestureRecognizers>
@@ -279,9 +279,9 @@
                     <BindableLayout.ItemTemplate>
                         <DataTemplate x:DataType="vm:BudgetRow">
                             <Border
-                    BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
-                    Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
-                    StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="16">
+                                BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                                Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="16">
                                 <VerticalStackLayout Spacing="10">
 
                                     <!-- Category header row -->

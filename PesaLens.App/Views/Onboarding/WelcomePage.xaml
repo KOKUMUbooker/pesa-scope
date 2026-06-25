@@ -7,13 +7,21 @@
     xmlns:local="clr-namespace:PesaLens.App.Views.Onboarding"
     xmlns:v="clr-namespace:PesaLens.App.Views.Onboarding"
     x:DataType="v:WelcomePage"
+    SafeAreaEdges="All"
     NavigationPage.HasNavigationBar="False"
     BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 
     <Grid RowDefinitions="Auto, *, Auto">
 
         <!-- ── Top bar: Page counter + Skip button ────────────────────── -->
-        <Grid Grid.Row="0" Padding="16,52,16,0" HeightRequest="20" ColumnDefinitions="Auto, *, Auto">
+        <Grid
+            Grid.Row="0"
+            Padding="16,0"
+            HeightRequest="56"
+            ZIndex="10"
+            InputTransparent="False"
+            ColumnDefinitions="Auto, *, Auto">
+
             <Label
                 x:Name="PageCounterLabel"
                 Grid.Column="0"
@@ -23,6 +31,17 @@
                 FontAttributes="Bold"
                 TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
                 Padding="8,4" />
+
+            <Label
+                Grid.Column="1"
+                VerticalOptions="Center"
+                FontSize="16"
+                FontAttributes="Bold"
+                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                HorizontalOptions="Center"
+                Text="PesaLens"
+                />
+
             <Button
                 x:Name="SkipButton"
                 Grid.Column="2"
@@ -34,7 +53,9 @@
                 TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
                 FontSize="14"
                 FontAttributes="None"
-                Padding="8,4" />
+                Padding="8,4"
+                ZIndex="10"
+                InputTransparent="False" />
         </Grid>
 
         <!-- ── CarouselView ────────────────────────────────────────────── -->
@@ -55,17 +76,16 @@
                             Grid.Row="0"
                             BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
                             StrokeThickness="0"
-                            Margin="0,0,0,40"
+                            Margin="0,0,0,20"
                             HeightRequest="300">
                             <Border.StrokeShape>
-                                <RoundRectangle CornerRadius="24" />
+                                <RoundRectangle CornerRadius="20" />
                             </Border.StrokeShape>
-                            <Label
-                                Text="{Binding IllustrationPlaceholder}"
-                                HorizontalOptions="Center"
-                                VerticalOptions="Center"
-                                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
-                                FontSize="14" />
+                            <Image
+                                Source="{Binding ImageSource}"
+                                Aspect="AspectFill"
+                                HorizontalOptions="Fill"
+                                VerticalOptions="Fill" />
                         </Border>
 
                         <!-- Title + Description -->

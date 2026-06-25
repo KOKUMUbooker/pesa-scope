@@ -15,6 +15,12 @@
     SafeAreaEdges="All"
     BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 
+    <uranium:UraniumContentPage.Resources>
+        <converters:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
+        <converters:NullToStringConverter x:Key="NullToStringConverter"/>
+        <converters:IntIsZeroConverter x:Key="IntIsZero"/>
+    </uranium:UraniumContentPage.Resources>
+
     <!-- ── Title bar ─────────────────────────────────────────────────────── -->
     <Shell.TitleView>
         <Grid ColumnDefinitions="*,Auto,Auto" Padding="5,10" >
@@ -381,9 +387,5 @@
         </VerticalStackLayout>
     </ScrollView>
 
-    <uranium:UraniumContentPage.Resources>
-        <converters:InvertedBoolConverter x:Key="InvertedBoolConverter"/> 
-        <converters:NullToStringConverter x:Key="NullToStringConverter"/>
-        <converters:IntIsZeroConverter x:Key="IntIsZero"/>
-    </uranium:UraniumContentPage.Resources>
+
 </uranium:UraniumContentPage>

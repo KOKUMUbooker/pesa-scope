@@ -8,19 +8,19 @@ public partial class WelcomePage : UraniumUI.Pages.UraniumContentPage
         {
             Title                  = "Know Your Spending Habits",
             Description            = "Hundreds of M-Pesa transactions can make it difficult to understand where your money goes. PesaLens brings everything together in one clear view.",
-            IllustrationPlaceholder = "📊  Illustration coming soon"
+            ImageSource = "onboarding_1.png"
         },
         new()
         {
             Title                  = "Your Transactions, Organized",
             Description            = "Food, transport, shopping, bills, and more. PesaLens automatically categorizes your expenses so you can quickly understand your spending patterns.",
-            IllustrationPlaceholder = "🗂️  Illustration coming soon"
+            ImageSource = "onboarding_2.png"
         },
         new()
         {
             Title                  = "Take Control of Your Money",
             Description            = "Create budgets, monitor progress, and make informed financial decisions with insights built from your everyday M-Pesa activity.",
-            IllustrationPlaceholder = "🎯  Illustration coming soon"
+            ImageSource = "onboarding_3.png"
         }
     ];
 
@@ -44,7 +44,7 @@ public partial class WelcomePage : UraniumUI.Pages.UraniumContentPage
             : "Next";
 
         // Hide Skip on the last page — Get Started serves the same purpose
-        SkipButton.IsVisible = e.CurrentPosition < Pages.Count - 1;
+        // SkipButton.IsVisible = e.CurrentPosition < Pages.Count - 1;
     }
 
     private void OnNextClicked(object? sender, EventArgs e)
@@ -80,5 +80,5 @@ public class OnboardingPageModel
 {
     public string Title { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
-    public string IllustrationPlaceholder { get; set; } = string.Empty;
+    public string ImageSource { get; set; } = string.Empty;  
 }

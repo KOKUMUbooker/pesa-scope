@@ -19,6 +19,7 @@
         <converters:InverseBoolConverter x:Key="InvertedBool"/>
         <converters:IconNameToGlyphConverter x:Key="IconNameToGlyph"/>
         <converters:TransactionTypeToIconConverter x:Key="TypeToEmoji" />
+        <converters:StringToBoolConverter x:Key="StringToBoolConverter"/>
     </uranium:UraniumContentPage.Resources>
 
     <!-- ── Title bar ─────────────────────────────────────────────────────── -->

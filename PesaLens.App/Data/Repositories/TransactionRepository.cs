@@ -195,4 +195,9 @@ public class TransactionRepository(DatabaseService databaseService)
         _db.Table<Transaction?>()
            .Where(t => t!.MpesaCode == code)
            .FirstOrDefaultAsync();
+
+    public Task<Transaction?> GetBySmsIdAsync(long smsId) =>
+        _db.Table<Transaction?>()
+           .Where(t => t!.SmsId == smsId)
+           .FirstOrDefaultAsync();
 }

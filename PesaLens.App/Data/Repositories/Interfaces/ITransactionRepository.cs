@@ -99,4 +99,9 @@ public interface ITransactionRepository : IRepository<Transaction>
     /// Updates list of transactions passed as argument
     /// </summary>
     Task<int> UpdateManyAsync(IEnumerable<Transaction> transactions);
+
+    /// <summary>
+    /// Gets sms messages by Id
+    /// </summary>
+    Task<Transaction?> GetBySmsIdAsync(long smsId);
 }

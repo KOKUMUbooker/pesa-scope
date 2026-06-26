@@ -185,7 +185,7 @@
                         Margin="0,0,0,12" />
 
                     <Label
-                        Text="To import your existing M-Pesa history, PesaLens needs to temporarily become your default SMS app."
+                        Text="To import your existing M-Pesa history, PesaLens needs to temporarily become your default SMS app. This is only needed to read your past messages. Once imported, PesaLens captures new transactions in the background automatically — no default app required."
                         FontSize="15" LineHeight="1.5"
                         HorizontalTextAlignment="Center"
                         TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"

@@ -38,6 +38,8 @@ public class SmsReaderService : ISmsReaderService
         var context = Android.App.Application.Context;
         var contentUri = Android.Net.Uri.Parse(SmsInboxUri);
 
+        if (contentUri == null) return [];
+
         using var cursor = context.ContentResolver?.Query(
             contentUri,
             projection: SmsColumns,

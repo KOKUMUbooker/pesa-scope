@@ -88,7 +88,10 @@ namespace PesaLens.App
             builder.Services.AddSingleton<IAutoCategorizationService, AutoCategorizationService>();
             builder.Services.AddSingleton<DatabaseSeeder>();
 
-            return builder.Build();
+            var app = builder.Build();
+            ServiceLocator.Initialize(app.Services);
+
+            return app;
         }
     }
 }

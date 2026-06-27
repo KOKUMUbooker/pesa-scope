@@ -38,6 +38,8 @@ public partial class CategoriesViewModel : ObservableObject
     [ObservableProperty] private bool _isCategoriesLoading;
     [ObservableProperty] private bool _isRulesLoading;
 
+    [ObservableProperty] private bool _isRefreshing;
+
     [ObservableProperty] private string _periodLabel = string.Empty;
     [ObservableProperty] private CategorySpendRow? _selectedCategory;
 
@@ -84,6 +86,20 @@ public partial class CategoriesViewModel : ObservableObject
         finally
         {
             IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    public async Task RefreshAsync()
+    {
+        IsRefreshing = true;
+        try
+        {
+            await LoadAsync();
+        }
+        finally
+        {
+            IsRefreshing = false;
         }
     }
 

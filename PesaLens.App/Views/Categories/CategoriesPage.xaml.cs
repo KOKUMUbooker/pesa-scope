@@ -21,6 +21,13 @@ public partial class CategoriesPage : UraniumUI.Pages.UraniumContentPage
         _vm = vm;
         BindingContext = _vm;
         BuildColorPicker();
+
+        // Repopulate rule picker whenever IsRefreshing goes false (refresh completed)
+        _vm.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(CategoriesViewModel.IsRefreshing) && !_vm.IsRefreshing)
+                PopulateRuleCategoryPicker();
+        };
     }
 
     protected override async void OnAppearing()

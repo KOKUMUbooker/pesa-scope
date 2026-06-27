@@ -116,21 +116,21 @@ public partial class CategoriesViewModel : ObservableObject
 
             var categories = await _categoryRepo.GetAllActiveAsync();
             var spendMap = await _transactionRepo.GetSpendingByCategoryAsync(from, to);
-            var catMap = categories.ToDictionary(c => c.Id);
 
-            var rows = spendMap
-                .Where(kvp => catMap.ContainsKey(kvp.Key) && kvp.Value > 0)
-                .OrderByDescending(kvp => kvp.Value)
+            // Categories with spending first, then zero-spend alphabetically
+            var ordered = categories
+                .OrderByDescending(c => spendMap.GetValueOrDefault(c.Id))
+                .ThenBy(c => c.Name)
                 .ToList();
 
-            decimal total = rows.Sum(r => r.Value);
+            decimal total = spendMap.Values.Sum();
 
             var pieSeries = new List<ISeries>();
             var categoryRows = new List<CategorySpendRow>();
 
-            foreach (var (categoryId, amount) in rows)
+            foreach (var cat in ordered)
             {
-                var cat = catMap[categoryId];
+                var amount = spendMap.GetValueOrDefault(cat.Id);
                 var color = ParseColor(cat.Color);
                 var pct = total > 0 ? (double)(amount / total) * 100 : 0;
 
@@ -142,16 +142,20 @@ public partial class CategoriesViewModel : ObservableObject
                     ChartColor = Color.FromArgb(cat.Color)
                 });
 
-                pieSeries.Add(new PieSeries<double>
+                // Only add to pie chart if there's actual spending
+                if (amount > 0)
                 {
-                    Values = [(double)amount],
-                    Name = cat.Name,
-                    Fill = new SolidColorPaint(color),
-                    Stroke = null,
-                    OuterRadiusOffset = 0,
-                    MaxRadialColumnWidth = 28,
-                    ToolTipLabelFormatter = p => $"{cat.Name}: Ksh {amount:N0}"
-                });
+                    pieSeries.Add(new PieSeries<double>
+                    {
+                        Values = [(double)amount],
+                        Name = cat.Name,
+                        Fill = new SolidColorPaint(color),
+                        Stroke = null,
+                        OuterRadiusOffset = 0,
+                        MaxRadialColumnWidth = 28,
+                        ToolTipLabelFormatter = p => $"{cat.Name}: Ksh {amount:N0}"
+                    });
+                }
             }
 
             Series = [.. pieSeries];

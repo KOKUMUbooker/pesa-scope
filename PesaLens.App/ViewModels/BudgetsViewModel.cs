@@ -84,6 +84,7 @@ public partial class BudgetsViewModel : ObservableObject
     // Load states
     [ObservableProperty] private bool _isOverallBudgetLoading = true;
     [ObservableProperty] private bool _isCategoryBudgetsLoading = true;
+    [ObservableProperty] private bool _isRefreshing;
 
     public BudgetsViewModel(
         IBudgetRepository budgetRepo,
@@ -111,6 +112,20 @@ public partial class BudgetsViewModel : ObservableObject
         finally
         {
             IsBusy = false;
+        }
+    }
+
+    [RelayCommand]
+    public async Task RefreshAsync()
+    {
+        IsRefreshing = true;
+        try
+        {
+            await LoadAsync();
+        }
+        finally
+        {
+            IsRefreshing = false;
         }
     }
 

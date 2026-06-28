@@ -21,6 +21,13 @@ public partial class CategoriesPage : UraniumUI.Pages.UraniumContentPage
         _vm = vm;
         BindingContext = _vm;
         BuildColorPicker();
+
+        // Repopulate rule picker whenever IsRefreshing goes false (refresh completed)
+        _vm.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(CategoriesViewModel.IsRefreshing) && !_vm.IsRefreshing)
+                PopulateRuleCategoryPicker();
+        };
     }
 
     protected override async void OnAppearing()
@@ -80,6 +87,14 @@ public partial class CategoriesPage : UraniumUI.Pages.UraniumContentPage
                 ? new SolidColorBrush(Color.FromArgb(_vm.EditColor))
                 : null;
             swatch.StrokeThickness = swatch.Stroke is not null ? 2.5 : 0;
+        }
+    }
+
+    private async void OnCategoryItemTapped(object sender, EventArgs e)
+    {
+        if (sender is ImageButton btn && btn.BindingContext is CategorySpendRow row)
+        {
+            await Shell.Current.GoToAsync($"//Transactions/TransactionsPage?categoryId={row.Category.Id}");
         }
     }
 

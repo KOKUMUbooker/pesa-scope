@@ -6,10 +6,29 @@ using PesaLens.App.Views.Transactions;
 
 namespace PesaLens.App.ViewModels;
 
+[QueryProperty(nameof(InitialCategoryIdRaw), "categoryId")]
 public partial class TransactionsViewModel : ObservableObject
 {
     private readonly ITransactionRepository _transactionRepo;
     private readonly ICategoryRepository _categoryRepo;
+
+    // Set by shell navigation, consumed once on first load, InitialCategoryIdRaw is received as string
+    private int? _initialCategoryId;
+
+    public string? InitialCategoryIdRaw
+    {
+        get => _initialCategoryId?.ToString();
+        set
+        {
+            _initialCategoryId = int.TryParse(value, out var id) ? id : null;
+            // Apply immediately so OnAppearing can read it before LoadAsync runs
+            if (_initialCategoryId.HasValue)
+            {
+                SelectedCategoryId = _initialCategoryId;
+                _initialCategoryId = null;
+            }
+        }
+    }
 
     // ── Filter state ──────────────────────────────────────────────────────────
 

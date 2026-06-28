@@ -19,6 +19,7 @@
         <converters:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
         <converters:NullToStringConverter x:Key="NullToStringConverter"/>
         <converters:IntIsZeroConverter x:Key="IntIsZero"/>
+        <converters:StringToColorConverter x:Key="StringToColorConverter"/>
     </uranium:UraniumContentPage.Resources>
 
     <!-- ── Title bar ─────────────────────────────────────────────────────── -->
@@ -328,38 +329,78 @@
                                         IsVisible="{Binding IsRulesLoading, Converter={StaticResource InvertedBoolConverter}}">
                                             <BindableLayout.ItemTemplate>
                                                 <DataTemplate x:DataType="models:AutoCategorizationRule">
-                                                    <Grid Padding="16,14" ColumnDefinitions="*,Auto,Auto" ColumnSpacing="12">
-                                                        <VerticalStackLayout Grid.Column="0" Spacing="2" VerticalOptions="Center">
-                                                            <Label Text="{Binding MatchValue}"
-                                                               FontSize="14" FontAttributes="Bold"
-                                                               TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
-                                                            <Label Text="{Binding RuleType}"
-                                                               FontSize="12"
-                                                               TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
-                                                        </VerticalStackLayout>
-                                                        <ImageButton Grid.Column="1"
-                                                                 BackgroundColor="Transparent" WidthRequest="36" HeightRequest="36"
-                                                                 Command="{Binding BindingContext.OpenEditRuleCommand, Source={x:Reference NCategoriesPage}}"
-                                                                 CommandParameter="{Binding .}">
-                                                            <ImageButton.Source>
-                                                                <FontImageSource FontFamily="MaterialSharp"
-                                                                Glyph="{x:Static m:MaterialSharp.Edit}"
-                                                                Color="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
-                                                                Size="16"/>
-                                                            </ImageButton.Source>
-                                                        </ImageButton>
-                                                        <ImageButton Grid.Column="2"
-                                                                 BackgroundColor="Transparent" WidthRequest="36" HeightRequest="36"
-                                                                 Command="{Binding BindingContext.DeleteRuleCommand, Source={x:Reference NCategoriesPage}}"
-                                                                 CommandParameter="{Binding .}">
-                                                            <ImageButton.Source>
-                                                                <FontImageSource FontFamily="MaterialSharp"
-                                                                Glyph="{x:Static m:MaterialSharp.Delete}"
-                                                                Color="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"
-                                                                Size="16"/>
-                                                            </ImageButton.Source>
-                                                        </ImageButton>
-                                                    </Grid>
+                                                    <Border
+                                                        Margin="4"
+                                                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                                                        StrokeThickness="0"
+                                                        StrokeShape="RoundRectangle 12"
+                                                        Padding="12">
+                                                            <VerticalStackLayout Spacing="8">
+
+                                                                <!-- Match value + action buttons -->
+                                                                <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="4">
+                                                                    <Label Grid.Column="0"
+                                                                       Text="{Binding MatchValue}"
+                                                                       FontSize="14" FontAttributes="Bold"
+                                                                       VerticalOptions="Center"
+                                                                       LineBreakMode="TailTruncation"
+                                                                       TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                                                                    <ImageButton Grid.Column="1"
+                                                                         BackgroundColor="Transparent"
+                                                                         WidthRequest="28" HeightRequest="28"
+                                                                         Command="{Binding BindingContext.OpenEditRuleCommand, Source={x:Reference NCategoriesPage}}"
+                                                                         CommandParameter="{Binding .}">
+                                                                        <ImageButton.Source>
+                                                                            <FontImageSource FontFamily="MaterialSharp"
+                                                                            Glyph="{x:Static m:MaterialSharp.Edit}"
+                                                                            Color="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                                                                            Size="14"/>             
+                                                                        </ImageButton.Source>
+                                                                    </ImageButton>
+                                                                    <ImageButton Grid.Column="2"
+                                                                         BackgroundColor="Transparent"
+                                                                         WidthRequest="28" HeightRequest="28"
+                                                                         Command="{Binding BindingContext.DeleteRuleCommand, Source={x:Reference NCategoriesPage}}"
+                                                                         CommandParameter="{Binding .}">
+                                                                        <ImageButton.Source>
+                                                                            <FontImageSource FontFamily="MaterialSharp"
+                                                                            Glyph="{x:Static m:MaterialSharp.Delete}"
+                                                                            Color="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"
+                                                                            Size="14"/> 
+                                                                        </ImageButton.Source>
+                                                                    </ImageButton>
+                                                                </Grid>
+
+                                                                <!-- Rule type badge -->
+                                                                <Border
+                                                                    BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
+                                                                    StrokeThickness="0"
+                                                                    StrokeShape="RoundRectangle 6"
+                                                                    Padding="8,4"
+                                                                    HorizontalOptions="Start">
+                                                                    <Label Text="{Binding RuleType}"
+                                                                       FontSize="11" FontAttributes="Bold"
+                                                                       TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                                                                </Border>
+
+                                                                <!-- Divider -->
+                                                                <BoxView HeightRequest="1"
+                                                                    Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"/>
+
+                                                                <!-- Linked category -->
+                                                                <HorizontalStackLayout Spacing="6" VerticalOptions="Center">
+                                                                    <BoxView
+                                                                        WidthRequest="8" HeightRequest="8" CornerRadius="4"
+                                                                        VerticalOptions="Center"
+                                                                        Color="{Binding Category.Color, Converter={StaticResource StringToColorConverter}}"/>
+                                                                    <Label
+                                                                        Text="{Binding Category.Name, FallbackValue='Uncategorized'}"
+                                                                        FontSize="12"
+                                                                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                                                                </HorizontalStackLayout>
+
+                                                            </VerticalStackLayout>
+                                                        </Border>
                                                 </DataTemplate>
                                             </BindableLayout.ItemTemplate>
                                         </VerticalStackLayout>

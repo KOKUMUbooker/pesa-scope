@@ -187,14 +187,18 @@ public partial class CategoriesViewModel : ObservableObject
     }
 
     // ── Rules loading ─────────────────────────────────────────────────────────
-
     private async Task LoadRulesAsync()
     {
         IsRulesLoading = true;
         try
         {
-            //Rules = await _rulesRepo.GetEnabledOrderedByPriorityAsync();
             var result = await _rulesRepo.GetEnabledOrderedByPriorityAsync();
+            var categories = await _categoryRepo.GetAllAsync();
+            var catMap = categories.ToDictionary(c => c.Id);
+
+            foreach (var rule in result)
+                rule.Category = catMap.GetValueOrDefault(rule.CategoryId);
+
             Rules = new ObservableCollection<AutoCategorizationRule>(result);
         }
         finally

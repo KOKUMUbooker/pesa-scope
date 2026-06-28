@@ -18,6 +18,7 @@ public partial class CategorySpendRow : ObservableObject
     public double Percentage { get; init; }
     public string FormattedAmount => $"Ksh {Amount:N0}";
     public string FormattedPercentage => $"{Percentage:0.#}%";
+    public double ProgressValue => Percentage / 100.0;
     public Color ChartColor { get; init; } = Colors.Gray;
 }
 

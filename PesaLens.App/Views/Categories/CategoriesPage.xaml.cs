@@ -90,6 +90,14 @@ public partial class CategoriesPage : UraniumUI.Pages.UraniumContentPage
         }
     }
 
+    private async void OnCategoryItemTapped(object sender, EventArgs e)
+    {
+        if (sender is ImageButton btn && btn.BindingContext is CategorySpendRow row)
+        {
+            await Shell.Current.GoToAsync($"//Transactions/TransactionsPage?categoryId={row.Category.Id}");
+        }
+    }
+
     // ── Rule category picker ──────────────────────────────────────────────────
 
     private void PopulateRuleCategoryPicker()

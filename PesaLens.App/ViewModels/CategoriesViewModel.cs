@@ -205,13 +205,12 @@ public partial class CategoriesViewModel : ObservableObject
 
     // ── Category tap (4.2) ────────────────────────────────────────────────────
 
-    [RelayCommand]
-    public async Task SelectCategoryAsync(CategorySpendRow row)
-    {
-        SelectedCategory = row;
-        await Shell.Current.GoToAsync(
-            $"TransactionsPage?categoryId={row.Category.Id}");
-    }
+    //[RelayCommand]
+    //public async Task SelectCategoryAsync(CategorySpendRow row)
+    //{
+    //    SelectedCategory = row;
+    //    await Shell.Current.GoToAsync($"//Transactions/TransactionsPage?categoryId={row.Category.Id}");
+    //}
 
     // ── Add / Edit category (4.4, 4.5) ───────────────────────────────────────
 

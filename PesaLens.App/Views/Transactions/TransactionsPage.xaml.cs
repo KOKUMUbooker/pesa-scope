@@ -19,10 +19,23 @@ public partial class TransactionsPage : UraniumUI.Pages.UraniumContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        if (_loaded) return;
-        _loaded = true;
-        await _vm.LoadAsync();
-        BuildCategoryChips();
+
+        if (!_loaded)
+        {
+            _loaded = true;
+            await _vm.LoadAsync();
+            _activeCategoryId = _vm.SelectedCategoryId;
+            BuildCategoryChips();
+            return;
+        }
+
+        // Page already loaded — check if a new category filter came in via navigation
+        if (_vm.SelectedCategoryId != _activeCategoryId)
+        {
+            _activeCategoryId = _vm.SelectedCategoryId;
+            await _vm.LoadAsync();
+            BuildCategoryChips();
+        }
     }
 
     // ── Category chips (3.6) ──────────────────────────────────────────────────

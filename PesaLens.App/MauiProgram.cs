@@ -16,6 +16,7 @@ using PesaLens.Core.Services;
 using PesaLens.Core.Services.Interfaces;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 using UraniumUI;
+using Plugin.LocalNotification;
 
 namespace PesaLens.App
 {
@@ -32,6 +33,7 @@ namespace PesaLens.App
                 .UseUraniumUI()
                 .UseUraniumUIMaterial()
                 .UseUraniumUIBlurs()
+                .UseLocalNotification()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");

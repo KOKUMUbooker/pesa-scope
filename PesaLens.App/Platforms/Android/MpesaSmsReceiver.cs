@@ -1,8 +1,6 @@
 ﻿using Android.App;
 using Android.Content;
 using Android.Provider;
-using Android.Telephony;
-using PesaLens.App.Data.Repositories;
 using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.App.Services.Interfaces;
 using PesaLens.Core.Services.Interfaces;
@@ -66,6 +64,7 @@ public class MpesaSmsReceiver : BroadcastReceiver
             var syncMetaRepo = ServiceLocator.GetService<ISyncMetadataRepository>();
             var categorizationService = ServiceLocator.GetService<IAutoCategorizationService>();
             var appSettingsRepo = ServiceLocator.GetService<IAppSettingsRepository>();
+            var budgetNotificationService = ServiceLocator.GetService<IBudgetNotificationService>();
 
             if (parser is null || transactionRepo is null) return;
 
@@ -82,13 +81,45 @@ public class MpesaSmsReceiver : BroadcastReceiver
 
             await transactionRepo.InsertAsync(transaction);
 
+            int? categoryId = null;
             // Auto-categorize the single new transaction
             if (categorizationService is not null)
-                await categorizationService.CategorizeAsync([transaction]);
+              categoryId = await categorizationService.CategorizeAndGetCategoryIdAsync(transaction);
 
             // Update sync metadata
             if (syncMetaRepo is not null)
                 await syncMetaRepo.UpdateAfterSyncAsync(smsId, timestampMs, newlyImportedCount: 1);
+
+            if (!settings.BudgetNotificationsEnabled) return;
+
+            // Categorize and get the resolved CategoryId in one step
+            var budgetRepo = ServiceLocator.GetService<IBudgetRepository>();
+            var overallBudgetRepo = ServiceLocator.GetService<IOverallBudgetRepository>();
+
+            // ── Category budget check ─────────────────────────────────────────────────
+            if (categoryId is not null && budgetRepo is not null)
+            {
+                var budget = await budgetRepo.GetByCategoryAsync(categoryId.Value);
+                if (budget is not null)
+                {
+                    var (from, to) = CurrentMonthRange();
+                    var spending = await transactionRepo.GetSpendingByCategoryAsync(from, to);
+                    var spent = spending.GetValueOrDefault(categoryId.Value);
+                    await budgetNotificationService!.CheckCategoryBudgetAsync(categoryId.Value, spent, budget);
+                }
+            }
+
+            // ── Overall budget check ──────────────────────────────────────────────────
+            if (overallBudgetRepo is not null)
+            {
+                var overall = await overallBudgetRepo.GetAsync();
+                if (overall is not null)
+                {
+                    var (from, to) = CurrentMonthRange();
+                    var totalSpent = await transactionRepo.GetTotalSpentAsync(from, to);
+                    await budgetNotificationService!.CheckOverallBudgetAsync(totalSpent, overall);
+                }
+            }
         }
         catch (Exception ex)
         {
@@ -126,5 +157,10 @@ public class MpesaSmsReceiver : BroadcastReceiver
 
         // Synthetic fallback — negative to avoid colliding with real inbox IDs
         return -timestampMs;
+    }
+    private static (DateTime from, DateTime to) CurrentMonthRange()
+    {
+        var today = DateTime.Today;
+        return (new DateTime(today.Year, today.Month, 1), today);
     }
 }

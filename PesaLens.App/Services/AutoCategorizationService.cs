@@ -36,6 +36,21 @@ public class AutoCategorizationService : IAutoCategorizationService
             await _transactionRepo.UpdateManyAsync(toUpdate);
     }
 
+    public async Task<int?> CategorizeAndGetCategoryIdAsync(Transaction transaction)
+    {
+        if (transaction.CategoryId != 0)
+            return transaction.CategoryId; // already categorized
+
+        var rules = await _rulesRepo.GetEnabledOrderedByPriorityAsync();
+        var matched = rules.FirstOrDefault(r => Matches(transaction, r));
+        if (matched is null) return null;
+
+        transaction.CategoryId = matched.CategoryId;
+        await _transactionRepo.UpdateManyAsync([transaction]);
+
+        return matched.CategoryId;
+    }
+
     private static bool Matches(Transaction tx, AutoCategorizationRule rule) =>
         rule.RuleType switch
         {

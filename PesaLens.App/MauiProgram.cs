@@ -88,6 +88,7 @@ namespace PesaLens.App
             builder.Services.AddSingleton<ISmsReaderService,SmsReaderService>();
             builder.Services.AddSingleton<IMpesaSmsParser,MpesaSmsParser>();
             builder.Services.AddSingleton<IAutoCategorizationService, AutoCategorizationService>();
+            builder.Services.AddSingleton<IBudgetNotificationService, BudgetNotificationService>();
             builder.Services.AddSingleton<DatabaseSeeder>();
 
             var app = builder.Build();

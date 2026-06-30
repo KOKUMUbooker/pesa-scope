@@ -22,7 +22,7 @@ public class AppSettings
 
     [NotNull]
     [Column("budget_notifications_enabled")]
-    public bool BudgetNotificationsEnabled { get; set; } = true;
+    public bool BudgetNotificationsEnabled { get; set; } = false;
 
     [NotNull]
     [Column("biometric_lock_enabled")]

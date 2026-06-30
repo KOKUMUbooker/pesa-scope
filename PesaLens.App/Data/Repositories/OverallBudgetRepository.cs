@@ -9,7 +9,7 @@ public class OverallBudgetRepository(DatabaseService databaseService) : IOverall
     private readonly SQLiteAsyncConnection _db = databaseService.Connection;
 
     public Task<OverallBudget?> GetAsync() =>
-        _db.Table<OverallBudget?>().FirstOrDefaultAsync();
+        _db.Table<OverallBudget>().FirstOrDefaultAsync()!;
 
     public async Task<int> UpsertAsync(OverallBudget budget)
     {

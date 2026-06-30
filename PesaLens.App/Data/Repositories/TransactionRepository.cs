@@ -192,12 +192,12 @@ public class TransactionRepository(DatabaseService databaseService)
            .ToListAsync();
 
     public Task<Transaction?> GetByMpesaCodeAsync(string code) =>
-        _db.Table<Transaction?>()
-           .Where(t => t!.MpesaCode == code)
-           .FirstOrDefaultAsync();
+        _db.Table<Transaction>()
+           .Where(t => t.MpesaCode == code)
+           .FirstOrDefaultAsync()!;
 
     public Task<Transaction?> GetBySmsIdAsync(long smsId) =>
-        _db.Table<Transaction?>()
+        _db.Table<Transaction>()
            .Where(t => t!.SmsId == smsId)
-           .FirstOrDefaultAsync();
+           .FirstOrDefaultAsync()!;
 }

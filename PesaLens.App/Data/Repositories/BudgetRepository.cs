@@ -7,9 +7,9 @@ public class BudgetRepository(DatabaseService databaseService)
     : BaseRepository<Budget>(databaseService), IBudgetRepository
 {
     public Task<Budget?> GetByCategoryAsync(int categoryId) =>
-        _db.Table<Budget?>()
-           .Where(b => b != null && b.CategoryId == categoryId)
-           .FirstOrDefaultAsync();
+        _db.Table<Budget>()
+           .Where(b => b.CategoryId == categoryId)
+           .FirstOrDefaultAsync()!;
 
     public Task<List<Budget>> GetAllWithCategoryAsync() =>
         _db.Table<Budget>().ToListAsync();

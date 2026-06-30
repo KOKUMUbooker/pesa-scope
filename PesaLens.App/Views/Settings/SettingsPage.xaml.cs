@@ -6,6 +6,7 @@ public partial class SettingsPage : UraniumUI.Pages.UraniumContentPage
 {
     private readonly SettingsViewModel _vm;
     private bool _loaded;
+    private bool _settingsReady; // guards against Toggled firing during bind
 
     public SettingsPage(SettingsViewModel vm)
     {
@@ -18,27 +19,39 @@ public partial class SettingsPage : UraniumUI.Pages.UraniumContentPage
         base.OnAppearing();
         if (_loaded) return;
         _loaded = true;
+
+        _settingsReady = false;
         await _vm.LoadAsync();
+        _settingsReady = true;
         // SyncCurrencyButtons();
     }
 
     // ── Toggle handlers ───────────────────────────────────────────────────────
-    // Switches in MAUI fire Toggled on initial bind — guard with a flag
-    // isn't needed here because LoadAsync sets the VM property before the
-    // page is fully visible, but we still delegate to the VM to keep logic
-    // out of the code-behind.
+    // Switches in MAUI fire Toggled on initial bind
 
-    private async void OnDarkModeToggled(object? sender, ToggledEventArgs e) =>
+    private async void OnDarkModeToggled(object? sender, ToggledEventArgs e)
+    {
+        if (!_settingsReady) return;
         await _vm.ToggleDarkModeCommand.ExecuteAsync(e.Value);
+    }
 
-    private async void OnBudgetNotificationsToggled(object? sender, ToggledEventArgs e) =>
+    private async void OnBudgetNotificationsToggled(object? sender, ToggledEventArgs e)
+    {
+        if (!_settingsReady) return;
         await _vm.ToggleBudgetNotificationsCommand.ExecuteAsync(e.Value);
+    }
 
-    private async void OnBiometricToggled(object? sender, ToggledEventArgs e) =>
+    private async void OnBiometricToggled(object? sender, ToggledEventArgs e)
+    {
+        if (!_settingsReady) return;
         await _vm.ToggleBiometricLockCommand.ExecuteAsync(e.Value);
+    }
 
-    private async void OnPinLockToggled(object? sender, ToggledEventArgs e) =>
+    private async void OnPinLockToggled(object? sender, ToggledEventArgs e)
+    {
+        if (!_settingsReady) return;
         await _vm.TogglePinLockCommand.ExecuteAsync(e.Value);
+    }
 
     // ── Currency picker ───────────────────────────────────────────────────────
 

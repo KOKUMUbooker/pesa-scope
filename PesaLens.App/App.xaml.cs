@@ -2,6 +2,8 @@
 using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.App.Views.Onboarding;
 using PesaLens.App.Views.Security;
+using Plugin.LocalNotification;
+using Plugin.LocalNotification.EventArgs;
 
 namespace PesaLens.App;
 
@@ -26,6 +28,9 @@ public partial class App : Application
         _appSettingsRepo = appSettingsRepo;
         _securitySettingsRepo = securitySettingsRepo;
         _services = services;
+
+        // Subscribe to notification tap event
+        LocalNotificationCenter.Current.NotificationActionTapped += OnNotificationActionTapped;
 
         // Kick off init — when done, signal _dbReady
         _ = InitializeAsync(databaseService, seeder);
@@ -94,6 +99,12 @@ public partial class App : Application
                 }
             };
         }
+    }
+
+    static void OnNotificationActionTapped(NotificationActionEventArgs e)
+    {
+        if (!e.IsTapped) return;
+        Shell.Current.GoToAsync("//Budgets/BudgetsPage");
     }
 }
 

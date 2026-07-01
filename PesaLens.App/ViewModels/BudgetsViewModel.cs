@@ -275,6 +275,10 @@ public partial class BudgetsViewModel : ObservableObject
         IsOverallSheetOpen = false;
     }
 
+    [RelayCommand]
+    private async Task GoToHistoryAsync() =>
+        await Shell.Current.GoToAsync("budgetHistory");
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private static (DateTime from, DateTime to) CurrentMonthRange()

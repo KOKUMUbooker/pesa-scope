@@ -2,6 +2,7 @@
 using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.App.Views.Onboarding;
 using PesaLens.App.Views.Security;
+using PesaLens.App.Data;
 using Plugin.LocalNotification;
 using Plugin.LocalNotification.EventArgs;
 
@@ -10,7 +11,6 @@ namespace PesaLens.App;
 public partial class App : Application
 {
     private readonly IAppSettingsRepository _appSettingsRepo;
-    private readonly ISecuritySettingsRepository _securitySettingsRepo;
     private readonly IServiceProvider _services;
 
     // Signals when DB init + seeding are done
@@ -20,13 +20,11 @@ public partial class App : Application
         DatabaseService databaseService,
         DatabaseSeeder seeder,
         IAppSettingsRepository appSettingsRepo,
-        ISecuritySettingsRepository securitySettingsRepo,
         IServiceProvider services)
     {
         InitializeComponent();
 
         _appSettingsRepo = appSettingsRepo;
-        _securitySettingsRepo = securitySettingsRepo;
         _services = services;
 
         // Subscribe to notification tap event
@@ -70,13 +68,12 @@ public partial class App : Application
             await _dbReady.Task;
 
             var settings = await _appSettingsRepo.GetAsync();
-            var securitySettings = await _securitySettingsRepo.GetAsync();
 
             Page startPage;
 
             if (!settings.OnboardingComplete)
                 startPage = _services.GetRequiredService<WelcomePage>(); 
-            else if (securitySettings.BiometricsEnabled || securitySettings.PinHash is not null)
+            else if (settings.AppLockEnabled)
                 startPage = _services.GetRequiredService<AppLockPage>(); 
             else
                 startPage = new AppShell();

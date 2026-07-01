@@ -13,10 +13,12 @@ using PesaLens.App.Views.Security;
 using PesaLens.App.Views.Settings;
 using PesaLens.App.Views.Transactions;
 using PesaLens.Core.Services;
+using PesaLens.App.Data;
 using PesaLens.Core.Services.Interfaces;
-using SkiaSharp.Views.Maui.Controls.Hosting;
-using UraniumUI;
 using Plugin.LocalNotification;
+using SkiaSharp.Views.Maui.Controls.Hosting;
+using Plugin.Maui.Biometric;
+using UraniumUI;
 
 namespace PesaLens.App
 {
@@ -76,6 +78,7 @@ namespace PesaLens.App
             // DatabaseService registered as singleton — App.cs resolves and inits it
             var dbPath = Path.Combine(FileSystem.AppDataDirectory, "pesalens.db");
             builder.Services.AddSingleton(new DatabaseService(dbPath));
+            builder.Services.AddSingleton<IBiometricAuthService, BiometricAuthService>();
             builder.Services.AddSingleton<ITransactionRepository, TransactionRepository>();
             builder.Services.AddSingleton<ICategoryRepository, CategoryRepository>();
             builder.Services.AddSingleton<IAutoCategorizationRuleRepository, AutoCategorizationRuleRepository>();
@@ -83,13 +86,14 @@ namespace PesaLens.App
             builder.Services.AddSingleton<IOverallBudgetRepository, OverallBudgetRepository>();
             builder.Services.AddSingleton<ISyncMetadataRepository, SyncMetadataRepository>();
             builder.Services.AddSingleton<IAppSettingsRepository, AppSettingsRepository>();
-            builder.Services.AddSingleton<ISecuritySettingsRepository, SecuritySettingsRepository>();
             builder.Services.AddSingleton<IExportHistoryRepository, ExportHistoryRepository>();
             builder.Services.AddSingleton<ISmsReaderService,SmsReaderService>();
             builder.Services.AddSingleton<IMpesaSmsParser,MpesaSmsParser>();
             builder.Services.AddSingleton<IAutoCategorizationService, AutoCategorizationService>();
             builder.Services.AddSingleton<IBudgetNotificationService, BudgetNotificationService>();
             builder.Services.AddSingleton<DatabaseSeeder>();
+
+            builder.Services.AddSingleton<IBiometric>(BiometricAuthenticationService.Default);
 
             var app = builder.Build();
             ServiceLocator.Initialize(app.Services);

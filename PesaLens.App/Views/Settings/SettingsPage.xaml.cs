@@ -41,16 +41,10 @@ public partial class SettingsPage : UraniumUI.Pages.UraniumContentPage
         await _vm.ToggleBudgetNotificationsCommand.ExecuteAsync(e.Value);
     }
 
-    private async void OnBiometricToggled(object? sender, ToggledEventArgs e)
+    private async void OnAppLockToggled(object? sender, ToggledEventArgs e)
     {
         if (!_settingsReady) return;
-        await _vm.ToggleBiometricLockCommand.ExecuteAsync(e.Value);
-    }
-
-    private async void OnPinLockToggled(object? sender, ToggledEventArgs e)
-    {
-        if (!_settingsReady) return;
-        await _vm.TogglePinLockCommand.ExecuteAsync(e.Value);
+        await _vm.ToggleAppLockCommand.ExecuteAsync(e.Value);
     }
 
     // ── Currency picker ───────────────────────────────────────────────────────

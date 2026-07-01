@@ -126,7 +126,7 @@
                     </Border.StrokeShape>
                     <VerticalStackLayout>
 
-                        <!-- Biometric Lock -->
+                        <!-- App Lock -->
                         <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,14" ColumnSpacing="14">
                             <Image Grid.Column="0" VerticalOptions="Center">
                                 <Image.Source>
@@ -138,18 +138,18 @@
                             </Image>
                             <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
                                 <Label
-                                    Text="Biometric Lock"
+                                    Text="App Lock"
                                     FontSize="15"
                                     TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
                                 <Label
-                                    Text="Use fingerprint to unlock the app"
+                                    Text="Require fingerprint, face, or device PIN to open"
                                     FontSize="11"
                                     TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
                             </VerticalStackLayout>
                             <Switch
                                 Grid.Column="2"
-                                IsToggled="{Binding BiometricLockEnabled}"
-                                Toggled="OnBiometricToggled"
+                                IsToggled="{Binding AppLockEnabled}"
+                                Toggled="OnAppLockToggled"
                                 OnColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
                                 ThumbColor="White"
                                 VerticalOptions="Center" />

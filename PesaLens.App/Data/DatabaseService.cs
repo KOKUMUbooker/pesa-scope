@@ -1,8 +1,7 @@
 ﻿using PesaLens.Core.Models;
-using PesaLens.App.Data.Repositories.Interfaces;
 using SQLite;
 
-namespace PesaLens.App.Data.Repositories;
+namespace PesaLens.App.Data;
 
 /// <summary>
 /// Owns the single SQLiteAsyncConnection for the app.
@@ -38,7 +37,6 @@ public class DatabaseService
         await _db.CreateTableAsync<OverallBudget>();
         await _db.CreateTableAsync<SyncMetadata>();
         await _db.CreateTableAsync<AppSettings>();
-        await _db.CreateTableAsync<SecuritySettings>();
         await _db.CreateTableAsync<ExportHistory>();
 
         _dbInitialized = true;
@@ -58,7 +56,6 @@ public class DatabaseService
         await _db.DropTableAsync<OverallBudget>();
         await _db.DropTableAsync<SyncMetadata>();
         await _db.DropTableAsync<AppSettings>();
-        await _db.DropTableAsync<SecuritySettings>();
         await _db.DropTableAsync<ExportHistory>();
 
         await InitializeAsync();

@@ -1,6 +1,6 @@
 ﻿using PesaLens.App.Data.Repositories.Interfaces;
 
-namespace PesaLens.App.Data.Repositories;
+namespace PesaLens.App.Data;
 
 /// <summary>
 /// Handles all first-launch data seeding in the correct dependency order:
@@ -14,13 +14,11 @@ namespace PesaLens.App.Data.Repositories;
 /// </summary>
 public class DatabaseSeeder(
     IAppSettingsRepository appSettingsRepo,
-    ISecuritySettingsRepository securitySettingsRepo,
     ISyncMetadataRepository syncMetadataRepo,
     ICategoryRepository categoryRepo,
     IAutoCategorizationRuleRepository ruleRepo)
 {
     private readonly IAppSettingsRepository _appSettingsRepo = appSettingsRepo;
-    private readonly ISecuritySettingsRepository _securitySettingsRepo = securitySettingsRepo;
     private readonly ISyncMetadataRepository _syncMetadataRepo = syncMetadataRepo;
     private readonly ICategoryRepository _categoryRepo = categoryRepo;
     private readonly IAutoCategorizationRuleRepository _ruleRepo = ruleRepo;
@@ -31,10 +29,9 @@ public class DatabaseSeeder(
     /// </summary>
     public async Task SeedAsync()
     {
-        // Step 1 — Singleton rows (AppSettings, SecuritySettings, SyncMetadata).
+        // Step 1 — Singleton rows (AppSettings, SyncMetadata).
         // GetAsync() creates the row with defaults if it doesn't exist yet.
         await _appSettingsRepo.GetAsync();
-        await _securitySettingsRepo.GetAsync();
         await _syncMetadataRepo.GetAsync();
 
         // Step 2 — Categories must be seeded before rules reference them.

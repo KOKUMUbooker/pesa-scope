@@ -25,12 +25,8 @@ public class AppSettings
     public bool BudgetNotificationsEnabled { get; set; } = false;
 
     [NotNull]
-    [Column("biometric_lock_enabled")]
-    public bool BiometricLockEnabled { get; set; } = false;
-
-    [NotNull]
-    [Column("pin_lock_enabled")]
-    public bool PinLockEnabled { get; set; } = false;
+    [Column("app_lock_enabled")]
+    public bool AppLockEnabled { get; set; } = false;
 
     [NotNull]
     [Column("onboarding_complete")]

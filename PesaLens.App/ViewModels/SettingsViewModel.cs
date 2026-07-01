@@ -2,21 +2,21 @@
 using CommunityToolkit.Mvvm.Input;
 using PesaLens.App.Data.Repositories;
 using PesaLens.App.Data.Repositories.Interfaces;
+using PesaLens.App.Services.Interfaces;
 using PesaLens.Core.Models;
-using PesaLens.Core;
+using PesaLens.App.Data;
 
 namespace PesaLens.App.ViewModels;
 
 public partial class SettingsViewModel : ObservableObject
 {
     private readonly IAppSettingsRepository _appSettingsRepo;
-    private readonly ISecuritySettingsRepository _securitySettingsRepo;
     private readonly ISyncMetadataRepository _syncMetadataRepo;
     private readonly DatabaseSeeder _seeder;
     private readonly DatabaseService _databaseService;
+    private readonly IBiometricAuthService _biometricAuthService;
 
     private AppSettings _appSettings = new();
-    private SecuritySettings _securitySettings = new();
 
     // ── General ───────────────────────────────────────────────────────────────
 
@@ -27,8 +27,7 @@ public partial class SettingsViewModel : ObservableObject
 
     // ── Security ──────────────────────────────────────────────────────────────
 
-    [ObservableProperty] private bool _biometricLockEnabled;
-    [ObservableProperty] private bool _pinLockEnabled;
+    [ObservableProperty] private bool _appLockEnabled;
 
     // ── About ─────────────────────────────────────────────────────────────────
 
@@ -37,15 +36,15 @@ public partial class SettingsViewModel : ObservableObject
 
     public SettingsViewModel(
         IAppSettingsRepository appSettingsRepo,
-        ISecuritySettingsRepository securitySettingsRepo,
         ISyncMetadataRepository syncMetadataRepo,
         DatabaseSeeder seeder,
+        IBiometricAuthService biometricAuthService,
         DatabaseService databaseService)
     {
         _appSettingsRepo = appSettingsRepo;
-        _securitySettingsRepo = securitySettingsRepo;
         _syncMetadataRepo = syncMetadataRepo;
         _seeder = seeder;
+        _biometricAuthService = biometricAuthService;
         _databaseService = databaseService;
     }
 
@@ -55,15 +54,13 @@ public partial class SettingsViewModel : ObservableObject
     public async Task LoadAsync()
     {
         _appSettings = await _appSettingsRepo.GetAsync();
-        _securitySettings = await _securitySettingsRepo.GetAsync();
         var syncMeta = await _syncMetadataRepo.GetAsync();
 
         // Populate observable properties without triggering saves
         IsDarkMode = _appSettings.Theme == PesaLens.Core.Models.AppTheme.Dark;
         BudgetNotificationsEnabled = _appSettings.BudgetNotificationsEnabled;
+
         CurrencyDisplay = _appSettings.CurrencyDisplay == PesaLens.Core.Models.CurrencyDisplay.Ksh ? "Ksh" : "KES";
-        BiometricLockEnabled = _securitySettings.BiometricsEnabled;
-        PinLockEnabled = _securitySettings.PinHash is not null;
 
         LastSyncedText = syncMeta.LastSyncTime == DateTime.MinValue
             ? "Never"
@@ -121,25 +118,25 @@ public partial class SettingsViewModel : ObservableObject
     }
 
     [RelayCommand]
-    public async Task ToggleBiometricLockAsync(bool value)
-    {
-        BiometricLockEnabled = value;
-        await _securitySettingsRepo.SetBiometricsEnabledAsync(value);
-    }
-
-    [RelayCommand]
-    public async Task TogglePinLockAsync(bool value)
+    public async Task ToggleAppLockAsync(bool value)
     {
         if (value)
         {
-            // Navigate to a PIN setup flow — placeholder for now
-             await Shell.Current.DisplayAlertAsync("PIN Lock", "PIN setup coming soon.", "OK");
+            var available = await _biometricAuthService.IsAvailableAsync();
+            if (!available)
+            {
+                AppLockEnabled = false; // revert
+                await Shell.Current.DisplayAlertAsync(
+                    "Unavailable",
+                    "Set up a screen lock (PIN, pattern, fingerprint, or face) on your device first.",
+                    "OK");
+                return;
+            }
         }
-        else
-        {
-            PinLockEnabled = false;
-            await _securitySettingsRepo.UpdatePinHashAsync(null);
-        }
+
+        AppLockEnabled = value;
+        _appSettings.AppLockEnabled = value;
+        await _appSettingsRepo.UpdateAsync(_appSettings);
     }
 
     // ── Data management ───────────────────────────────────────────────────────

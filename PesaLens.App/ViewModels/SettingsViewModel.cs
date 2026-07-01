@@ -1,6 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using PesaLens.App.Data.Repositories;
 using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.App.Services.Interfaces;
 using PesaLens.Core.Models;
@@ -59,6 +58,7 @@ public partial class SettingsViewModel : ObservableObject
         // Populate observable properties without triggering saves
         IsDarkMode = _appSettings.Theme == PesaLens.Core.Models.AppTheme.Dark;
         BudgetNotificationsEnabled = _appSettings.BudgetNotificationsEnabled;
+        AppLockEnabled = _appSettings.AppLockEnabled;
 
         CurrencyDisplay = _appSettings.CurrencyDisplay == PesaLens.Core.Models.CurrencyDisplay.Ksh ? "Ksh" : "KES";
 

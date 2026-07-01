@@ -38,6 +38,7 @@ public class DatabaseService
         await _db.CreateTableAsync<SyncMetadata>();
         await _db.CreateTableAsync<AppSettings>();
         await _db.CreateTableAsync<ExportHistory>();
+        await _db.CreateTableAsync<BudgetSnapshot>();
 
         _dbInitialized = true;
 
@@ -57,6 +58,7 @@ public class DatabaseService
         await _db.DropTableAsync<SyncMetadata>();
         await _db.DropTableAsync<AppSettings>();
         await _db.DropTableAsync<ExportHistory>();
+        await _db.DropTableAsync<BudgetSnapshot>();
 
         await InitializeAsync();
     }

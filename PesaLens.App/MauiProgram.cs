@@ -100,7 +100,10 @@ namespace PesaLens.App
 
             // Register biometric service
             builder.Services.AddSingleton<IBiometric>(BiometricAuthenticationService.Default);
-            
+
+            // Set questpdf licence
+            QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
             var app = builder.Build();
             ServiceLocator.Initialize(app.Services);
 

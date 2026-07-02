@@ -13,4 +13,7 @@ public interface IExportHistoryRepository : IRepository<ExportHistory>
     /// Returns all exports of a specific type.
     /// </summary>
     Task<List<ExportHistory>> GetByTypeAsync(ExportType exportType);
+
+    Task ClearAllAsync();
+
 }

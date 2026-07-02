@@ -17,4 +17,7 @@ public class ExportHistoryRepository(DatabaseService databaseService)
            .Where(e => e.ExportType == exportType)
            .OrderByDescending(e => e.ExportedAt)
            .ToListAsync();
+
+    public Task ClearAllAsync() =>
+        _db.DeleteAllAsync<ExportHistory>();
 }

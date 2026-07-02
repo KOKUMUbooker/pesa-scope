@@ -151,6 +151,46 @@ public partial class ExportViewModel : ObservableObject
     public Task ExportBudgetCompliancePdfAsync() =>
         RunExportAsync(() => _exportService.ExportBudgetCompliancePdfAsync(SelectedYear, SelectedMonthIndex));
 
+    [RelayCommand]
+    public async Task ClearAllExportsAsync()
+    {
+        if (!HasRecentExports) return;
+
+        bool confirmed = await Shell.Current.DisplayAlertAsync(
+            "Clear Export History",
+            "This deletes your export history and the generated files. Anything already shared or saved elsewhere (e.g. Downloads, WhatsApp) is unaffected.",
+            "Clear",
+            "Cancel");
+
+        if (!confirmed) return;
+
+        // RecentExports only holds the top 10 — fetch the full set so older,
+        // off-screen entries don't get orphaned (row deleted, file left behind).
+        var all = await _exportHistoryRepo.GetRecentAsync(int.MaxValue);
+
+        foreach (var entry in all)
+        {
+            var path = entry.FilePath;
+            if (string.IsNullOrEmpty(path)) continue;
+
+            try
+            {
+                if (File.Exists(path)) File.Delete(path);
+            }
+            catch
+            {
+                // File may already be gone (cache cleared by OS) or locked — ignore and
+                // continue, the history row is getting removed regardless.
+            }
+        }
+
+        await _exportHistoryRepo.ClearAllAsync();
+        RecentExports.Clear();
+        HasRecentExports = false;
+    }
+
+
+
     // ── Share / re-share ──────────────────────────────────────────────────────
 
     [RelayCommand]

@@ -201,9 +201,19 @@
                          Recent Exports
                          ══════════════════════════════════════════════════════ -->
                     <VerticalStackLayout Spacing="10">
-                        <Label Text="RECENT EXPORTS" FontSize="11" FontAttributes="Bold"
-                               CharacterSpacing="1.2"
-                               TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="RECENT EXPORTS" FontSize="11" FontAttributes="Bold"
+                                   CharacterSpacing="1.2" VerticalOptions="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                            <Label Grid.Column="1" Text="Clear All" FontSize="11" FontAttributes="Bold"
+                                   VerticalOptions="Center"
+                                   IsVisible="{Binding HasRecentExports}"
+                                   TextColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ClearAllExportsCommand}"/>
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </Grid>
 
                         <!-- Empty state -->
                         <Border BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"

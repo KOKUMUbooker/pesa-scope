@@ -77,6 +77,7 @@ namespace PesaLens.App
             // It's page will get pushed and popped after use
             builder.Services.AddTransient<TransactionDetailViewModel>();
             builder.Services.AddTransient<BudgetHistoryViewModel>();
+            builder.Services.AddTransient<ExportViewModel>();
 
             // DatabaseService registered as singleton — App.cs resolves and inits it
             var dbPath = Path.Combine(FileSystem.AppDataDirectory, "pesalens.db");
@@ -96,6 +97,7 @@ namespace PesaLens.App
             builder.Services.AddSingleton<IAutoCategorizationService, AutoCategorizationService>();
             builder.Services.AddSingleton<IBudgetNotificationService, BudgetNotificationService>();
             builder.Services.AddSingleton<IBudgetSnapshotService,BudgetSnapshotService>();
+            builder.Services.AddSingleton<IReportExportService,ReportExportService>();
             builder.Services.AddSingleton<DatabaseSeeder>();
 
             // Register biometric service

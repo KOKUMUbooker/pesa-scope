@@ -1,5 +1,6 @@
 ﻿using PesaLens.App.Services.Interfaces;
 using PesaLens.App.Views.Budgets;
+using PesaLens.App.Views.Settings;
 using PesaLens.App.Views.Transactions;
 
 namespace PesaLens.App
@@ -15,6 +16,7 @@ namespace PesaLens.App
             // Shell.Current.GoToAsync("TransactionDetailPage?code=RG84XY1234")
             Routing.RegisterRoute(nameof(TransactionDetailPage), typeof(TransactionDetailPage));
             Routing.RegisterRoute("budgetHistory", typeof(BudgetHistoryPage));
+            Routing.RegisterRoute(nameof(ExportPage), typeof(ExportPage));
         }
 
         protected override async void OnAppearing()

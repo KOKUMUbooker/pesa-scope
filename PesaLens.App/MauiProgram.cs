@@ -57,6 +57,7 @@ namespace PesaLens.App
             builder.Services.AddTransient<ImportProgressPage>();
             builder.Services.AddTransient<TransactionDetailPage>();
             builder.Services.AddTransient<BudgetHistoryPage>();
+            builder.Services.AddTransient<ExportPage>();
 
             // App pages - Registered as Singleton to avoid recreation on every tab switch
             builder.Services.AddSingleton<AppLockPage>();
@@ -76,6 +77,7 @@ namespace PesaLens.App
             // It's page will get pushed and popped after use
             builder.Services.AddTransient<TransactionDetailViewModel>();
             builder.Services.AddTransient<BudgetHistoryViewModel>();
+            builder.Services.AddTransient<ExportViewModel>();
 
             // DatabaseService registered as singleton — App.cs resolves and inits it
             var dbPath = Path.Combine(FileSystem.AppDataDirectory, "pesalens.db");
@@ -95,11 +97,15 @@ namespace PesaLens.App
             builder.Services.AddSingleton<IAutoCategorizationService, AutoCategorizationService>();
             builder.Services.AddSingleton<IBudgetNotificationService, BudgetNotificationService>();
             builder.Services.AddSingleton<IBudgetSnapshotService,BudgetSnapshotService>();
+            builder.Services.AddSingleton<IReportExportService,ReportExportService>();
             builder.Services.AddSingleton<DatabaseSeeder>();
 
             // Register biometric service
             builder.Services.AddSingleton<IBiometric>(BiometricAuthenticationService.Default);
-            
+
+            // Set questpdf licence
+            QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
             var app = builder.Build();
             ServiceLocator.Initialize(app.Services);
 

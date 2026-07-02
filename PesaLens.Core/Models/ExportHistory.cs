@@ -10,6 +10,10 @@ public class ExportHistory
     public int Id { get; set; }
 
     [NotNull]
+    [Column("report_kind")]
+    public ReportKind ReportKind { get; set; }        
+
+    [NotNull]
     [Column("export_type")]
     public ExportType ExportType { get; set; }
 
@@ -24,6 +28,9 @@ public class ExportHistory
     [Column("start_date")]
     public DateTime StartDate { get; set; }
 
+    [Column("file_path")] 
+    public string? FilePath { get; set; }
+
     /// <summary>
     /// End of the date range included in this export.
     /// </summary>
@@ -36,4 +43,10 @@ public enum ExportType
 {
     Csv = 1,
     Pdf = 2
+}
+
+public enum ReportKind { 
+    Transactions = 1, 
+    SpendingSummary = 2,
+    BudgetCompliance = 3 
 }

@@ -1,4 +1,6 @@
-﻿using PesaLens.App.Views.Transactions;
+﻿using PesaLens.App.Services.Interfaces;
+using PesaLens.App.Views.Budgets;
+using PesaLens.App.Views.Transactions;
 
 namespace PesaLens.App
 {
@@ -12,6 +14,15 @@ namespace PesaLens.App
             // These are pushed on top of a tab's navigation stack via
             // Shell.Current.GoToAsync("TransactionDetailPage?code=RG84XY1234")
             Routing.RegisterRoute(nameof(TransactionDetailPage), typeof(TransactionDetailPage));
+            Routing.RegisterRoute("budgetHistory", typeof(BudgetHistoryPage));
+        }
+
+        protected override async void OnAppearing()
+        {
+            base.OnAppearing();
+            var snapshotService = ServiceLocator.GetService<IBudgetSnapshotService>();
+            if (snapshotService is not null)
+                await snapshotService.SnapshotPreviousMonthIfNeededAsync();
         }
     }
 }

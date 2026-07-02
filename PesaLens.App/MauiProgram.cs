@@ -56,6 +56,7 @@ namespace PesaLens.App
             builder.Services.AddTransient<PermissionPage>();
             builder.Services.AddTransient<ImportProgressPage>();
             builder.Services.AddTransient<TransactionDetailPage>();
+            builder.Services.AddTransient<BudgetHistoryPage>();
 
             // App pages - Registered as Singleton to avoid recreation on every tab switch
             builder.Services.AddSingleton<AppLockPage>();
@@ -74,6 +75,7 @@ namespace PesaLens.App
 
             // It's page will get pushed and popped after use
             builder.Services.AddTransient<TransactionDetailViewModel>();
+            builder.Services.AddTransient<BudgetHistoryViewModel>();
 
             // DatabaseService registered as singleton — App.cs resolves and inits it
             var dbPath = Path.Combine(FileSystem.AppDataDirectory, "pesalens.db");
@@ -87,14 +89,17 @@ namespace PesaLens.App
             builder.Services.AddSingleton<ISyncMetadataRepository, SyncMetadataRepository>();
             builder.Services.AddSingleton<IAppSettingsRepository, AppSettingsRepository>();
             builder.Services.AddSingleton<IExportHistoryRepository, ExportHistoryRepository>();
+            builder.Services.AddSingleton<IBudgetSnapshotRepository,BudgetSnapshotRepository>();
             builder.Services.AddSingleton<ISmsReaderService,SmsReaderService>();
             builder.Services.AddSingleton<IMpesaSmsParser,MpesaSmsParser>();
             builder.Services.AddSingleton<IAutoCategorizationService, AutoCategorizationService>();
             builder.Services.AddSingleton<IBudgetNotificationService, BudgetNotificationService>();
+            builder.Services.AddSingleton<IBudgetSnapshotService,BudgetSnapshotService>();
             builder.Services.AddSingleton<DatabaseSeeder>();
 
+            // Register biometric service
             builder.Services.AddSingleton<IBiometric>(BiometricAuthenticationService.Default);
-
+            
             var app = builder.Build();
             ServiceLocator.Initialize(app.Services);
 

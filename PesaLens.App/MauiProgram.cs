@@ -57,6 +57,7 @@ namespace PesaLens.App
             builder.Services.AddTransient<ImportProgressPage>();
             builder.Services.AddTransient<TransactionDetailPage>();
             builder.Services.AddTransient<BudgetHistoryPage>();
+            builder.Services.AddTransient<ExportPage>();
 
             // App pages - Registered as Singleton to avoid recreation on every tab switch
             builder.Services.AddSingleton<AppLockPage>();

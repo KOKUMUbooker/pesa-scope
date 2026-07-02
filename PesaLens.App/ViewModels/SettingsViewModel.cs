@@ -1,9 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using PesaLens.App.Data;
 using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.App.Services.Interfaces;
+using PesaLens.App.Views.Settings;
 using PesaLens.Core.Models;
-using PesaLens.App.Data;
 
 namespace PesaLens.App.ViewModels;
 
@@ -166,6 +167,10 @@ public partial class SettingsViewModel : ObservableObject
         if (Application.Current?.Windows.FirstOrDefault() is Window window)
             window.Page = new AppShell();
     }
+
+    [RelayCommand]
+    public async Task OpenExportsAsync() =>
+        await Shell.Current.GoToAsync(nameof(ExportPage));
 
     // ── About ─────────────────────────────────────────────────────────────────
 

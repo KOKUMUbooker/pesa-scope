@@ -76,6 +76,63 @@
                             Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
                             Opacity="0.5" />
 
+                        <!-- ── Reports ───────────────────────────────────────────── -->
+                        <VerticalStackLayout Spacing="10">
+                            <Label
+                                Text="REPORTS"
+                                FontSize="11"
+                                FontAttributes="Bold"
+                                CharacterSpacing="1.2"
+                                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+
+                            <Border
+                                BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                                Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                StrokeThickness="1"
+                                Padding="0">
+                                <Border.StrokeShape>
+                                    <RoundRectangle CornerRadius="14" />
+                                </Border.StrokeShape>
+                                <VerticalStackLayout>
+
+                                    <!-- Export & Reports -->
+                                    <Grid
+                                        ColumnDefinitions="Auto,*,Auto"
+                                        Padding="16,14"
+                                        ColumnSpacing="14">
+                                        <Grid.GestureRecognizers>
+                                            <TapGestureRecognizer Command="{Binding OpenExportsCommand}" />
+                                        </Grid.GestureRecognizers>
+                                        <Image Grid.Column="0" VerticalOptions="Center">
+                                            <Image.Source>
+                                                <FontImageSource
+                                                   FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Ios_share}"
+                                                   Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                                   Size="24" />
+                                            </Image.Source>
+                                        </Image>
+                                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                            <Label
+                                                Text="Export &amp; Reports"
+                                                FontSize="15"
+                                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                                            <Label
+                                            Text="Export transactions, spending summaries, and budget reports"
+                                            FontSize="11"
+                                            TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                                        </VerticalStackLayout>
+                                        <Label
+                                            Grid.Column="2"
+                                            Text="›"
+                                            FontSize="20"
+                                            VerticalOptions="Center"
+                                            TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                                    </Grid>
+
+                                </VerticalStackLayout>
+                            </Border>
+                        </VerticalStackLayout>
+
 
                         <!-- Budget Notifications -->
                         <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,14" ColumnSpacing="14">

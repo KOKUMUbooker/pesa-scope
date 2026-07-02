@@ -18,7 +18,7 @@ public class ReportExportService(
     IAppSettingsRepository appSettingsRepo,
     IExportHistoryRepository exportHistoryRepo) : IReportExportService
 {
-    private const string LogoLogicalName = "logo_rounded.png";
+    private const string LogoLogicalName = "logo_rounded_mini.png";
 
     // ════════════════════════════════════════════════════════════════════════
     // Transactions

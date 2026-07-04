@@ -20,6 +20,7 @@
         <converters:IconNameToGlyphConverter x:Key="IconNameToGlyph"/>
         <converters:TransactionTypeToIconConverter x:Key="TypeToEmoji" />
         <converters:StringToBoolConverter x:Key="StringToBoolConverter"/>
+        <converters:IsEqualConverter x:Key="IsEqualConverter"/>
     </uranium:UraniumContentPage.Resources>
 
     <!-- ── Title bar ─────────────────────────────────────────────────────── -->

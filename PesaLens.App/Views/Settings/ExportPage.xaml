@@ -8,6 +8,7 @@
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     xmlns:converters="clr-namespace:PesaLens.App.Converters"
     x:DataType="vm:ExportViewModel"
+    Shell.TabBarIsVisible="False"
     SafeAreaEdges="All"
     BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 

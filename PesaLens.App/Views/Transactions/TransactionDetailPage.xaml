@@ -21,6 +21,7 @@
         <converters:TransactionTypeToIconConverter x:Key="TypeToEmoji" />
         <converters:StringToBoolConverter x:Key="StringToBoolConverter"/>
         <converters:IsEqualConverter x:Key="IsEqualConverter"/>
+        <converters:EqualsToColorMultiConverter x:Key="EqualsToColorMultiConverter"/>
     </uranium:UraniumContentPage.Resources>
 
     <!-- ── Title bar ─────────────────────────────────────────────────────── -->
@@ -96,14 +97,12 @@
                                     StrokeThickness="0"
                                     StrokeShape="RoundRectangle 12"
                                     Padding="14,12">
-                                    <Border.Triggers>
-                                        <DataTrigger TargetType="Border"
-                                            Binding="{Binding Source={RelativeSource AncestorType={x:Type vm:TransactionDetailViewModel}}, Path=SelectedCategory.Id}"
-                                            Value="{Binding Id}">
-                                            <Setter Property="BackgroundColor"
-                                                Value="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"/>
-                                        </DataTrigger>
-                                    </Border.Triggers>
+                                    <Border.BackgroundColor>
+                                        <MultiBinding Converter="{StaticResource EqualsToColorMultiConverter}">
+                                            <Binding Source="{RelativeSource AncestorType={x:Type vm:TransactionDetailViewModel}}" Path="SelectedCategory.Id"/>
+                                            <Binding Path="Id"/>
+                                        </MultiBinding>
+                                    </Border.BackgroundColor>
                                     <Border.GestureRecognizers>
                                         <TapGestureRecognizer
                                             Command="{Binding BindingContext.SelectCategoryForEditCommand, Source={x:Reference NTransactionDetailPage}}"

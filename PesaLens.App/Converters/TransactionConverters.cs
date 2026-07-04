@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using PesaLens.Core.Models;
+using AppTheme = Microsoft.Maui.ApplicationModel.AppTheme;
 
 namespace PesaLens.App.Converters;
 
@@ -104,5 +105,37 @@ public class IsEqualConverter : IValueConverter
     }
 
     public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotImplementedException();
+}
+
+/// <summary>
+/// Compares two values (e.g. SelectedCategory.Id and the current item's Id)
+/// and returns trueColor if equal, falseColor otherwise.
+/// Colors are passed via ConverterParameter as "trueColorKey|falseColorKey"
+/// resolved from Application resources, or pass literal Color objects directly
+/// via code if binding from XAML resources isn't convenient.
+/// </summary>
+public class EqualsToColorMultiConverter : IMultiValueConverter
+{
+    public object Convert(object[]? values, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (values is not { Length: 2 } || values[0] is null || values[1] is null)
+            return Colors.Transparent;
+
+        bool isEqual = System.Convert.ToString(values[0], culture)
+            == System.Convert.ToString(values[1], culture);
+
+        if (!isEqual)
+            return Colors.Transparent;
+
+        var isDark = Application.Current?.RequestedTheme == AppTheme.Dark;
+        var key = isDark ? "PrimaryContainerDark" : "PrimaryContainer";
+
+        return Application.Current!.Resources.TryGetValue(key, out var color)
+            ? color
+            : Colors.Transparent;
+    }
+
+    public object[] ConvertBack(object value, Type[] targetTypes, object? parameter, CultureInfo culture)
         => throw new NotImplementedException();
 }

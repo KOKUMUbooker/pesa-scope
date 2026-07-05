@@ -366,6 +366,44 @@
                     <material:TabItem Title="Rules">
                         <material:TabItem.Content>
                             <VerticalStackLayout Spacing="10" Padding="0,12,0,0">
+                                <!-- ── Search + filter ───────────────────────────────────────── -->
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" Padding="4,0,4,4">
+
+                                    <!-- Search box -->
+                                    <Border Grid.Column="0"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                                        StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="12,0">
+                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                            <Image Grid.Column="0" VerticalOptions="Center">
+                                                <Image.Source>
+                                                    <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Search}"
+                                                        Color="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                                                        Size="16"/>
+                                                </Image.Source>
+                                            </Image>
+                                            <Entry Grid.Column="1"
+                                                Text="{Binding RuleSearchText}"
+                                                Placeholder="Search rules..."
+                                                FontSize="14" HeightRequest="44" BackgroundColor="Transparent"
+                                                ClearButtonVisibility="WhileEditing"
+                                                PlaceholderColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Category filter -->
+                                    <Border Grid.Column="1"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                                        StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="10,0"
+                                        WidthRequest="140">
+                                        <Picker ItemsSource="{Binding RuleFilterCategories}"
+                                            ItemDisplayBinding="{Binding Name}"
+                                            SelectedItem="{Binding RuleFilterCategory}"
+                                            FontSize="13" HeightRequest="44" BackgroundColor="Transparent"
+                                            TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                                    </Border>
+                                </Grid>
+
                                 <Border
                                 BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
                                 Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
@@ -461,7 +499,7 @@
                                     </Grid>
                                 </Border>
 
-                                <Label Text="No rules yet. Tap '+ Add rule' to create one."
+                                <Label Text="{Binding RulesEmptyMessage}"
                                    IsVisible="{Binding Rules.Count, Converter={StaticResource IntIsZero}}"
                                    FontSize="14" HorizontalTextAlignment="Center" HorizontalOptions="Center"
                                    Margin="0,4"

@@ -8,7 +8,6 @@ using PesaLens.Core.Models;
 using SkiaSharp;
 using System.Collections.ObjectModel;
 using System.Data;
-using static Android.InputMethodServices.Keyboard;
 
 namespace PesaLens.App.ViewModels;
 
@@ -29,9 +28,18 @@ public partial class CategoriesViewModel : ObservableObject
     private readonly ITransactionRepository _transactionRepo;
     private readonly IAutoCategorizationRuleRepository _rulesRepo;
 
+    // Sentinel used to represent "no filter" in the category filter picker.
+    private static readonly Category AllCategoriesOption = new()
+    {
+        Id = 0,
+        Name = "All Categories"
+    };
+
+    // Unfiltered rules as loaded from the repo. Rules (below) is the filtered/displayed view.
+    private List<AutoCategorizationRule> _allRules = [];
+
     [ObservableProperty] private ISeries[] _series = [];
     [ObservableProperty] private List<CategorySpendRow> _categoryRows = [];
-    // [ObservableProperty] private List<AutoCategorizationRule> _rules = [];
     [ObservableProperty] private ObservableCollection<AutoCategorizationRule> _rules = [];
     [ObservableProperty] private bool _isBusy;
 
@@ -45,6 +53,12 @@ public partial class CategoriesViewModel : ObservableObject
 
     [ObservableProperty] private string _periodLabel = string.Empty;
     [ObservableProperty] private CategorySpendRow? _selectedCategory;
+
+    // ── Rules search / filter state ──────────────────────────────────────────
+    [ObservableProperty] private string _ruleSearchText = string.Empty;
+    [ObservableProperty] private Category? _ruleFilterCategory;
+    [ObservableProperty] private List<Category> _ruleFilterCategories = [AllCategoriesOption];
+    [ObservableProperty] private string _rulesEmptyMessage = "No rules yet. Tap '+ Add rule' to create one.";
 
     // ── Add/Edit Category sheet state ────────────────────────────────────────
     [ObservableProperty] private bool _isSheetOpen;
@@ -70,6 +84,9 @@ public partial class CategoriesViewModel : ObservableObject
         _categoryRepo = categoryRepo;
         _transactionRepo = transactionRepo;
         _rulesRepo = rulesRepo;
+
+        // Default the filter to "All Categories" so the picker has a sane initial selection.
+        RuleFilterCategory = AllCategoriesOption;
     }
 
     [RelayCommand]
@@ -178,9 +195,6 @@ public partial class CategoriesViewModel : ObservableObject
         IsCategoriesLoading = true;
         try
         {
-            // If you want to load categories separately from the chart data
-            // This could fetch additional category data if needed
-            // Currently, categories are loaded in LoadChartAsync, but we keep this for separation
             await Task.CompletedTask; // Placeholder for future category-specific loading
         }
         finally
@@ -202,7 +216,26 @@ public partial class CategoriesViewModel : ObservableObject
             foreach (var rule in result)
                 rule.Category = catMap.GetValueOrDefault(rule.CategoryId);
 
-            Rules = new ObservableCollection<AutoCategorizationRule>(result);
+            _allRules = result;
+
+            // Build the filter dropdown: "All Categories" + every category that actually has a rule,
+            // alphabetically. Re-built each load so newly added/removed categories stay in sync.
+            RuleFilterCategories =
+            [
+                AllCategoriesOption,
+                .. result
+                    .Where(r => r.Category is not null)
+                    .Select(r => r.Category!)
+                    .DistinctBy(c => c.Id)
+                    .OrderBy(c => c.Name)
+            ];
+
+            // Preserve the current filter selection if it still exists in the new list,
+            // otherwise fall back to "All Categories".
+            RuleFilterCategory = RuleFilterCategories
+                .FirstOrDefault(c => c.Id == RuleFilterCategory?.Id) ?? AllCategoriesOption;
+
+            ApplyRuleFilters();
         }
         finally
         {
@@ -210,14 +243,32 @@ public partial class CategoriesViewModel : ObservableObject
         }
     }
 
-    // ── Category tap (4.2) ────────────────────────────────────────────────────
+    partial void OnRuleSearchTextChanged(string value) => ApplyRuleFilters();
 
-    //[RelayCommand]
-    //public async Task SelectCategoryAsync(CategorySpendRow row)
-    //{
-    //    SelectedCategory = row;
-    //    await Shell.Current.GoToAsync($"//Transactions/TransactionsPage?categoryId={row.Category.Id}");
-    //}
+    partial void OnRuleFilterCategoryChanged(Category? value) => ApplyRuleFilters();
+
+    private void ApplyRuleFilters()
+    {
+        IEnumerable<AutoCategorizationRule> filtered = _allRules;
+
+        if (RuleFilterCategory is not null && RuleFilterCategory.Id != 0)
+            filtered = filtered.Where(r => r.CategoryId == RuleFilterCategory.Id);
+
+        if (!string.IsNullOrWhiteSpace(RuleSearchText))
+        {
+            var search = RuleSearchText.Trim();
+            filtered = filtered.Where(r =>
+                r.MatchValue.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                r.RuleType.ToString().Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                (r.Category?.Name?.Contains(search, StringComparison.OrdinalIgnoreCase) ?? false));
+        }
+
+        Rules = new ObservableCollection<AutoCategorizationRule>(filtered);
+
+        RulesEmptyMessage = _allRules.Count == 0
+            ? "No rules yet. Tap '+ Add rule' to create one."
+            : "No rules match your search or filter.";
+    }
 
     // ── Add / Edit category (4.4, 4.5) ───────────────────────────────────────
 
@@ -356,6 +407,13 @@ public partial class CategoriesViewModel : ObservableObject
     {
         IsSheetOpen = false;
         IsRuleSheetOpen = false;
+    }
+
+    [RelayCommand]
+    public void ClearRuleFilters()
+    {
+        RuleSearchText = string.Empty;
+        RuleFilterCategory = AllCategoriesOption;
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

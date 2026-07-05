@@ -341,7 +341,7 @@ public partial class DashboardViewModel : ObservableObject
         for (int i = 0; i < dayCount; i++)
         {
             var day = from.Date.AddDays(i);
-            labels[i] = day.ToString("ddd")[..1]; // M, T, W …
+            labels[i] = day.ToString("ddd");
             values[i] = daily.TryGetValue(day, out var amt) ? (double)amt : 0d;
         }
 
@@ -408,6 +408,8 @@ public partial class DashboardViewModel : ObservableObject
                 LabelsPaint = labelPaint,
                 SeparatorsPaint = null,
                 TicksPaint = null,
+                MinStep = 1,
+                ForceStepToMin = true,
             }
         ];
 
@@ -420,11 +422,12 @@ public partial class DashboardViewModel : ObservableObject
                 SeparatorsPaint = gridLinePaint,
                 TicksPaint = null,
                 Labeler = val => val switch
-                {
-                    0 => "0",
-                    < 1000 => $"Ksh {val:0}",
-                    _ => $"Ksh {val / 1000:0.#}k"
-                },
+                    {
+                        0 => "0",
+                        < 1000 => $"Ksh {val:0}",
+                        < 1_000_000 => $"Ksh {val / 1000:0.#}k",
+                        _ => $"Ksh {val / 1_000_000:0.#}M"
+                    },
             }
         ];
     }

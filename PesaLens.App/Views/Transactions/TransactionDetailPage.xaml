@@ -330,15 +330,29 @@
                 Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
                 StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="16">
                 <VerticalStackLayout Spacing="10">
-                    <Label Text="Original SMS" FontSize="16" FontAttributes="Bold"
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="Original SMS" FontSize="16" FontAttributes="Bold"
+                           VerticalOptions="Center"
                            TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                        <ImageButton Grid.Column="1"
+                             Command="{Binding CopySmsCommand}"
+                             BackgroundColor="Transparent" Padding="6"
+                             WidthRequest="32" HeightRequest="32">
+                            <ImageButton.Source>
+                                <FontImageSource
+                                   FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Content_copy}"
+                                   Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                   Size="18" />
+                            </ImageButton.Source>
+                        </ImageButton>
+                    </Grid>
                     <Border
                         BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
                         StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="14">
                         <Label Text="{Binding Transaction.OriginalSms}"
-                               FontSize="13" LineBreakMode="WordWrap"
-                               FontFamily="OpenSansRegular"
-                               TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                           FontSize="13" LineBreakMode="WordWrap"
+                           FontFamily="OpenSansRegular"
+                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
                     </Border>
                 </VerticalStackLayout>
             </Border>

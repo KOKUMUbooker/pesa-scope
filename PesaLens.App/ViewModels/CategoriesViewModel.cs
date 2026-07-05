@@ -8,8 +8,23 @@ using PesaLens.Core.Models;
 using SkiaSharp;
 using System.Collections.ObjectModel;
 using System.Data;
+using System.Globalization;
 
 namespace PesaLens.App.ViewModels;
+
+public enum CategoryTypeFilter
+{
+    All = 0,
+    SystemOnly = 1,
+    UserDefinedOnly = 2
+}
+
+public enum CategorySortOption
+{
+    Alphabetical = 0,
+    HighestAmount = 1,
+    LowestAmount = 2
+}
 
 public partial class CategorySpendRow : ObservableObject
 {
@@ -28,14 +43,16 @@ public partial class CategoriesViewModel : ObservableObject
     private readonly ITransactionRepository _transactionRepo;
     private readonly IAutoCategorizationRuleRepository _rulesRepo;
 
-    // Sentinel used to represent "no filter" in the category filter picker.
+    // Sentinel used to represent "no filter" in the rule category filter picker.
     private static readonly Category AllCategoriesOption = new()
     {
         Id = 0,
         Name = "All Categories"
     };
 
-    // Unfiltered rules as loaded from the repo. Rules (below) is the filtered/displayed view.
+    // Unfiltered data as loaded from the repo. The [ObservableProperty] versions
+    // (CategoryRows / Rules) hold the filtered/sorted view actually shown in the UI.
+    private List<CategorySpendRow> _allCategoryRows = [];
     private List<AutoCategorizationRule> _allRules = [];
 
     [ObservableProperty] private ISeries[] _series = [];
@@ -54,7 +71,28 @@ public partial class CategoriesViewModel : ObservableObject
     [ObservableProperty] private string _periodLabel = string.Empty;
     [ObservableProperty] private CategorySpendRow? _selectedCategory;
 
-    // ── Rules search / filter state ──────────────────────────────────────────
+    // ── Categories tab: search / filter / sort state ─────────────────────────
+    [ObservableProperty] private string _categorySearchText = string.Empty;
+    [ObservableProperty] private CategoryTypeFilter _categoryTypeFilter = CategoryTypeFilter.All;
+    [ObservableProperty] private CategorySortOption _categorySortOption = CategorySortOption.Alphabetical;
+    [ObservableProperty] private decimal? _minAmountFilter;
+    [ObservableProperty] private decimal? _maxAmountFilter;
+    [ObservableProperty] private bool _isCategoryFilterSheetOpen;
+    [ObservableProperty] private bool _hasActiveCategoryFilters;
+    [ObservableProperty] private string _categoriesEmptyMessage = "No categories to show.";
+
+    // Draft copies edited inside the filter bottom sheet; only committed to the
+    // properties above when the user taps "Apply", so amount thresholds don't
+    // re-filter on every keystroke.
+    [ObservableProperty] private string _draftMinAmountText = string.Empty;
+    [ObservableProperty] private string _draftMaxAmountText = string.Empty;
+    [ObservableProperty] private CategoryTypeFilter _draftCategoryTypeFilter = CategoryTypeFilter.All;
+    [ObservableProperty] private CategorySortOption _draftCategorySortOption = CategorySortOption.Alphabetical;
+
+    public List<CategoryTypeFilter> CategoryTypeFilterOptions { get; } = Enum.GetValues<CategoryTypeFilter>().ToList();
+    public List<CategorySortOption> CategorySortOptions { get; } = Enum.GetValues<CategorySortOption>().ToList();
+
+    // ── Rules tab: search / filter state ─────────────────────────────────────
     [ObservableProperty] private string _ruleSearchText = string.Empty;
     [ObservableProperty] private Category? _ruleFilterCategory;
     [ObservableProperty] private List<Category> _ruleFilterCategories = [AllCategoriesOption];
@@ -85,7 +123,7 @@ public partial class CategoriesViewModel : ObservableObject
         _transactionRepo = transactionRepo;
         _rulesRepo = rulesRepo;
 
-        // Default the filter to "All Categories" so the picker has a sane initial selection.
+        // Default the rule filter to "All Categories" so the picker has a sane initial selection.
         RuleFilterCategory = AllCategoriesOption;
     }
 
@@ -96,7 +134,6 @@ public partial class CategoriesViewModel : ObservableObject
         IsBusy = true;
         try
         {
-            // Load all sections in parallel with individual loading states
             var chartTask = LoadChartAsync();
             var categoriesTask = LoadCategoriesAsync();
             var rulesTask = LoadRulesAsync();
@@ -123,7 +160,7 @@ public partial class CategoriesViewModel : ObservableObject
         }
     }
 
-    // ── Chart loading ─────────────────────────────────────────────────────────
+    // ── Chart / category-row loading ──────────────────────────────────────────
 
     private async Task LoadChartAsync()
     {
@@ -137,18 +174,12 @@ public partial class CategoriesViewModel : ObservableObject
             var categories = await _categoryRepo.GetAllActiveAsync();
             var spendMap = await _transactionRepo.GetSpendingByCategoryAsync(from, to);
 
-            // Categories with spending first, then zero-spend alphabetically
-            var ordered = categories
-                .OrderByDescending(c => spendMap.GetValueOrDefault(c.Id))
-                .ThenBy(c => c.Name)
-                .ToList();
-
             decimal total = spendMap.Values.Sum();
 
             var pieSeries = new List<ISeries>();
             var categoryRows = new List<CategorySpendRow>();
 
-            foreach (var cat in ordered)
+            foreach (var cat in categories)
             {
                 var amount = spendMap.GetValueOrDefault(cat.Id);
                 var color = ParseColor(cat.Color);
@@ -179,16 +210,16 @@ public partial class CategoriesViewModel : ObservableObject
             }
 
             Series = [.. pieSeries];
-            CategoryRows = categoryRows;
+            _allCategoryRows = categoryRows;
             IsChartEmpty = total <= 0;
+
+            ApplyCategoryDisplayFilters();
         }
         finally
         {
             IsChartLoading = false;
         }
     }
-
-    // ── Categories loading (separate from chart) ─────────────────────────────
 
     private async Task LoadCategoriesAsync()
     {
@@ -218,8 +249,6 @@ public partial class CategoriesViewModel : ObservableObject
 
             _allRules = result;
 
-            // Build the filter dropdown: "All Categories" + every category that actually has a rule,
-            // alphabetically. Re-built each load so newly added/removed categories stay in sync.
             RuleFilterCategories =
             [
                 AllCategoriesOption,
@@ -230,8 +259,6 @@ public partial class CategoriesViewModel : ObservableObject
                     .OrderBy(c => c.Name)
             ];
 
-            // Preserve the current filter selection if it still exists in the new list,
-            // otherwise fall back to "All Categories".
             RuleFilterCategory = RuleFilterCategories
                 .FirstOrDefault(c => c.Id == RuleFilterCategory?.Id) ?? AllCategoriesOption;
 
@@ -268,6 +295,117 @@ public partial class CategoriesViewModel : ObservableObject
         RulesEmptyMessage = _allRules.Count == 0
             ? "No rules yet. Tap '+ Add rule' to create one."
             : "No rules match your search or filter.";
+    }
+
+    [RelayCommand]
+    public void ClearRuleFilters()
+    {
+        RuleSearchText = string.Empty;
+        RuleFilterCategory = AllCategoriesOption;
+    }
+
+    // ── Categories tab: search / filter / sort ────────────────────────────────
+
+    partial void OnCategorySearchTextChanged(string value) => ApplyCategoryDisplayFilters();
+
+    [RelayCommand]
+    public void OpenCategoryFilterSheet()
+    {
+        // Seed the draft from the currently-applied filters so the sheet
+        // reopens showing what's actually in effect.
+        DraftMinAmountText = MinAmountFilter?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
+        DraftMaxAmountText = MaxAmountFilter?.ToString(CultureInfo.InvariantCulture) ?? string.Empty;
+        DraftCategoryTypeFilter = CategoryTypeFilter;
+        DraftCategorySortOption = CategorySortOption;
+        IsCategoryFilterSheetOpen = true;
+    }
+
+    [RelayCommand]
+    public void CloseCategoryFilterSheet()
+    {
+        // Discard any unapplied draft edits.
+        IsCategoryFilterSheetOpen = false;
+    }
+
+    [RelayCommand]
+    public void ApplyCategoryFilters()
+    {
+        decimal? min = decimal.TryParse(DraftMinAmountText, NumberStyles.Number, CultureInfo.InvariantCulture, out var minVal)
+            ? minVal
+            : null;
+        decimal? max = decimal.TryParse(DraftMaxAmountText, NumberStyles.Number, CultureInfo.InvariantCulture, out var maxVal)
+            ? maxVal
+            : null;
+
+        MinAmountFilter = min;
+        MaxAmountFilter = max;
+        CategoryTypeFilter = DraftCategoryTypeFilter;
+        CategorySortOption = DraftCategorySortOption;
+
+        IsCategoryFilterSheetOpen = false;
+        ApplyCategoryDisplayFilters();
+    }
+
+    [RelayCommand]
+    public void ResetCategoryFilters()
+    {
+        DraftMinAmountText = string.Empty;
+        DraftMaxAmountText = string.Empty;
+        DraftCategoryTypeFilter = CategoryTypeFilter.All;
+        DraftCategorySortOption = CategorySortOption.Alphabetical;
+
+        MinAmountFilter = null;
+        MaxAmountFilter = null;
+        CategoryTypeFilter = CategoryTypeFilter.All;
+        CategorySortOption = CategorySortOption.Alphabetical;
+
+        IsCategoryFilterSheetOpen = false;
+        ApplyCategoryDisplayFilters();
+    }
+
+    private void ApplyCategoryDisplayFilters()
+    {
+        IEnumerable<CategorySpendRow> filtered = _allCategoryRows;
+
+        if (!string.IsNullOrWhiteSpace(CategorySearchText))
+        {
+            var search = CategorySearchText.Trim();
+            filtered = filtered.Where(r =>
+                r.Category.Name.Contains(search, StringComparison.OrdinalIgnoreCase));
+        }
+
+        if (MinAmountFilter is decimal min)
+            filtered = filtered.Where(r => r.Amount >= min);
+
+        if (MaxAmountFilter is decimal max)
+            filtered = filtered.Where(r => r.Amount <= max);
+
+        filtered = CategoryTypeFilter switch
+        {
+            CategoryTypeFilter.SystemOnly => filtered.Where(r => r.Category.IsSystemCategory),
+            CategoryTypeFilter.UserDefinedOnly => filtered.Where(r => !r.Category.IsSystemCategory),
+            _ => filtered
+        };
+
+        filtered = CategorySortOption switch
+        {
+            CategorySortOption.HighestAmount => filtered.OrderByDescending(r => r.Amount).ThenBy(r => r.Category.Name),
+            CategorySortOption.LowestAmount => filtered.OrderBy(r => r.Amount).ThenBy(r => r.Category.Name),
+            _ => filtered.OrderBy(r => r.Category.Name)
+        };
+
+        CategoryRows = filtered.ToList();
+
+        HasActiveCategoryFilters =
+            !string.IsNullOrWhiteSpace(CategorySearchText) ||
+            MinAmountFilter is not null ||
+            MaxAmountFilter is not null ||
+            CategoryTypeFilter != CategoryTypeFilter.All ||
+            CategorySortOption != CategorySortOption.Alphabetical;
+
+        CategoriesEmptyMessage = _allCategoryRows.Count == 0
+            ? "No categories to show."
+            : "No categories match your search or filters.";
     }
 
     // ── Add / Edit category (4.4, 4.5) ───────────────────────────────────────
@@ -407,13 +545,6 @@ public partial class CategoriesViewModel : ObservableObject
     {
         IsSheetOpen = false;
         IsRuleSheetOpen = false;
-    }
-
-    [RelayCommand]
-    public void ClearRuleFilters()
-    {
-        RuleSearchText = string.Empty;
-        RuleFilterCategory = AllCategoriesOption;
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

@@ -161,6 +161,83 @@
             </VerticalStackLayout>
         </material:BottomSheetView>
 
+        <!-- ── Category filter sheet ─────────────────────────────────────── -->
+        <material:BottomSheetView
+            x:Name="CategoryFilterSheet"
+            IsPresented="{Binding IsCategoryFilterSheetOpen}"
+            IsVisible="{Binding IsCategoryFilterSheetOpen}"
+            CloseOnTapOutside="False"
+            BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
+
+            <VerticalStackLayout Padding="24,12,24,48" Spacing="16">
+                <Label Text="Filter &amp; Sort Categories" FontSize="18" FontAttributes="Bold"
+               HorizontalOptions="Center"
+               TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+
+                <!-- Amount range -->
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="AMOUNT RANGE (KSH)" FontSize="11" FontAttributes="Bold" CharacterSpacing="1.2"
+                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                        <Border Grid.Column="0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                        StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14,0">
+                            <Entry Text="{Binding DraftMinAmountText}" Placeholder="Min"
+                           Keyboard="Numeric"
+                           FontSize="14" HeightRequest="48" BackgroundColor="Transparent"
+                           PlaceholderColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                           TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                        </Border>
+                        <Border Grid.Column="1"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                        StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14,0">
+                            <Entry Text="{Binding DraftMaxAmountText}" Placeholder="Max"
+                           Keyboard="Numeric"
+                           FontSize="14" HeightRequest="48" BackgroundColor="Transparent"
+                           PlaceholderColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                           TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                        </Border>
+                    </Grid>
+                </VerticalStackLayout>
+
+                <!-- Category type -->
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="CATEGORY TYPE" FontSize="11" FontAttributes="Bold" CharacterSpacing="1.2"
+                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                    StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14,4">
+                        <Picker ItemsSource="{Binding CategoryTypeFilterOptions}"
+                        SelectedItem="{Binding DraftCategoryTypeFilter}"
+                        FontSize="14" HeightRequest="48" BackgroundColor="Transparent"
+                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <!-- Sort by -->
+                <VerticalStackLayout Spacing="6">
+                    <Label Text="SORT BY" FontSize="11" FontAttributes="Bold" CharacterSpacing="1.2"
+                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                    <Border BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                    StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14,4">
+                        <Picker ItemsSource="{Binding CategorySortOptions}"
+                        SelectedItem="{Binding DraftCategorySortOption}"
+                        FontSize="14" HeightRequest="48" BackgroundColor="Transparent"
+                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                    </Border>
+                </VerticalStackLayout>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,8,0,0">
+                    <Button Grid.Column="0" Text="Reset" Command="{Binding ResetCategoryFiltersCommand}"
+                    HeightRequest="50" CornerRadius="25" FontSize="15" FontAttributes="Bold"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                    TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                    <Button Grid.Column="1" Text="Apply" Command="{Binding ApplyCategoryFiltersCommand}"
+                    HeightRequest="50" CornerRadius="25" FontSize="15" FontAttributes="Bold"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                    TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"/>
+                </Grid>
+            </VerticalStackLayout>
+        </material:BottomSheetView>
     </uranium:UraniumContentPage.Attachments>
 
     <!-- ── Main content ───────────────────────────────────────────────────── -->
@@ -241,11 +318,58 @@
                     <!-- Tab 1 : Categories -->
                     <material:TabItem Title="Categories">
                         <material:TabItem.Content>
-                            <VerticalStackLayout Spacing="0" Padding="0,12,0,0">
+                            <VerticalStackLayout Spacing="10" Padding="0,12,0,0">
+                                <!-- ── Search + filter ───────────────────────────────────────── -->
+                                <Grid ColumnDefinitions="*,Auto" ColumnSpacing="8" Padding="4,0,4,4">
+
+                                    <!-- Search box -->
+                                    <Border Grid.Column="0"
+                                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                                        StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="12,0">
+                                        <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                                            <Image Grid.Column="0" VerticalOptions="Center">
+                                                <Image.Source>
+                                                    <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Search}"
+                                                        Color="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                                                        Size="16"/>
+                                                </Image.Source>
+                                            </Image>
+                                            <Entry Grid.Column="1"
+                                               Text="{Binding CategorySearchText}"
+                                               Placeholder="Search categories..."
+                                               FontSize="14" HeightRequest="44" BackgroundColor="Transparent"
+                                               ClearButtonVisibility="WhileEditing"
+                                               PlaceholderColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                                               TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Filter button (with active-filter badge) -->
+                                    <Grid Grid.Column="1" WidthRequest="44" HeightRequest="44">
+                                        <Border BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                                            StrokeThickness="0" StrokeShape="RoundRectangle 12">
+                                            <ImageButton Command="{Binding OpenCategoryFilterSheetCommand}"
+                                                BackgroundColor="Transparent" Padding="10">
+                                                <ImageButton.Source>
+                                                    <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Tune}"
+                                                        Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                                        Size="20"/>
+                                                </ImageButton.Source>
+                                            </ImageButton>
+                                        </Border>
+                                        <BoxView WidthRequest="9" HeightRequest="9" CornerRadius="4.5"
+                                             Color="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"
+                                             HorizontalOptions="End" VerticalOptions="Start"
+                                             Margin="0,4,4,0"
+                                             IsVisible="{Binding HasActiveCategoryFilters}"
+                                             InputTransparent="True"/>
+                                    </Grid>
+                                </Grid>
+
                                 <Border
-                                BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
-                                Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
-                                StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="0">
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                                    Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                    StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="0">
                                     <Grid>
                                         <VerticalStackLayout
                                         BindableLayout.ItemsSource="{Binding CategoryRows}"
@@ -358,6 +482,12 @@
                                         WidthRequest="40" HeightRequest="40"/>
                                     </Grid>
                                 </Border>
+
+                                <Label Text="{Binding CategoriesEmptyMessage}"
+                                   IsVisible="{Binding CategoryRows.Count, Converter={StaticResource IntIsZero}}"
+                                   FontSize="14" HorizontalTextAlignment="Center" HorizontalOptions="Center"
+                                   Margin="0,16"
+                                   TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
                             </VerticalStackLayout>
                         </material:TabItem.Content>
                     </material:TabItem>
@@ -405,9 +535,9 @@
                                 </Grid>
 
                                 <Border
-                                BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
-                                Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
-                                StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="0">
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                                    Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                    StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="0">
                                     <Grid>
                                         <VerticalStackLayout
                                         BindableLayout.ItemsSource="{Binding Rules}"

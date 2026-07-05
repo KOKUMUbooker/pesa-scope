@@ -7,6 +7,8 @@ using PesaLens.App.Views.Transactions;
 namespace PesaLens.App.ViewModels;
 
 [QueryProperty(nameof(InitialCategoryIdRaw), "categoryId")]
+[QueryProperty(nameof(FromDateRaw), "fromDate")]
+[QueryProperty(nameof(ToDateRaw), "toDate")]
 public partial class TransactionsViewModel : ObservableObject
 {
     private readonly ITransactionRepository _transactionRepo;
@@ -14,6 +16,7 @@ public partial class TransactionsViewModel : ObservableObject
 
     // Set by shell navigation, consumed once on first load, InitialCategoryIdRaw is received as string
     private int? _initialCategoryId;
+    private bool _pendingExternalDateRange;
 
     public string? InitialCategoryIdRaw
     {
@@ -26,6 +29,34 @@ public partial class TransactionsViewModel : ObservableObject
             {
                 SelectedCategoryId = _initialCategoryId;
                 _initialCategoryId = null;
+            }
+        }
+    }
+
+    // Set by Shell navigation from the Categories page. Consumed once in LoadAsync,
+    // which runs after Shell finishes setting all query properties for this navigation.
+    public string? FromDateRaw
+    {
+        get => null;
+        set
+        {
+            if (DateTime.TryParse(value, out var parsed))
+            {
+                FromDate = parsed.Date;
+                _pendingExternalDateRange = true;
+            }
+        }
+    }
+
+    public string? ToDateRaw
+    {
+        get => null;
+        set
+        {
+            if (DateTime.TryParse(value, out var parsed))
+            {
+                ToDate = parsed.Date;
+                _pendingExternalDateRange = true;
             }
         }
     }
@@ -73,6 +104,12 @@ public partial class TransactionsViewModel : ObservableObject
     public async Task LoadAsync()
     {
         IsLoading = true;
+
+        if (_pendingExternalDateRange)
+        {
+            DateRangeLabel = BuildDateRangeLabel(FromDate, ToDate);
+            _pendingExternalDateRange = false;
+        }
 
         Categories = await _categoryRepo.GetAllActiveAsync();
 
@@ -201,6 +238,23 @@ public partial class TransactionsViewModel : ObservableObject
         var today = DateTime.Today;
         int diff = ((int)today.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
         return today.AddDays(-diff);
+    }
+
+    private static string BuildDateRangeLabel(DateTime from, DateTime to)
+    {
+        var monthStart = new DateTime(from.Year, from.Month, 1);
+        var monthEnd = monthStart.AddMonths(1).AddDays(-1);
+        var today = DateTime.Today;
+
+        // Treat it as "a whole month" if it spans the calendar month exactly,
+        // or spans month-start through today (the in-progress current month case
+        // used by the Categories page).
+        bool isFullMonth = from.Date == monthStart &&
+            (to.Date == monthEnd || (monthStart.Year == today.Year && monthStart.Month == today.Month && to.Date == today));
+
+        return isFullMonth
+            ? from.ToString("MMMM yyyy")
+            : $"{from:d MMM} – {to:d MMM}";
     }
 }
 

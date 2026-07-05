@@ -6,6 +6,7 @@ using PesaLens.App.Services.Interfaces;
 using PesaLens.App.Views.Onboarding;
 using PesaLens.App.Views.Settings;
 using PesaLens.Core.Models;
+using PesaLens.Core.Services.Interfaces;
 using AppTheme = PesaLens.Core.Models.AppTheme;
 
 namespace PesaLens.App.ViewModels;
@@ -14,6 +15,10 @@ public partial class SettingsViewModel : ObservableObject
 {
     private readonly IAppSettingsRepository _appSettingsRepo;
     private readonly ISyncMetadataRepository _syncMetadataRepo;
+    private readonly ITransactionRepository _transactionRepo;
+    private readonly ISmsReaderService _smsReader;
+    private readonly IMpesaSmsParser _mpesaSmsParser;
+    private readonly IAutoCategorizationService _autoCategorizationService;
     private readonly DatabaseSeeder _seeder;
     private readonly DatabaseService _databaseService;
     private readonly IBiometricAuthService _biometricAuthService;
@@ -27,19 +32,30 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _budgetNotificationsEnabled;
     [ObservableProperty] private string _currencyDisplay = "Ksh";
     [ObservableProperty] private string _lastSyncedText = "Never";
+    [ObservableProperty] private bool _isSyncing;
 
     // ── Security ──────────────────────────────────────────────────────────────
 
     [ObservableProperty] private bool _appLockEnabled;
 
     // ── About ─────────────────────────────────────────────────────────────────
-
     public string AppVersion =>
-        AppInfo.VersionString is { } v ? $"v{v}" : "v1.0.0";
+        AppInfo.VersionString is { } v ? $"v{v} ({AppInfo.BuildString})" : "v1.0.0";
+
+    // ── Developer info ────────────────────────────────────────────────────────
+
+    public string DeveloperName => "Booker Okumu";
+    private const string PortfolioUrl = "https://bkokumu.com";
+    private const string LinkedInUrl = "https://linkedin.com/in/booker-ochieng";
+    private const string GitHubUrl = "https://github.com/KOKUMUbooker/pesa-lens";
 
     public SettingsViewModel(
         IAppSettingsRepository appSettingsRepo,
         ISyncMetadataRepository syncMetadataRepo,
+        ITransactionRepository transactionRepo,
+        ISmsReaderService smsReader,
+        IMpesaSmsParser mpesaSmsParser,
+        IAutoCategorizationService autoCategorizationService,
         DatabaseSeeder seeder,
         IBiometricAuthService biometricAuthService,
         IServiceProvider services,
@@ -47,6 +63,10 @@ public partial class SettingsViewModel : ObservableObject
     {
         _appSettingsRepo = appSettingsRepo;
         _syncMetadataRepo = syncMetadataRepo;
+        _transactionRepo = transactionRepo;
+        _smsReader = smsReader;
+        _mpesaSmsParser = mpesaSmsParser;
+        _autoCategorizationService = autoCategorizationService;
         _seeder = seeder;
         _biometricAuthService = biometricAuthService;
         _databaseService = databaseService;
@@ -148,14 +168,75 @@ public partial class SettingsViewModel : ObservableObject
         await _appSettingsRepo.UpdateAsync(_appSettings);
     }
 
+
     // ── Data management ───────────────────────────────────────────────────────
 
     [RelayCommand]
     public async Task SyncNowAsync()
     {
-        // Trigger SMS sync service — placeholder until SyncService is implemented
-        await Shell.Current.DisplayAlertAsync("Sync", "Sync will be available soon.", "OK");
-        LastSyncedText = FormatSyncTime(DateTime.UtcNow);
+        if (IsSyncing) return;
+        IsSyncing = true;
+
+        try
+        {
+            var hasPermission = await _smsReader.HasPermissionAsync();
+            if (!hasPermission)
+            {
+                await Shell.Current.DisplayAlertAsync(
+                    "Permission Needed",
+                    "PesaLens needs SMS read permission to sync your M-Pesa messages. " +
+                    "Please grant it in your device's app settings.",
+                    "OK");
+                return;
+            }
+
+            var syncMeta = await _syncMetadataRepo.GetAsync();
+            var newMessages = await _smsReader.GetNewMpesaMessagesAsync(syncMeta.LastSmsId);
+
+            if (newMessages is null || newMessages.Count == 0)
+            {
+                LastSyncedText = FormatSyncTime(DateTime.UtcNow);
+                await Shell.Current.DisplayAlertAsync(
+                    "Sync Complete",
+                    "You're all caught up — no new transactions found.",
+                    "OK");
+                return;
+            }
+
+            var transactions = new List<Transaction>();
+            foreach (var msg in newMessages)
+            {
+                var tx = _mpesaSmsParser.Parse(msg.Body, msg.SmsId, msg.Timestamp);
+                if (tx is not null)
+                    transactions.Add(tx);
+            }
+
+            int inserted = await _transactionRepo.InsertManyAsync(transactions);
+            await _autoCategorizationService.CategorizeAsync(transactions);
+
+            var last = newMessages[^1];
+            await _syncMetadataRepo.UpdateAfterSyncAsync(last.SmsId, last.Timestamp, inserted);
+
+            LastSyncedText = FormatSyncTime(DateTime.UtcNow);
+
+            await Shell.Current.DisplayAlertAsync(
+                "Sync Complete",
+                $"Found {inserted} new transaction{(inserted == 1 ? "" : "s")}.",
+                "OK");
+        }
+        catch (Exception)
+        {
+            await Shell.Current.DisplayAlertAsync(
+                "Sync Failed",
+                "Something went wrong while syncing. Please try again.",
+                "OK");
+            // TODO: route ex through whatever logging/telemetry you use elsewhere,
+            // once that's wired up — swallowing it silently here otherwise.
+        }
+        finally
+        {
+            IsSyncing = false;
+        }
     }
 
     [RelayCommand]
@@ -181,15 +262,94 @@ public partial class SettingsViewModel : ObservableObject
         await Shell.Current.GoToAsync(nameof(ExportPage));
 
     // ── About ─────────────────────────────────────────────────────────────────
+    [RelayCommand]
+    public async Task CopyVersionInfoAsync()
+    {
+        await Clipboard.Default.SetTextAsync(AppVersion);
+        await Shell.Current.DisplayAlertAsync("Copied", "Version info copied to clipboard.", "OK");
+    }
 
     [RelayCommand]
     public async Task SendFeedbackAsync()
     {
-        const string email = "feedback@pesalens.app";
+        //const string email = "feedback@pesalens.app";
+        const string email = "booker20dev@gmail.com";
         const string subject = "PesaLens Feedback";
 
+        var body =
+            $"\n\n---\n" +
+            $"App version: {AppVersion}\n" +
+            $"Platform: {DeviceInfo.Platform} {DeviceInfo.VersionString}\n" +
+            $"Device: {DeviceInfo.Manufacturer} {DeviceInfo.Model}";
+
         if (Email.Default.IsComposeSupported)
-            await Email.Default.ComposeAsync(subject, string.Empty, email);
+        {
+            try
+            {
+                var message = new EmailMessage
+                {
+                    Subject = subject,
+                    Body = body,
+                    To = [email]
+                };
+                await Email.Default.ComposeAsync(message);
+            }
+            catch (FeatureNotSupportedException)
+            {
+                await FallbackToMailtoAsync(email, subject, body);
+            }
+        }
+        else
+        {
+            await FallbackToMailtoAsync(email, subject, body);
+        }
+    }
+
+    private static async Task FallbackToMailtoAsync(string email, string subject, string body)
+    {
+        var mailto = $"mailto:{email}?subject={Uri.EscapeDataString(subject)}&body={Uri.EscapeDataString(body)}";
+
+        try
+        {
+            await Launcher.Default.OpenAsync(mailto);
+        }
+        catch
+        {
+            // No mail handling capability at all on this device — last resort:
+            // let the user copy the address manually.
+            await Clipboard.Default.SetTextAsync(email);
+            await Shell.Current.DisplayAlertAsync(
+                "No Email App Found",
+                $"We couldn't find an email app on this device. The address {email} has been copied to your clipboard.",
+                "OK");
+        }
+    }
+
+    // ── Developer info ────────────────────────────────────────────────────────
+
+    [RelayCommand]
+    public async Task OpenPortfolioAsync() => await OpenLinkAsync(PortfolioUrl);
+
+    [RelayCommand]
+    public async Task OpenLinkedInAsync() => await OpenLinkAsync(LinkedInUrl);
+
+    [RelayCommand]
+    public async Task OpenGitHubAsync() => await OpenLinkAsync(GitHubUrl);
+
+    private static async Task OpenLinkAsync(string url)
+    {
+        try
+        {
+            await Launcher.Default.OpenAsync(new Uri(url));
+        }
+        catch
+        {
+            await Clipboard.Default.SetTextAsync(url);
+            await Shell.Current.DisplayAlertAsync(
+                "Couldn't Open Link",
+                $"The link has been copied to your clipboard instead:\n{url}",
+                "OK");
+        }
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

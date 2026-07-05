@@ -4,6 +4,7 @@ using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using PesaLens.App.Data.Repositories.Interfaces;
+using PesaLens.App.Views.Transactions;
 using PesaLens.Core.Models;
 using SkiaSharp;
 
@@ -282,6 +283,11 @@ public partial class DashboardViewModel : ObservableObject
     [RelayCommand]
     private static async Task NavigateToTransactionsAsync() =>
         await Shell.Current.GoToAsync("//TransactionsPage");
+
+    [RelayCommand]
+    private static async Task OpenTransactionAsync(Transaction transaction) =>
+        await Shell.Current.GoToAsync(
+            $"{nameof(TransactionDetailPage)}?code={transaction.MpesaCode}");
 
     // ── Core refresh logic ────────────────────────────────────────────────────
 

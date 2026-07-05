@@ -19,6 +19,13 @@ public partial class RecentTransactionsView : ContentView
             typeof(RecentTransactionsView),
             defaultValue: null);
 
+    public static readonly BindableProperty OpenTransactionCommandProperty =
+        BindableProperty.Create(
+            nameof(OpenTransactionCommand),
+            typeof(ICommand),
+            typeof(RecentTransactionsView),
+            defaultValue: null);
+
     public IList<Transaction> Transactions
     {
         get => (IList<Transaction>)GetValue(TransactionsProperty);
@@ -29,6 +36,12 @@ public partial class RecentTransactionsView : ContentView
     {
         get => (ICommand?)GetValue(ViewAllCommandProperty);
         set => SetValue(ViewAllCommandProperty, value);
+    }
+
+    public ICommand? OpenTransactionCommand
+    {
+        get => (ICommand?)GetValue(OpenTransactionCommandProperty);
+        set => SetValue(OpenTransactionCommandProperty, value);
     }
 
     public RecentTransactionsView()

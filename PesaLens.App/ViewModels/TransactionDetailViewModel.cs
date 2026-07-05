@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Android.Widget;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.Core.Models;
@@ -149,4 +150,13 @@ public partial class TransactionDetailViewModel : ObservableObject
 
     [RelayCommand]
     public async Task GoBackAsync() => await Shell.Current.GoToAsync("..");
+
+    [RelayCommand]
+    public async Task CopySmsAsync()
+    {
+        if (Transaction is null || string.IsNullOrWhiteSpace(Transaction.OriginalSms))
+            return;
+
+        await Clipboard.Default.SetTextAsync(Transaction.OriginalSms);
+    }
 }

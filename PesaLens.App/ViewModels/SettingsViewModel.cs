@@ -33,9 +33,15 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _appLockEnabled;
 
     // ── About ─────────────────────────────────────────────────────────────────
-
     public string AppVersion =>
-        AppInfo.VersionString is { } v ? $"v{v}" : "v1.0.0";
+        AppInfo.VersionString is { } v ? $"v{v} ({AppInfo.BuildString})" : "v1.0.0";
+
+    // ── Developer info ────────────────────────────────────────────────────────
+
+    public string DeveloperName => "Booker Okumu";
+    private const string PortfolioUrl = "https://bkokumu.com";
+    private const string LinkedInUrl = "https://linkedin.com/in/booker-ochieng";
+    private const string GitHubUrl = "https://github.com/KOKUMUbooker/pesa-lens";
 
     public SettingsViewModel(
         IAppSettingsRepository appSettingsRepo,
@@ -181,6 +187,12 @@ public partial class SettingsViewModel : ObservableObject
         await Shell.Current.GoToAsync(nameof(ExportPage));
 
     // ── About ─────────────────────────────────────────────────────────────────
+    [RelayCommand]
+    public async Task CopyVersionInfoAsync()
+    {
+        await Clipboard.Default.SetTextAsync(AppVersion);
+        await Shell.Current.DisplayAlertAsync("Copied", "Version info copied to clipboard.", "OK");
+    }
 
     [RelayCommand]
     public async Task SendFeedbackAsync()
@@ -188,8 +200,80 @@ public partial class SettingsViewModel : ObservableObject
         const string email = "feedback@pesalens.app";
         const string subject = "PesaLens Feedback";
 
+        var body =
+            $"\n\n---\n" +
+            $"App version: {AppVersion}\n" +
+            $"Platform: {DeviceInfo.Platform} {DeviceInfo.VersionString}\n" +
+            $"Device: {DeviceInfo.Manufacturer} {DeviceInfo.Model}";
+
         if (Email.Default.IsComposeSupported)
-            await Email.Default.ComposeAsync(subject, string.Empty, email);
+        {
+            try
+            {
+                var message = new EmailMessage
+                {
+                    Subject = subject,
+                    Body = body,
+                    To = [email]
+                };
+                await Email.Default.ComposeAsync(message);
+            }
+            catch (FeatureNotSupportedException)
+            {
+                await FallbackToMailtoAsync(email, subject, body);
+            }
+        }
+        else
+        {
+            await FallbackToMailtoAsync(email, subject, body);
+        }
+    }
+
+    private static async Task FallbackToMailtoAsync(string email, string subject, string body)
+    {
+        var mailto = $"mailto:{email}?subject={Uri.EscapeDataString(subject)}&body={Uri.EscapeDataString(body)}";
+
+        try
+        {
+            await Launcher.Default.OpenAsync(mailto);
+        }
+        catch
+        {
+            // No mail handling capability at all on this device — last resort:
+            // let the user copy the address manually.
+            await Clipboard.Default.SetTextAsync(email);
+            await Shell.Current.DisplayAlertAsync(
+                "No Email App Found",
+                $"We couldn't find an email app on this device. The address {email} has been copied to your clipboard.",
+                "OK");
+        }
+    }
+
+    // ── Developer info ────────────────────────────────────────────────────────
+
+    [RelayCommand]
+    public async Task OpenPortfolioAsync() => await OpenLinkAsync(PortfolioUrl);
+
+    [RelayCommand]
+    public async Task OpenLinkedInAsync() => await OpenLinkAsync(LinkedInUrl);
+
+    [RelayCommand]
+    public async Task OpenGitHubAsync() => await OpenLinkAsync(GitHubUrl);
+
+    private static async Task OpenLinkAsync(string url)
+    {
+        try
+        {
+            await Launcher.Default.OpenAsync(new Uri(url));
+        }
+        catch
+        {
+            await Clipboard.Default.SetTextAsync(url);
+            await Shell.Current.DisplayAlertAsync(
+                "Couldn't Open Link",
+                $"The link has been copied to your clipboard instead:\n{url}",
+                "OK");
+        }
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────

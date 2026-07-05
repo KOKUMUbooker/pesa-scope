@@ -26,6 +26,13 @@ public enum CategorySortOption
     LowestAmount = 2
 }
 
+public class MonthOption
+{
+    public int Value { get; init; }
+    public string Name { get; init; } = string.Empty;
+    public override string ToString() => Name;
+}
+
 public partial class CategorySpendRow : ObservableObject
 {
     public Category Category { get; init; } = null!;
@@ -70,6 +77,23 @@ public partial class CategoriesViewModel : ObservableObject
 
     [ObservableProperty] private string _periodLabel = string.Empty;
     [ObservableProperty] private CategorySpendRow? _selectedCategory;
+
+    // ── Accordion state for spending breakdown ───────────────────────────────
+    [ObservableProperty] private bool _isChartExpanded = true;
+
+    // ── Year / Month selectors ────────────────────────────────────────────────
+    [ObservableProperty] private int _selectedYear;
+    [ObservableProperty] private MonthOption _selectedMonth = null!;
+
+    public List<int> AvailableYears { get; private set; } = [];
+    public List<MonthOption> AvailableMonths { get; } =
+        Enumerable.Range(1, 12)
+            .Select(m => new MonthOption
+            {
+                Value = m,
+                Name = new DateTime(2000, m, 1).ToString("MMMM")
+            })
+            .ToList();
 
     // ── Categories tab: search / filter / sort state ─────────────────────────
     [ObservableProperty] private string _categorySearchText = string.Empty;
@@ -125,6 +149,13 @@ public partial class CategoriesViewModel : ObservableObject
 
         // Default the rule filter to "All Categories" so the picker has a sane initial selection.
         RuleFilterCategory = AllCategoriesOption;
+
+        // Default to the current date; year range spans back 4 years for now,
+        // which is generous for a personal-finance app with local SMS history.
+        var today = DateTime.Today;
+        AvailableYears = Enumerable.Range(today.Year - 4, 5).Reverse().ToList();
+        _selectedYear = today.Year;
+        _selectedMonth = AvailableMonths.First(m => m.Value == today.Month);
     }
 
     [RelayCommand]
@@ -167,8 +198,9 @@ public partial class CategoriesViewModel : ObservableObject
         IsChartLoading = true;
         try
         {
-            var from = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
-            var to = DateTime.Today;
+            var from = new DateTime(SelectedYear, SelectedMonth.Value, 1);
+            var isCurrentMonth = from.Year == DateTime.Today.Year && from.Month == DateTime.Today.Month;
+            var to = isCurrentMonth ? DateTime.Today : from.AddMonths(1).AddDays(-1);
             PeriodLabel = from.ToString("MMMM yyyy");
 
             var categories = await _categoryRepo.GetAllActiveAsync();
@@ -303,6 +335,9 @@ public partial class CategoriesViewModel : ObservableObject
         RuleSearchText = string.Empty;
         RuleFilterCategory = AllCategoriesOption;
     }
+
+    [RelayCommand]
+    public void ToggleChartExpanded() => IsChartExpanded = !IsChartExpanded;
 
     // ── Categories tab: search / filter / sort ────────────────────────────────
 
@@ -546,6 +581,10 @@ public partial class CategoriesViewModel : ObservableObject
         IsSheetOpen = false;
         IsRuleSheetOpen = false;
     }
+
+    partial void OnSelectedYearChanged(int value) => _ = LoadChartAsync();
+
+    partial void OnSelectedMonthChanged(MonthOption value) => _ = LoadChartAsync();
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 

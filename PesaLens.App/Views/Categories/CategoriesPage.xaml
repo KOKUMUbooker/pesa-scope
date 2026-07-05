@@ -20,6 +20,7 @@
         <converters:NullToStringConverter x:Key="NullToStringConverter"/>
         <converters:IntIsZeroConverter x:Key="IntIsZero"/>
         <converters:StringToColorConverter x:Key="StringToColorConverter"/>
+        <converters:BoolToRotationConverter x:Key="BoolToRotationConverter"/>
     </uranium:UraniumContentPage.Resources>
 
     <!-- ── Title bar ─────────────────────────────────────────────────────── -->
@@ -248,26 +249,73 @@
 
         <ScrollView>
             <VerticalStackLayout Spacing="24" Padding="20,16,20,40">
+                <!-- ── Period selector ───────────────────────────────────────── -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <Border Grid.Column="0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                        StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14,4">
+                        <Picker ItemsSource="{Binding AvailableMonths}"
+                            SelectedItem="{Binding SelectedMonth}"
+                            FontSize="14" HeightRequest="46" BackgroundColor="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                    </Border>
+                    <Border Grid.Column="1"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                        StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14,4">
+                        <Picker ItemsSource="{Binding AvailableYears}"
+                            SelectedItem="{Binding SelectedYear}"
+                            FontSize="14" HeightRequest="46" BackgroundColor="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                    </Border>
+                </Grid>
+
 
                 <!-- ── Donut chart ───────────────────────────── -->
                 <Border
                     BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
                     Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
                     StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="16">
-                    <Grid RowDefinitions="Auto,220" RowSpacing="4">
+                    <Grid RowDefinitions="Auto,Auto">
 
                         <!-- Header -->
-                        <VerticalStackLayout Grid.Row="0" Spacing="4">
-                            <Label Text="Spending breakdown"
+                        <!-- Header (tap to expand/collapse) -->
+                        <Grid Grid.Row="0" ColumnDefinitions="Auto,*">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ToggleChartExpandedCommand}"/>
+                            </Grid.GestureRecognizers>
+
+                            <ImageButton Grid.Column="0"
+                                 Command="{Binding ToggleChartExpandedCommand}"
+                                 BackgroundColor="Transparent" Padding="4"
+                                 WidthRequest="32" HeightRequest="32"
+                                 VerticalOptions="Center">
+                                <ImageButton.Source>
+                                    <FontImageSource FontFamily="MaterialSharp"
+                                        Glyph="{x:Static m:MaterialSharp.Chevron_right}"
+                                        Color="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                                        Size="18"/>
+                                </ImageButton.Source>
+                                <ImageButton.Rotation>
+                                    <Binding Path="IsChartExpanded">
+                                        <Binding.Converter>
+                                            <converters:BoolToRotationConverter/>
+                                        </Binding.Converter>
+                                    </Binding>
+                                </ImageButton.Rotation>
+                            </ImageButton>
+
+                            <VerticalStackLayout Grid.Column="1" Spacing="4" VerticalOptions="Center">
+                                <Label Text="Spending breakdown"
                                 FontSize="16" FontAttributes="Bold"
                                 TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
-                            <Label Text="{Binding PeriodLabel}"
-                                FontSize="12"
-                                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
-                        </VerticalStackLayout>
+                                <Label Text="{Binding PeriodLabel}"
+                                    FontSize="12"
+                                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                            </VerticalStackLayout>
+                        </Grid>
 
                         <!-- Row 1: chart, empty state, and loading indicator all share this cell -->
-                        <Grid Grid.Row="1">
+                        <Grid Grid.Row="1" HeightRequest="220" IsVisible="{Binding IsChartExpanded}">
                             <lvc:PieChart
                                 Background="Transparent"
                                 Series="{Binding Series}"

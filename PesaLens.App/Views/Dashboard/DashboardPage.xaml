@@ -248,11 +248,12 @@
                         Categories="{Binding TopCategories}"/>
 
                     <!-- ── RECENT TRANSACTIONS ───────────────────────────── -->
-                    <HomeControls:RecentTransactionsView
-                        Transactions="{Binding RecentTransactions}"
-                        ViewAllCommand="{Binding NavigateToTransactionsCommand}"/>
-                    
-                </VerticalStackLayout>
+                        <HomeControls:RecentTransactionsView
+                            Transactions="{Binding RecentTransactions}"
+                            ViewAllCommand="{Binding NavigateToTransactionsCommand}"
+                            OpenTransactionCommand="{Binding OpenTransactionCommand}"/>
+
+                    </VerticalStackLayout>
                 <!-- /body -->
 
             </VerticalStackLayout>

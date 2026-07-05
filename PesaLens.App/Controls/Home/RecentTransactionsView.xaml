@@ -58,6 +58,13 @@
                             ColumnDefinitions="44,*,Auto"
                             ColumnSpacing="12">
 
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding Source={x:Reference this}, Path=OpenTransactionCommand}"
+                                    CommandParameter="{Binding .}"/>
+                            </Grid.GestureRecognizers>
+
+
                             <!-- Icon circle -->
                             <Border
                                 Grid.Column="0"

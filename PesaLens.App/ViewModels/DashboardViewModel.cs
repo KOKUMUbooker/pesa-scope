@@ -9,6 +9,22 @@ using SkiaSharp;
 
 namespace PesaLens.App.ViewModels;
 
+public enum DashboardViewMode
+{
+    Weekly = 0,
+    Monthly = 1,
+    Yearly = 2
+}
+
+public partial class WeekOption : ObservableObject
+{
+    public DateTime Start { get; init; }
+    public DateTime End { get; init; } // inclusive, already clipped to the month
+    public string Label { get; init; } = string.Empty;
+
+    [ObservableProperty] private bool _isSelected;
+}
+
 public partial class CategorySpendItem
 {
     public string Name { get; set; } = string.Empty;
@@ -24,25 +40,35 @@ public partial class DashboardViewModel : ObservableObject
     private readonly ITransactionRepository _transactions;
     private readonly ICategoryRepository _categories;
 
-    // ── Week range (Mon 00:00 → Sun 23:59:59 of the current week) ────────────
-    //    DayOfWeek is 0=Sun … 6=Sat; we anchor to Monday.
-    private static (DateTime from, DateTime to) CurrentWeekRange()
-    {
-        var today = DateTime.Today;
-        int daysSinceMon = ((int)today.DayOfWeek + 6) % 7; // Mon=0 … Sun=6
-        var weekStart = today.AddDays(-daysSinceMon);
-        var weekEnd = weekStart.AddDays(6).AddHours(23).AddMinutes(59).AddSeconds(59);
-        return (weekStart, weekEnd);
-    }
+    // Guards against partial-property-changed hooks firing while we're
+    // programmatically initializing state (e.g. when switching view modes).
+    private bool _isInitializingSelection;
 
-    public string PeriodLabel
-    {
-        get
-        {
-            var (from, to) = CurrentWeekRange();
-            return $"{from:d MMM} – {to:d MMM yyyy}";
-        }
-    }
+    // ── View mode ──────────────────────────────────────────────────────────
+    [ObservableProperty] private DashboardViewMode _viewMode = DashboardViewMode.Weekly;
+    [ObservableProperty] private bool _isWeeklyMode = true;
+    [ObservableProperty] private bool _isMonthlyMode = false;
+    [ObservableProperty] private bool _isYearlyMode = false;
+
+    // ── Monthly mode: year / month / week selection ──────────────────────────
+    [ObservableProperty] private int _selectedYear;
+    [ObservableProperty] private MonthOption _selectedMonth = null!;
+    [ObservableProperty] private List<WeekOption> _availableWeeks = [];
+    [ObservableProperty] private WeekOption? _selectedWeek;
+
+    public List<int> AvailableYears { get; private set; } = [];
+    public List<MonthOption> AvailableMonths { get; } =
+        Enumerable.Range(1, 12)
+            .Select(m => new MonthOption
+            {
+                Value = m,
+                Name = new DateTime(2000, m, 1).ToString("MMMM")
+            })
+            .ToList();
+
+    // ── Period label + chart title (both vary by mode) ────────────────────────
+    [ObservableProperty] private string _periodLabel = string.Empty;
+    [ObservableProperty] private string _chartTitle = "Weekly spending";
 
     // ── Summary ───────────────────────────────────────────────────────────────
     [ObservableProperty] private decimal _moneyIn;
@@ -73,6 +99,153 @@ public partial class DashboardViewModel : ObservableObject
     {
         _transactions = transactions;
         _categories = categories;
+
+        var today = DateTime.Today;
+        AvailableYears = Enumerable.Range(today.Year - 4, 5).Reverse().ToList();
+
+        _isInitializingSelection = true;
+        _selectedYear = today.Year;
+        _selectedMonth = AvailableMonths.First(m => m.Value == today.Month);
+        _availableWeeks = GenerateWeeksForMonth(today.Year, today.Month);
+        SetSelectedWeek(_availableWeeks.FirstOrDefault(w => today >= w.Start && today <= w.End)
+            ?? _availableWeeks.FirstOrDefault());
+        _isInitializingSelection = false;
+    }
+
+    // ── View mode switching ────────────────────────────────────────────────────
+
+    [RelayCommand]
+    private async Task SwitchViewModeAsync(DashboardViewMode mode)
+    {
+        if (ViewMode == mode || IsBusy) return;
+
+        ViewMode = mode;
+        IsWeeklyMode = mode == DashboardViewMode.Weekly;
+        IsMonthlyMode = mode == DashboardViewMode.Monthly;
+        IsYearlyMode = mode == DashboardViewMode.Yearly;
+
+        if (mode == DashboardViewMode.Monthly)
+        {
+            _isInitializingSelection = true;
+            AvailableWeeks = GenerateWeeksForMonth(SelectedYear, SelectedMonth.Value);
+            var today = DateTime.Today;
+            SetSelectedWeek(AvailableWeeks.FirstOrDefault(w => today >= w.Start && today <= w.End)
+                ?? AvailableWeeks.FirstOrDefault());
+            _isInitializingSelection = false;
+        }
+
+        await LoadAsync();
+    }
+
+    partial void OnSelectedYearChanged(int value)
+    {
+        if (_isInitializingSelection) return;
+
+        if (ViewMode == DashboardViewMode.Monthly)
+            RegenerateWeeksAndReload();
+        else if (ViewMode == DashboardViewMode.Yearly)
+            _ = LoadAsync();
+    }
+
+    partial void OnSelectedMonthChanged(MonthOption value)
+    {
+        if (_isInitializingSelection) return;
+        if (ViewMode == DashboardViewMode.Monthly)
+            RegenerateWeeksAndReload();
+    }
+
+    private void RegenerateWeeksAndReload()
+    {
+        _isInitializingSelection = true;
+        AvailableWeeks = GenerateWeeksForMonth(SelectedYear, SelectedMonth.Value);
+        var today = DateTime.Today;
+        SetSelectedWeek(AvailableWeeks.FirstOrDefault(w => today >= w.Start && today <= w.End)
+            ?? AvailableWeeks.FirstOrDefault());
+        _isInitializingSelection = false;
+
+        _ = LoadAsync();
+    }
+
+    [RelayCommand]
+    private async Task SelectWeekAsync(WeekOption week)
+    {
+        if (SelectedWeek == week) return;
+        SetSelectedWeek(week);
+        await LoadAsync();
+    }
+
+    // ── Week generation (clipped to month boundaries) ─────────────────────────
+
+    private static List<WeekOption> GenerateWeeksForMonth(int year, int month)
+    {
+        var monthStart = new DateTime(year, month, 1);
+        var monthEnd = monthStart.AddMonths(1).AddDays(-1);
+
+        var weeks = new List<WeekOption>();
+
+        // Monday on/before monthStart — the calendar week containing the 1st.
+        int daysSinceMonday = ((int)monthStart.DayOfWeek + 6) % 7;
+        var cursor = monthStart.AddDays(-daysSinceMonday);
+
+        while (cursor <= monthEnd)
+        {
+            var weekEnd = cursor.AddDays(6);
+            var clippedStart = cursor < monthStart ? monthStart : cursor;
+            var clippedEnd = weekEnd > monthEnd ? monthEnd : weekEnd;
+
+            weeks.Add(new WeekOption
+            {
+                Start = clippedStart,
+                End = clippedEnd,
+                Label = clippedStart.Date == clippedEnd.Date
+                    ? clippedStart.ToString("d MMM")
+                    : $"{clippedStart:d MMM} – {clippedEnd:d MMM}"
+            });
+
+            cursor = cursor.AddDays(7);
+        }
+
+        return weeks;
+    }
+
+    // ── Resolved period for the active view mode ──────────────────────────────
+
+    private (DateTime from, DateTime to) ResolveCurrentPeriod()
+    {
+        switch (ViewMode)
+        {
+            case DashboardViewMode.Monthly when SelectedWeek is not null:
+                return (SelectedWeek.Start, SelectedWeek.End.AddHours(23).AddMinutes(59).AddSeconds(59));
+
+            case DashboardViewMode.Yearly:
+                var yearStart = new DateTime(SelectedYear, 1, 1);
+                var yearEnd = SelectedYear == DateTime.Today.Year
+                    ? DateTime.Today
+                    : new DateTime(SelectedYear, 12, 31);
+                return (yearStart, yearEnd.AddHours(23).AddMinutes(59).AddSeconds(59));
+
+            default: // Weekly, or Monthly with no week resolved yet
+                return CurrentWeekRange();
+        }
+    }
+
+    private static (DateTime from, DateTime to) CurrentWeekRange()
+    {
+        var today = DateTime.Today;
+        int daysSinceMon = ((int)today.DayOfWeek + 6) % 7;
+        var weekStart = today.AddDays(-daysSinceMon);
+        var weekEnd = weekStart.AddDays(6).AddHours(23).AddMinutes(59).AddSeconds(59);
+        return (weekStart, weekEnd);
+    }
+
+    private string ResolvePeriodLabel((DateTime from, DateTime to) period)
+    {
+        return ViewMode switch
+        {
+            DashboardViewMode.Yearly => SelectedYear.ToString(),
+            DashboardViewMode.Monthly when SelectedWeek is not null => SelectedWeek.Label,
+            _ => $"{period.from:d MMM} – {period.to:d MMM yyyy}"
+        };
     }
 
     // ── Commands ──────────────────────────────────────────────────────────────
@@ -114,14 +287,27 @@ public partial class DashboardViewModel : ObservableObject
 
     private async Task RefreshDashboardAsync()
     {
-        var (from, to) = CurrentWeekRange();
+        var period = ResolveCurrentPeriod();
+        PeriodLabel = ResolvePeriodLabel(period);
+        ChartTitle = ViewMode == DashboardViewMode.Yearly ? "Monthly spending" : "Daily spending";
+
+        var chartTask = ViewMode == DashboardViewMode.Yearly
+            ? LoadYearlyChartAsync(SelectedYear)
+            : LoadDailyChartAsync(period.from, period.to);
 
         await Task.WhenAll(
-            LoadSummaryAsync(from, to),
-            LoadChartAsync(from, to),
-            LoadTopCategoriesAsync(from, to),
+            LoadSummaryAsync(period.from, period.to),
+            chartTask,
+            LoadTopCategoriesAsync(period.from, period.to),
             LoadRecentTransactionsAsync()
         );
+
+        ChartTitle = ViewMode switch
+        {
+            DashboardViewMode.Yearly => "Monthly spending",
+            DashboardViewMode.Weekly => "Weekly spending",
+            _ => "Daily spending"
+        };
 
         LastSynced = $"Updated {DateTime.Now:h:mm tt}";
     }
@@ -142,44 +328,74 @@ public partial class DashboardViewModel : ObservableObject
         FormattedNetBalance = $"Ksh {NetBalance:N0}";
     }
 
-    private async Task LoadChartAsync(DateTime from, DateTime to)
+    // ── Daily chart (used for Weekly and Monthly modes) ───────────────────────
+
+    private async Task LoadDailyChartAsync(DateTime from, DateTime to)
     {
         var daily = await _transactions.GetDailySpendingAsync(from, to);
 
-        // Always exactly 7 entries: Mon → Sun
-        var labels = new string[7];
-        var values = new double[7];
-        var today = DateTime.Today;
+        int dayCount = (to.Date - from.Date).Days + 1;
+        var labels = new string[dayCount];
+        var values = new double[dayCount];
 
-        for (int i = 0; i < 7; i++)
+        for (int i = 0; i < dayCount; i++)
         {
             var day = from.Date.AddDays(i);
-            labels[i] = day.ToString("ddd")[..1];  // M, T, W …
+            labels[i] = day.ToString("ddd");
             values[i] = daily.TryGetValue(day, out var amt) ? (double)amt : 0d;
         }
 
-        // Subtle grid line colour — matches OutlineVariant from the design tokens
-        var gridLinePaint = new SolidColorPaint(new SKColor(0xD6, 0xE2, 0xDC, 0x99)) // #D6E2DC @ 60%
+        BuildChart(labels, values);
+    }
+
+    // ── Monthly-bucket chart (used for Yearly mode) ───────────────────────────
+
+    private async Task LoadYearlyChartAsync(int year)
+    {
+        var yearStart = new DateTime(year, 1, 1);
+        var yearEnd = year == DateTime.Today.Year
+            ? DateTime.Today
+            : new DateTime(year, 12, 31);
+
+        // Reuses the existing daily-spending query; a year of daily rows is
+        // negligible to aggregate client-side, so no new repository method needed.
+        var daily = await _transactions.GetDailySpendingAsync(yearStart, yearEnd);
+
+        var monthTotals = new decimal[12];
+        foreach (var (date, amount) in daily)
+        {
+            if (date.Year == year)
+                monthTotals[date.Month - 1] += amount;
+        }
+
+        var labels = Enumerable.Range(1, 12)
+            .Select(m => new DateTime(2000, m, 1).ToString("MMMM")[..1])
+            .ToArray();
+        var values = monthTotals.Select(v => (double)v).ToArray();
+
+        BuildChart(labels, values);
+    }
+
+    private void BuildChart(string[] labels, double[] values)
+    {
+        var gridLinePaint = new SolidColorPaint(new SKColor(0xD6, 0xE2, 0xDC, 0x99))
         {
             StrokeThickness = 0.8f
         };
-
-        // Muted label colour — matches OnSurfaceVariant
         var labelPaint = new SolidColorPaint(new SKColor(0x4B, 0x5F, 0x56));
 
         SpendingSeries =
         [
             new ColumnSeries<double>
             {
-                Values                      = values,
-                Fill                        = new SolidColorPaint(SKColor.Parse("#1A8C62")),
-                Stroke                      = null,
-                //IgnoresBarVisualTransitions = false,
-                MaxBarWidth                 = 40,
-                Rx                          = 6,
-                Ry                          = 6,
-                Name                        = "Daily spend",
-                DataLabelsPaint             = null,
+                Values = values,
+                Fill = new SolidColorPaint(SKColor.Parse("#1A8C62")),
+                Stroke = null,
+                MaxBarWidth = 40,
+                Rx = 6,
+                Ry = 6,
+                Name = "Spend",
+                DataLabelsPaint = null,
             }
         ];
 
@@ -187,11 +403,13 @@ public partial class DashboardViewModel : ObservableObject
         [
             new Axis
             {
-                Labels          = labels,
-                TextSize        = 11,
-                LabelsPaint     = labelPaint,
+                Labels = labels,
+                TextSize = 11,
+                LabelsPaint = labelPaint,
                 SeparatorsPaint = null,
-                TicksPaint      = null,
+                TicksPaint = null,
+                MinStep = 1,
+                ForceStepToMin = true,
             }
         ];
 
@@ -199,16 +417,17 @@ public partial class DashboardViewModel : ObservableObject
         [
             new Axis
             {
-                TextSize        = 10,
-                LabelsPaint     = labelPaint,
+                TextSize = 10,
+                LabelsPaint = labelPaint,
                 SeparatorsPaint = gridLinePaint,
-                TicksPaint      = null,
+                TicksPaint = null,
                 Labeler = val => val switch
-                                {
-                                    0          => "0",
-                                    < 1000     => $"Ksh {val:0}",
-                                    _          => $"Ksh {val / 1000:0.#}k"
-                                },
+                    {
+                        0 => "0",
+                        < 1000 => $"Ksh {val:0}",
+                        < 1_000_000 => $"Ksh {val / 1000:0.#}k",
+                        _ => $"Ksh {val / 1_000_000:0.#}M"
+                    },
             }
         ];
     }
@@ -238,6 +457,19 @@ public partial class DashboardViewModel : ObservableObject
 
     private async Task LoadRecentTransactionsAsync()
     {
+        // Always the latest 5 overall, independent of the selected period.
         RecentTransactions = await _transactions.GetRecentAsync(5);
     }
+
+    private void SetSelectedWeek(WeekOption? week)
+    {
+        foreach (var w in AvailableWeeks)
+            w.IsSelected = false;
+
+        if (week is not null)
+            week.IsSelected = true;
+
+        SelectedWeek = week;
+    }
 }
+

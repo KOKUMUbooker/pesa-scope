@@ -20,7 +20,7 @@
             <Grid ColumnDefinitions="*,Auto">
                 <Label
                     Grid.Column="0"
-                    Text="Weekly spending"
+                    Text="{Binding Source={x:Reference this}, Path=ChartTitle}"
                     FontSize="16"
                     FontAttributes="Bold"
                     TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>

@@ -47,30 +47,57 @@
                     </Border.StrokeShape>
                     <VerticalStackLayout>
 
-                        <!-- Dark Mode -->
-                        <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,14" ColumnSpacing="14">
-                            <Image Grid.Column="0" VerticalOptions="Center">
-                                <Image.Source>
-                                    <FontImageSource
-                                     FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Dark_mode}"
-                                     Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                                     Size="24" />
-                                </Image.Source>
-                            </Image>
-                            <Label
-                                Grid.Column="1"
-                                Text="Dark Mode"
-                                FontSize="15"
-                                VerticalOptions="Center"
-                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
-                            <Switch
-                                Grid.Column="2"
-                                IsToggled="{Binding IsDarkMode}"
-                                Toggled="OnDarkModeToggled"
-                                OnColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                                ThumbColor="White"
-                                VerticalOptions="Center" />
-                        </Grid>
+                        <!-- Theme -->
+                        <VerticalStackLayout Padding="16,14" Spacing="10">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                                <Image Grid.Column="0" VerticalOptions="Center">
+                                    <Image.Source>
+                                        <FontImageSource
+                                            FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Colors}"
+                                            Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                            Size="24" />
+                                    </Image.Source>
+                                </Image>
+                                <Label
+                                    Grid.Column="1"
+                                    Text="Theme"
+                                    FontSize="15"
+                                    VerticalOptions="Center"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                                <Border x:Name="SystemThemeButton" Grid.Column="0" Padding="0,8" StrokeThickness="1">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="10" />
+                                    </Border.StrokeShape>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnSystemThemeSelected" />
+                                    </Border.GestureRecognizers>
+                                    <Label x:Name="SystemThemeLabel" Text="System" FontSize="13" HorizontalOptions="Center" />
+                                </Border>
+
+                                <Border x:Name="LightThemeButton" Grid.Column="1" Padding="0,8" StrokeThickness="1">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="10" />
+                                    </Border.StrokeShape>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnLightThemeSelected" />
+                                    </Border.GestureRecognizers>
+                                    <Label x:Name="LightThemeLabel" Text="Light" FontSize="13" HorizontalOptions="Center" />
+                                </Border>
+
+                                <Border x:Name="DarkThemeButton" Grid.Column="2" Padding="0,8" StrokeThickness="1">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="10" />
+                                    </Border.StrokeShape>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnDarkThemeSelected" />
+                                    </Border.GestureRecognizers>
+                                    <Label x:Name="DarkThemeLabel" Text="Dark" FontSize="13" HorizontalOptions="Center" />
+                                </Border>
+                            </Grid>
+                        </VerticalStackLayout>
 
                         <BoxView HeightRequest="1" Margin="8,0"
                             Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"

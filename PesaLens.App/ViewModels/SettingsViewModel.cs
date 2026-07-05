@@ -3,8 +3,10 @@ using CommunityToolkit.Mvvm.Input;
 using PesaLens.App.Data;
 using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.App.Services.Interfaces;
+using PesaLens.App.Views.Onboarding;
 using PesaLens.App.Views.Settings;
 using PesaLens.Core.Models;
+using AppTheme = PesaLens.Core.Models.AppTheme;
 
 namespace PesaLens.App.ViewModels;
 
@@ -15,12 +17,13 @@ public partial class SettingsViewModel : ObservableObject
     private readonly DatabaseSeeder _seeder;
     private readonly DatabaseService _databaseService;
     private readonly IBiometricAuthService _biometricAuthService;
+    private readonly IServiceProvider _services;
 
     private AppSettings _appSettings = new();
 
     // ── General ───────────────────────────────────────────────────────────────
 
-    [ObservableProperty] private bool _isDarkMode;
+    [ObservableProperty] private AppTheme _currentTheme;
     [ObservableProperty] private bool _budgetNotificationsEnabled;
     [ObservableProperty] private string _currencyDisplay = "Ksh";
     [ObservableProperty] private string _lastSyncedText = "Never";
@@ -39,6 +42,7 @@ public partial class SettingsViewModel : ObservableObject
         ISyncMetadataRepository syncMetadataRepo,
         DatabaseSeeder seeder,
         IBiometricAuthService biometricAuthService,
+        IServiceProvider services,
         DatabaseService databaseService)
     {
         _appSettingsRepo = appSettingsRepo;
@@ -46,6 +50,7 @@ public partial class SettingsViewModel : ObservableObject
         _seeder = seeder;
         _biometricAuthService = biometricAuthService;
         _databaseService = databaseService;
+        _services = services;
     }
 
     // ── Load ──────────────────────────────────────────────────────────────────
@@ -57,7 +62,7 @@ public partial class SettingsViewModel : ObservableObject
         var syncMeta = await _syncMetadataRepo.GetAsync();
 
         // Populate observable properties without triggering saves
-        IsDarkMode = _appSettings.Theme == PesaLens.Core.Models.AppTheme.Dark;
+        CurrentTheme = _appSettings.Theme;
         BudgetNotificationsEnabled = _appSettings.BudgetNotificationsEnabled;
         AppLockEnabled = _appSettings.AppLockEnabled;
 
@@ -71,14 +76,17 @@ public partial class SettingsViewModel : ObservableObject
     // ── Toggle handlers ───────────────────────────────────────────────────────
 
     [RelayCommand]
-    public async Task ToggleDarkModeAsync(bool value)
+    public async Task SetThemeAsync(AppTheme theme)
     {
-        IsDarkMode = value;
-        _appSettings.Theme = value ? PesaLens.Core.Models.AppTheme.Dark : PesaLens.Core.Models.AppTheme.Light;
+        CurrentTheme = theme;
+        _appSettings.Theme = theme;
 
-        Application.Current!.UserAppTheme = value
-            ? Microsoft.Maui.ApplicationModel.AppTheme.Dark
-            : Microsoft.Maui.ApplicationModel.AppTheme.Light;
+        Application.Current!.UserAppTheme = theme switch
+        {
+            AppTheme.Light => Microsoft.Maui.ApplicationModel.AppTheme.Light,
+            AppTheme.Dark => Microsoft.Maui.ApplicationModel.AppTheme.Dark,
+            _ => Microsoft.Maui.ApplicationModel.AppTheme.Unspecified
+        };
 
         await _appSettingsRepo.UpdateAsync(_appSettings);
     }
@@ -165,7 +173,7 @@ public partial class SettingsViewModel : ObservableObject
 
         // Restart to onboarding
         if (Application.Current?.Windows.FirstOrDefault() is Window window)
-            window.Page = new AppShell();
+            window.Page = _services.GetRequiredService<WelcomePage>();
     }
 
     [RelayCommand]

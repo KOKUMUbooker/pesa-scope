@@ -23,18 +23,12 @@ public partial class SettingsPage : UraniumUI.Pages.UraniumContentPage
         _settingsReady = false;
         await _vm.LoadAsync();
         _settingsReady = true;
+        SyncThemeButtons();
         // SyncCurrencyButtons();
     }
 
     // ── Toggle handlers ───────────────────────────────────────────────────────
     // Switches in MAUI fire Toggled on initial bind
-
-    private async void OnDarkModeToggled(object? sender, ToggledEventArgs e)
-    {
-        if (!_settingsReady) return;
-        await _vm.ToggleDarkModeCommand.ExecuteAsync(e.Value);
-    }
-
     private async void OnBudgetNotificationsToggled(object? sender, ToggledEventArgs e)
     {
         if (!_settingsReady) return;
@@ -45,6 +39,44 @@ public partial class SettingsPage : UraniumUI.Pages.UraniumContentPage
     {
         if (!_settingsReady) return;
         await _vm.ToggleAppLockCommand.ExecuteAsync(e.Value);
+    }
+
+    private async void OnSystemThemeSelected(object? sender, EventArgs e)
+    {
+        await _vm.SetThemeCommand.ExecuteAsync(PesaLens.Core.Models.AppTheme.System);
+        SyncThemeButtons();
+    }
+
+    private async void OnLightThemeSelected(object? sender, EventArgs e)
+    {
+        await _vm.SetThemeCommand.ExecuteAsync(PesaLens.Core.Models.AppTheme.Light);
+        SyncThemeButtons();
+    }
+
+    private async void OnDarkThemeSelected(object? sender, EventArgs e)
+    {
+        await _vm.SetThemeCommand.ExecuteAsync(PesaLens.Core.Models.AppTheme.Dark);
+        SyncThemeButtons();
+    }
+
+    private void SyncThemeButtons()
+    {
+        var active = _vm.CurrentTheme;
+        var primary = (Color)Application.Current!.Resources["Primary"];
+        var primaryContainer = (Color)Application.Current!.Resources["PrimaryContainer"];
+        var onSurfaceVariant = (Color)Application.Current!.Resources["OnSurfaceVariant"];
+
+        void Apply(Border border, Label label, bool isActive)
+        {
+            border.BackgroundColor = isActive ? primaryContainer : Colors.Transparent;
+            border.Stroke = isActive ? primary : onSurfaceVariant;
+            label.TextColor = isActive ? primary : onSurfaceVariant;
+            label.FontAttributes = isActive ? FontAttributes.Bold : FontAttributes.None;
+        }
+
+        Apply(SystemThemeButton, SystemThemeLabel, active == PesaLens.Core.Models.AppTheme.System);
+        Apply(LightThemeButton, LightThemeLabel, active == PesaLens.Core.Models.AppTheme.Light);
+        Apply(DarkThemeButton, DarkThemeLabel, active == PesaLens.Core.Models.AppTheme.Dark);
     }
 
     // ── Currency picker ───────────────────────────────────────────────────────

@@ -165,45 +165,76 @@
 
     <!-- ── Main content ───────────────────────────────────────────────────── -->
     <RefreshView
-    Command="{Binding RefreshCommand}"
-    IsRefreshing="{Binding IsRefreshing}"
-    RefreshColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
+        Command="{Binding RefreshCommand}"
+        IsRefreshing="{Binding IsRefreshing}"
+        RefreshColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
 
         <ScrollView>
             <VerticalStackLayout Spacing="24" Padding="20,16,20,40">
 
                 <!-- ── Donut chart ───────────────────────────── -->
                 <Border
-                BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
-                Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
-                StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="16">
-                    <Grid>
-                        <VerticalStackLayout Spacing="4">
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                    Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                    StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="16">
+                    <Grid RowDefinitions="Auto,220" RowSpacing="4">
+
+                        <!-- Header -->
+                        <VerticalStackLayout Grid.Row="0" Spacing="4">
                             <Label Text="Spending breakdown"
-                               FontSize="16" FontAttributes="Bold"
-                               TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                                FontSize="16" FontAttributes="Bold"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
                             <Label Text="{Binding PeriodLabel}"
-                               FontSize="12"
-                               TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
-                            <lvc:PieChart
-                            HeightRequest="220"
-                            Background="Transparent"
-                            Series="{Binding Series}"
-                            LegendPosition="Hidden"
-                            TooltipPosition="Top"
-                            TooltipBackgroundPaint="{x:Null}"
-                            TooltipTextPaint="{x:Null}"
-                            AnimationsSpeed="00:00:00.500" />
+                                FontSize="12"
+                                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
                         </VerticalStackLayout>
-                        <ActivityIndicator
-                        IsRunning="{Binding IsChartLoading}"
-                        IsVisible="{Binding IsChartLoading}"
-                        HorizontalOptions="Center" VerticalOptions="Center"
-                        Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                        WidthRequest="40" HeightRequest="40"/>
+
+                        <!-- Row 1: chart, empty state, and loading indicator all share this cell -->
+                        <Grid Grid.Row="1">
+                            <lvc:PieChart
+                                Background="Transparent"
+                                Series="{Binding Series}"
+                                LegendPosition="Hidden"
+                                TooltipPosition="Top"
+                                TooltipBackgroundPaint="{x:Null}"
+                                TooltipTextPaint="{x:Null}"
+                                AnimationsSpeed="00:00:00.500"
+                                IsVisible="{Binding IsChartEmpty, Converter={StaticResource InvertedBoolConverter}}" />
+
+                            <VerticalStackLayout
+                                Spacing="8"
+                                HorizontalOptions="Center"
+                                VerticalOptions="Center"
+                                IsVisible="{Binding IsChartEmpty}">
+                                <Image HorizontalOptions="Center">
+                                    <Image.Source>
+                                        <FontImageSource FontFamily="MaterialSharp"
+                                            Glyph="{x:Static m:MaterialSharp.Pie_chart}"
+                                            Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                            Size="40"/>
+                                    </Image.Source>
+                                </Image>
+                                <Label Text="No spending recorded yet"
+                                    FontSize="14" FontAttributes="Bold"
+                                    HorizontalOptions="Center"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                                <Label Text="Transactions you categorize this month will show up here."
+                                    FontSize="12" HorizontalTextAlignment="Center"
+                                    HorizontalOptions="Center"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                                    Opacity="0.7"/>
+                            </VerticalStackLayout>
+
+                            <ActivityIndicator
+                                IsRunning="{Binding IsChartLoading}"
+                                IsVisible="{Binding IsChartLoading}"
+                                HorizontalOptions="Center" VerticalOptions="Center"
+                                Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                WidthRequest="40" HeightRequest="40"/>
+                        </Grid>
+
                     </Grid>
                 </Border>
-
                 <!-- ── Tabs ──────────────────────────────────────────────── -->
                 <material:TabView CachingStrategy="CacheOnLayout">
 
@@ -246,18 +277,35 @@
                                                                 <HorizontalStackLayout Grid.Column="2" Spacing="10" >
                                                                     <!-- Edit button (non-system categories only) -->
                                                                     <ImageButton
-                                                                      BackgroundColor="Transparent"
-                                                                      HorizontalOptions="End"
-                                                                      WidthRequest="28" HeightRequest="28"
-                                                                      CornerRadius="5"
-                                                                      IsVisible="{Binding Category.IsSystemCategory, Converter={StaticResource InvertedBoolConverter}}"
-                                                                      Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=OpenEditCategoryCommand}"
-                                                                      CommandParameter="{Binding .}">
+                                                                        BackgroundColor="Transparent"
+                                                                        HorizontalOptions="End"
+                                                                        WidthRequest="28" HeightRequest="28"
+                                                                        CornerRadius="5"
+                                                                        IsVisible="{Binding Category.IsSystemCategory, Converter={StaticResource InvertedBoolConverter}}"
+                                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=OpenEditCategoryCommand}"
+                                                                        CommandParameter="{Binding .}">
                                                                         <ImageButton.Source>
-                                                                        <FontImageSource FontFamily="MaterialSharp"
-                                                                          Glyph="{x:Static m:MaterialSharp.Edit}"
-                                                                          Color="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
-                                                                          Size="14"/>
+                                                                            <FontImageSource FontFamily="MaterialSharp"
+                                                                                Glyph="{x:Static m:MaterialSharp.Edit}"
+                                                                                Color="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                                                                                Size="14"/>
+                                                                        </ImageButton.Source>
+                                                                    </ImageButton>
+
+                                                                    <!-- Delete button (non-system categories only) -->
+                                                                    <ImageButton
+                                                                        BackgroundColor="Transparent"
+                                                                        HorizontalOptions="End"
+                                                                        WidthRequest="28" HeightRequest="28"
+                                                                        CornerRadius="5"
+                                                                        IsVisible="{Binding Category.IsSystemCategory, Converter={StaticResource InvertedBoolConverter}}"
+                                                                        Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=DeleteCategoryCommand}"
+                                                                        CommandParameter="{Binding .}">
+                                                                        <ImageButton.Source>
+                                                                            <FontImageSource FontFamily="MaterialSharp"
+                                                                                Glyph="{x:Static m:MaterialSharp.Delete}"
+                                                                                Color="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"
+                                                                                Size="14"/>
                                                                         </ImageButton.Source>
                                                                     </ImageButton>
 

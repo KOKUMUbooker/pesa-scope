@@ -69,6 +69,14 @@ public partial class App : Application
 
             var settings = await _appSettingsRepo.GetAsync();
 
+            // Apply saved theme before showing any UI
+            Application.Current!.UserAppTheme = settings.Theme switch
+            {
+                PesaLens.Core.Models.AppTheme.Light => Microsoft.Maui.ApplicationModel.AppTheme.Light,
+                PesaLens.Core.Models.AppTheme.Dark => Microsoft.Maui.ApplicationModel.AppTheme.Dark,
+                _ => Microsoft.Maui.ApplicationModel.AppTheme.Unspecified
+            };
+
             Page startPage;
 
             if (!settings.OnboardingComplete)

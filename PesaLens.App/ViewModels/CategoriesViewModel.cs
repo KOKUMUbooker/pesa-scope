@@ -38,6 +38,7 @@ public partial class CategoriesViewModel : ObservableObject
     [ObservableProperty] private bool _isChartLoading;
     [ObservableProperty] private bool _isCategoriesLoading;
     [ObservableProperty] private bool _isRulesLoading;
+    [ObservableProperty] private bool _isChartEmpty;
 
     [ObservableProperty] private bool _isRefreshing;
 
@@ -161,6 +162,7 @@ public partial class CategoriesViewModel : ObservableObject
 
             Series = [.. pieSeries];
             CategoryRows = categoryRows;
+            IsChartEmpty = total <= 0;
         }
         finally
         {
@@ -270,6 +272,15 @@ public partial class CategoriesViewModel : ObservableObject
     public async Task DeleteCategoryAsync(CategorySpendRow row)
     {
         if (row.Category.IsSystemCategory) return;
+
+        bool confirmed = await Shell.Current.DisplayAlertAsync(
+            "Delete Category",
+            $"Transactions in '{row.Category.Name}' will be moved to Uncategorized, and any linked rules or budgets will be removed. This can't be undone.",
+            "Delete",
+            "Cancel");
+
+        if (!confirmed) return;
+
         await _categoryRepo.DeleteAndReassignAsync(row.Category.Id);
         await LoadAsync();
     }

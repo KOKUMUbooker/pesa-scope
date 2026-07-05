@@ -60,6 +60,7 @@ public class DatabaseService
         await _db.DropTableAsync<ExportHistory>();
         await _db.DropTableAsync<BudgetSnapshot>();
 
+        _dbInitialized = false;   // ← allow InitializeAsync to actually run again
         await InitializeAsync();
     }
 }

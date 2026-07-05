@@ -70,6 +70,8 @@
         RefreshColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
 
         <ScrollView>
+            <Grid>
+                
             <VerticalStackLayout Spacing="0">
 
                 <!-- Hairline separator -->
@@ -83,13 +85,148 @@
                 ──────────────────────────────────────────────────────────── -->
                 <VerticalStackLayout Padding="20,20,20,40" Spacing="20">
 
-                    <!-- Loading spinner (shown while IsBusy on first load) -->
-                    <ActivityIndicator
-                        IsRunning="{Binding IsBusy}"
-                        IsVisible="{Binding IsBusy}"
-                        Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                        HorizontalOptions="Center"
-                        HeightRequest="48"/>
+                    <!-- ── View mode toggle ──────────────────────────────────────────── -->
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                        <Border Grid.Column="0" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="0,10">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsWeeklyMode}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsWeeklyMode}" Value="False">
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"/>
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SwitchViewModeCommand}" CommandParameter="{x:Static vm:DashboardViewMode.Weekly}"/>
+                            </Border.GestureRecognizers>
+                            <Label Text="Weekly" FontSize="13" FontAttributes="Bold" HorizontalOptions="Center">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsWeeklyMode}" Value="True">
+                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"/>
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsWeeklyMode}" Value="False">
+                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </Border>
+
+                        <Border Grid.Column="1" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="0,10">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsMonthlyMode}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsMonthlyMode}" Value="False">
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"/>
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SwitchViewModeCommand}" CommandParameter="{x:Static vm:DashboardViewMode.Monthly}"/>
+                            </Border.GestureRecognizers>
+                            <Label Text="Monthly" FontSize="13" FontAttributes="Bold" HorizontalOptions="Center">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsMonthlyMode}" Value="True">
+                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"/>
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsMonthlyMode}" Value="False">
+                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </Border>
+
+                        <Border Grid.Column="2" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="0,10">
+                            <Border.Triggers>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsYearlyMode}" Value="True">
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Border" Binding="{Binding IsYearlyMode}" Value="False">
+                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"/>
+                                </DataTrigger>
+                            </Border.Triggers>
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SwitchViewModeCommand}" CommandParameter="{x:Static vm:DashboardViewMode.Yearly}"/>
+                            </Border.GestureRecognizers>
+                            <Label Text="Yearly" FontSize="13" FontAttributes="Bold" HorizontalOptions="Center">
+                                <Label.Triggers>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsYearlyMode}" Value="True">
+                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"/>
+                                    </DataTrigger>
+                                    <DataTrigger TargetType="Label" Binding="{Binding IsYearlyMode}" Value="False">
+                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                                    </DataTrigger>
+                                </Label.Triggers>
+                            </Label>
+                        </Border>
+                    </Grid>
+
+                    <!-- ── Monthly mode: year/month + week chips ────────────────────── -->
+                    <VerticalStackLayout Spacing="10" IsVisible="{Binding IsMonthlyMode}">
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <Border Grid.Column="0"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                                    StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14,4">
+                                <Picker ItemsSource="{Binding AvailableMonths}"
+                                    SelectedItem="{Binding SelectedMonth}"
+                                    FontSize="14" HeightRequest="46" BackgroundColor="Transparent"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                            </Border>
+                            <Border Grid.Column="1"
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                                    StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14,4">
+                                <Picker ItemsSource="{Binding AvailableYears}"
+                                    SelectedItem="{Binding SelectedYear}"
+                                    FontSize="14" HeightRequest="46" BackgroundColor="Transparent"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                            </Border>
+                        </Grid>
+
+                        <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
+                            <HorizontalStackLayout Spacing="8"
+                                 BindableLayout.ItemsSource="{Binding AvailableWeeks}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:WeekOption">
+                                        <Border StrokeThickness="0" StrokeShape="RoundRectangle 18" Padding="14,10">
+                                            <Border.Triggers>
+                                                <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                                                </DataTrigger>
+                                                <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="False">
+                                                    <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"/>
+                                                </DataTrigger>
+                                            </Border.Triggers>
+                                            <Border.GestureRecognizers>
+                                                <TapGestureRecognizer
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:DashboardViewModel}}, Path=SelectWeekCommand}"
+                                                    CommandParameter="{Binding .}"/>
+                                            </Border.GestureRecognizers>
+                                            <Label Text="{Binding Label}" FontSize="13" FontAttributes="Bold">
+                                                <Label.Triggers>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="True">
+                                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger TargetType="Label" Binding="{Binding IsSelected}" Value="False">
+                                                        <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                                                    </DataTrigger>
+                                                </Label.Triggers>
+                                            </Label>
+                                        </Border>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </HorizontalStackLayout>
+                        </ScrollView>
+                    </VerticalStackLayout>
+
+                    <!-- ── Yearly mode: year selector ─────────────────────────────────── -->
+                    <Border Grid.Column="0"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                        StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14,4"
+                        IsVisible="{Binding IsYearlyMode}">
+                        <Picker ItemsSource="{Binding AvailableYears}"
+                            SelectedItem="{Binding SelectedYear}"
+                            FontSize="14" HeightRequest="46" BackgroundColor="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                    </Border>
 
                     <!-- ── NET BALANCE HERO CARD ─────────────────────────── -->
                     <HomeControls:BalanceCardView
@@ -100,12 +237,13 @@
 
                     <!-- ── DAILY SPENDING CHART ──────────────────────────── -->
                     <HomeControls:SpendingChartView
+                        ChartTitle="{Binding ChartTitle}"
                         PeriodLabel="{Binding PeriodLabel}"
                         Series="{Binding SpendingSeries}"
                         XAxes="{Binding XAxes}"
                         YAxes="{Binding YAxes}"/>
-                   
-                    <!-- ── TOP CATEGORIES ────────────────────────────────── -->
+
+                        <!-- ── TOP CATEGORIES ────────────────────────────────── -->
                     <HomeControls:TopCategoriesView
                         Categories="{Binding TopCategories}"/>
 
@@ -118,6 +256,15 @@
                 <!-- /body -->
 
             </VerticalStackLayout>
+
+            <!-- Overlay spinner — shares the same cell -->
+            <ActivityIndicator
+            IsRunning="{Binding IsBusy}"
+            IsVisible="{Binding IsBusy}"
+            Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+            HorizontalOptions="Center"
+            VerticalOptions="Center"/>
+            </Grid>
         </ScrollView>
     </RefreshView>
 </uranium:UraniumContentPage>

@@ -5,6 +5,9 @@ namespace PesaLens.App.Controls.Home;
 
 public partial class SpendingChartView : ContentView
 {
+    public static readonly BindableProperty ChartTitleProperty =
+        BindableProperty.Create(nameof(ChartTitle), typeof(string), typeof(SpendingChartView), "Weekly spending");
+
     public static readonly BindableProperty PeriodLabelProperty =
         BindableProperty.Create(nameof(PeriodLabel), typeof(string), typeof(SpendingChartView), string.Empty);
 
@@ -16,6 +19,12 @@ public partial class SpendingChartView : ContentView
 
     public static readonly BindableProperty YAxesProperty =
         BindableProperty.Create(nameof(YAxes), typeof(Axis[]), typeof(SpendingChartView), Array.Empty<Axis>());
+
+    public string ChartTitle
+    {
+        get => (string)GetValue(ChartTitleProperty);
+        set => SetValue(ChartTitleProperty, value);
+    }
 
     public string PeriodLabel
     {

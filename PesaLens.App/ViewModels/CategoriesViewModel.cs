@@ -8,6 +8,7 @@ using PesaLens.Core.Models;
 using SkiaSharp;
 using System.Collections.ObjectModel;
 using System.Data;
+using static Android.InputMethodServices.Keyboard;
 
 namespace PesaLens.App.ViewModels;
 
@@ -338,6 +339,14 @@ public partial class CategoriesViewModel : ObservableObject
     [RelayCommand]
     public async Task DeleteRuleAsync(AutoCategorizationRule rule)
     {
+        bool confirmed = await Shell.Current.DisplayAlertAsync(
+            "Delete Rule",
+            $"Are you sure you want to delete this rule as this can't be undone ?",
+            "Delete",
+            "Cancel");
+
+        if (!confirmed) return;
+
         await _rulesRepo.DeleteAsync(rule);
         await LoadRulesAsync();
     }

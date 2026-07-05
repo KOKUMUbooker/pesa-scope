@@ -136,6 +136,10 @@ public partial class CategoriesViewModel : ObservableObject
     [ObservableProperty] private Category? _ruleTargetCategory;
     [ObservableProperty] private AutoCategorizationRule? _editingRule;
 
+    // ── Resolved period (set by LoadChartAsync, read by the page for navigation) ──
+    public DateTime PeriodStart { get; private set; }
+    public DateTime PeriodEnd { get; private set; }
+
     public List<RuleType> RuleTypes { get; } = Enum.GetValues<RuleType>().ToList();
 
     public CategoriesViewModel(
@@ -201,6 +205,8 @@ public partial class CategoriesViewModel : ObservableObject
             var from = new DateTime(SelectedYear, SelectedMonth.Value, 1);
             var isCurrentMonth = from.Year == DateTime.Today.Year && from.Month == DateTime.Today.Month;
             var to = isCurrentMonth ? DateTime.Today : from.AddMonths(1).AddDays(-1);
+            PeriodStart = from;
+            PeriodEnd = to;
             PeriodLabel = from.ToString("MMMM yyyy");
 
             var categories = await _categoryRepo.GetAllActiveAsync();

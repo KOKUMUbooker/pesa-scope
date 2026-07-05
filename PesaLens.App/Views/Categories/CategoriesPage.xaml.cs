@@ -94,7 +94,9 @@ public partial class CategoriesPage : UraniumUI.Pages.UraniumContentPage
     {
         if (sender is ImageButton btn && btn.BindingContext is CategorySpendRow row)
         {
-            await Shell.Current.GoToAsync($"//Transactions/TransactionsPage?categoryId={row.Category.Id}");
+            await Shell.Current.GoToAsync(
+                $"//Transactions/TransactionsPage?categoryId={row.Category.Id}" +
+                $"&fromDate={_vm.PeriodStart:yyyy-MM-dd}&toDate={_vm.PeriodEnd:yyyy-MM-dd}");
         }
     }
 

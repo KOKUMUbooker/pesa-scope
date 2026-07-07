@@ -76,7 +76,9 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
     {
         try
         {
-            if (HistoricalImportEnabled)
+            var settings = await _appSettingsRepo.GetAsync();
+
+            if (HistoricalImportEnabled && !settings.ImportComplete)
                 await RunHistoricalImportAsync();
             else
                 await RunSkippedImportAsync();
@@ -121,7 +123,7 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
             CountLabel.IsVisible = false;
         });
 
-        await FinishAsync(importedCount: 0, wasHistorical: false);
+        await FinishAsync(importedCount: 0, wasHistorical: false, false, IsPesaLensStillDefault());
     }
 
     // ── Parse + insert ────────────────────────────────────────────────────────
@@ -174,9 +176,9 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
 
     // ── Completion ────────────────────────────────────────────────────────────
 
-    private async Task FinishAsync(int importedCount, bool wasHistorical, bool noMessages = false)
+    private async Task FinishAsync(int importedCount, bool wasHistorical, bool noMessages = false, bool showRestoreCard = false)
     {
-        await MainThread.InvokeOnMainThreadAsync(() =>
+        await MainThread.InvokeOnMainThreadAsync(async() =>
         {
             ImportProgressBar.Progress = 1.0;
 
@@ -214,8 +216,13 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
 
             // Show restore card whenever PesaLens was set as default,
             // even if the inbox was empty — it's still the default app.
-            if (wasHistorical)
+            if (wasHistorical || showRestoreCard)
                 RestoreDefaultCard.IsVisible = true;
+
+            // Mark import flag as done
+            var settings = await _appSettingsRepo.GetAsync();
+            settings.ImportComplete = true;
+            await _appSettingsRepo.UpdateAsync(settings);
 
             ShowDoneButton("Go to Dashboard");
         });
@@ -314,6 +321,7 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
     {
         var settings = await _appSettingsRepo.GetAsync();
         settings.OnboardingComplete = true;
+        settings.ImportComplete = true;
         await _appSettingsRepo.UpdateAsync(settings);
     }
 }

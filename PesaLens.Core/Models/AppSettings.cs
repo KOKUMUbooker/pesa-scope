@@ -37,6 +37,10 @@ public class AppSettings
     public bool OnboardingComplete { get; set; } = false;
 
     [NotNull]
+    [Column("import_complete")]
+    public bool ImportComplete { get; set; } = false;
+
+    [NotNull]
     [Column("updated_at")]
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }

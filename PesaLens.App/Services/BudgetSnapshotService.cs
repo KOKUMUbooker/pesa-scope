@@ -20,7 +20,7 @@ public class BudgetSnapshotService(
     public async Task TakeSnapshotAsync(int year, int month)
     {
         var from = new DateTime(year, month, 1);
-        var to = from.AddMonths(1).AddDays(-1); // last day of the month
+        var to = from.AddMonths(1).AddDays(-1).AddHours(23).AddMinutes(59).AddSeconds(59); // last day of the month
 
         var spendingByCategory = await _transactionRepo.GetSpendingByCategoryAsync(from, to);
         var totalSpent = await _transactionRepo.GetTotalSpentAsync(from, to);

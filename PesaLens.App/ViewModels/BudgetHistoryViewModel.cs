@@ -2,6 +2,7 @@
 using CommunityToolkit.Mvvm.Input;
 using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.Core.Models;
+using UraniumUI.Icons.MaterialSymbols;
 
 namespace PesaLens.App.ViewModels;
 
@@ -37,7 +38,16 @@ public class BudgetHistoryRow
             ? $"Ksh {Limit - Spent:N0} under limit"
             : $"Ksh {Spent:N0} spent";
 
+    // Tinted background for the status pill, derived from the same status color
+    public Color StatusBackgroundColor => ProgressColor.WithAlpha(0.14f);
+
     public string StatusEmoji => WasExceeded ? "🔴" : IsWarning ? "🟡" : "✅";
+
+    public string StatusIcon => WasExceeded
+        ? MaterialSharp.Cancel
+        : IsWarning
+            ? MaterialSharp.Error
+            : MaterialSharp.Check_circle;
 }
 
 public partial class BudgetHistoryViewModel : ObservableObject

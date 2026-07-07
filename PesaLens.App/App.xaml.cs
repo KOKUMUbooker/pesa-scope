@@ -1,8 +1,9 @@
-﻿using PesaLens.App.Data.Repositories;
+﻿using PesaLens.App.Data;
+using PesaLens.App.Data.Repositories;
 using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.App.Views.Onboarding;
 using PesaLens.App.Views.Security;
-using PesaLens.App.Data;
+using PesaLens.App.Views.Transactions;
 using Plugin.LocalNotification;
 using Plugin.LocalNotification.EventArgs;
 
@@ -106,10 +107,23 @@ public partial class App : Application
         }
     }
 
-    static void OnNotificationActionTapped(NotificationActionEventArgs e)
+    static async void OnNotificationActionTapped(NotificationActionEventArgs e)
     {
         if (!e.IsTapped) return;
-        Shell.Current.GoToAsync("//Budgets/BudgetsPage");
+
+        var mpesaCode = e.Request.ReturningData;
+
+        if (!string.IsNullOrWhiteSpace(mpesaCode))
+        {
+            // Transaction notification — navigate to detail page
+            await Shell.Current.GoToAsync(
+                $"{nameof(TransactionDetailPage)}?code={mpesaCode}");
+        }
+        else
+        {
+            // Budget notification — navigate to budgets tab
+            await Shell.Current.GoToAsync("//Budgets/BudgetsPage");
+        }
     }
 }
 

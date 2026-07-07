@@ -180,6 +180,7 @@ public class MpesaSmsReceiver : BroadcastReceiver
             NotificationId = (int)(Math.Abs(transaction.SmsId) % int.MaxValue),
             Title = title,
             Description = body,
+            ReturningData = transaction.MpesaCode, // ← carry the code through
         });
     }
 

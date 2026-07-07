@@ -3,7 +3,10 @@ using Android.Content;
 using Android.Provider;
 using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.App.Services.Interfaces;
+using PesaLens.Core.Models;
 using PesaLens.Core.Services.Interfaces;
+using Plugin.LocalNotification;
+using Plugin.LocalNotification.Core.Models;
 
 namespace PesaLens.App;
 
@@ -90,6 +93,10 @@ public class MpesaSmsReceiver : BroadcastReceiver
             if (syncMetaRepo is not null)
                 await syncMetaRepo.UpdateAfterSyncAsync(smsId, timestampMs, newlyImportedCount: 1);
 
+            // ── Transaction notification ──────────────────────────────────────────
+            if (settings.TransactionNotificationsEnabled)
+                ShowTransactionNotification(transaction);
+
             if (!settings.BudgetNotificationsEnabled) return;
 
             // Categorize and get the resolved CategoryId in one step
@@ -163,4 +170,40 @@ public class MpesaSmsReceiver : BroadcastReceiver
         var today = DateTime.Today;
         return (new DateTime(today.Year, today.Month, 1), today);
     }
+
+    private static void ShowTransactionNotification(Transaction transaction)
+    {
+        var (title, body) = BuildNotificationContent(transaction);
+
+        LocalNotificationCenter.Current.Show(new NotificationRequest
+        {
+            NotificationId = (int)(Math.Abs(transaction.SmsId) % int.MaxValue),
+            Title = title,
+            Description = body,
+        });
+    }
+
+    private static (string title, string body) BuildNotificationContent(Transaction transaction)
+    {
+        var amount = transaction.Amount.ToString("N2");
+        var balance = transaction.BalanceAfterTransaction.ToString("N2");
+        var counterparty = transaction.CounterpartyName;
+
+        var title = transaction.Type switch
+        {
+            TransactionType.SendMoney => $"Sent KES {amount} to {counterparty}",
+            TransactionType.ReceiveMoney => $"Received KES {amount} from {counterparty}",
+            TransactionType.PayBill => $"Paid KES {amount} to {counterparty}",
+            TransactionType.BuyGoods => $"Bought goods KES {amount} at {counterparty}",
+            TransactionType.Withdrawal => $"Withdrew KES {amount} at {counterparty}",
+            TransactionType.AirtimePurchase => $"Airtime KES {amount}",
+            TransactionType.Deposit => $"Deposited KES {amount}",
+            TransactionType.Fuliza => $"Fuliza KES {amount}",
+            TransactionType.Reversal => $"Reversal KES {amount}",
+            _ => $"M-Pesa KES {amount}",
+        };
+
+        return (title, $"Balance: KES {balance}");
+    }
 }
+

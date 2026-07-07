@@ -8,7 +8,7 @@ namespace PesaLens.App;
 /// Real-time capture is handled by MpesaSmsReceiver (SMS_RECEIVED),
 /// which fires regardless of default app status.
 /// </summary>
-[BroadcastReceiver(Exported = true, Permission = "android.permission.BROADCAST_SMS")]
+[BroadcastReceiver(Exported = true, Name = "com.bkokumu.pesalens.SmsReceiver", Permission = "android.permission.BROADCAST_SMS")]
 [IntentFilter(["android.provider.Telephony.SMS_DELIVER"])]
 public class SmsReceiver : BroadcastReceiver
 {
@@ -16,6 +16,5 @@ public class SmsReceiver : BroadcastReceiver
     {
         // SMS_DELIVER only fires when PesaLens is the default app (onboarding only).
         // MpesaSmsReceiver handles all post-onboarding capture via SMS_RECEIVED.
-        // No action needed here.
     }
 }

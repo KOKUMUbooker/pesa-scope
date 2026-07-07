@@ -359,9 +359,10 @@ public partial class DashboardViewModel : ObservableObject
     private async Task LoadYearlyChartAsync(int year)
     {
         var yearStart = new DateTime(year, 1, 1);
-        var yearEnd = year == DateTime.Today.Year
+        var lastDay = year == DateTime.Today.Year
             ? DateTime.Today
             : new DateTime(year, 12, 31);
+        var yearEnd = lastDay.Date.AddDays(1).AddTicks(-1); // end of lastDay, 23:59:59.9999999
 
         // Reuses the existing daily-spending query; a year of daily rows is
         // negligible to aggregate client-side, so no new repository method needed.

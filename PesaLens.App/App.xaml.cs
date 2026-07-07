@@ -80,7 +80,7 @@ public partial class App : Application
 
             Page startPage;
 
-            if (settings.ImportComplete)
+            if (settings.ImportComplete && !settings.OnboardingComplete)
                 startPage = _services.GetRequiredService<ImportProgressPage>();
             else if (!settings.OnboardingComplete)
                 startPage = _services.GetRequiredService<WelcomePage>();

@@ -80,10 +80,12 @@ public partial class App : Application
 
             Page startPage;
 
-            if (!settings.OnboardingComplete)
-                startPage = _services.GetRequiredService<WelcomePage>(); 
+            if (settings.ImportComplete)
+                startPage = _services.GetRequiredService<ImportProgressPage>();
+            else if (!settings.OnboardingComplete)
+                startPage = _services.GetRequiredService<WelcomePage>();
             else if (settings.AppLockEnabled)
-                startPage = _services.GetRequiredService<AppLockPage>(); 
+                startPage = _services.GetRequiredService<AppLockPage>();
             else
                 startPage = new AppShell();
 

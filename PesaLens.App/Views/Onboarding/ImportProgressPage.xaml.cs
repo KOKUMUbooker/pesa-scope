@@ -1,5 +1,4 @@
-﻿using Android.Provider;
-using PesaLens.App.Data.Repositories.Interfaces;
+﻿using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.App.Services.Interfaces;
 using PesaLens.Core.Models;
 using PesaLens.Core.Services.Interfaces;
@@ -77,7 +76,9 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
     {
         try
         {
-            if (HistoricalImportEnabled)
+            var settings = await _appSettingsRepo.GetAsync();
+
+            if (HistoricalImportEnabled && !settings.ImportComplete)
                 await RunHistoricalImportAsync();
             else
                 await RunSkippedImportAsync();
@@ -122,7 +123,7 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
             CountLabel.IsVisible = false;
         });
 
-        await FinishAsync(importedCount: 0, wasHistorical: false);
+        await FinishAsync(importedCount: 0, wasHistorical: false, false, IsPesaLensStillDefault());
     }
 
     // ── Parse + insert ────────────────────────────────────────────────────────
@@ -175,13 +176,9 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
 
     // ── Completion ────────────────────────────────────────────────────────────
 
-    private async Task FinishAsync(int importedCount, bool wasHistorical, bool noMessages = false)
+    private async Task FinishAsync(int importedCount, bool wasHistorical, bool noMessages = false, bool showRestoreCard = false)
     {
-        var settings = await _appSettingsRepo.GetAsync();
-        settings.OnboardingComplete = true;
-        await _appSettingsRepo.UpdateAsync(settings);
-
-        await MainThread.InvokeOnMainThreadAsync(() =>
+        await MainThread.InvokeOnMainThreadAsync(async() =>
         {
             ImportProgressBar.Progress = 1.0;
 
@@ -219,8 +216,13 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
 
             // Show restore card whenever PesaLens was set as default,
             // even if the inbox was empty — it's still the default app.
-            if (wasHistorical)
+            if (wasHistorical || showRestoreCard)
                 RestoreDefaultCard.IsVisible = true;
+
+            // Mark import flag as done
+            var settings = await _appSettingsRepo.GetAsync();
+            settings.ImportComplete = true;
+            await _appSettingsRepo.UpdateAsync(settings);
 
             ShowDoneButton("Go to Dashboard");
         });
@@ -268,15 +270,18 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
 
     private async void OnDoneClicked(object? sender, EventArgs e)
     {
-        if (IsPesaLensStillDefault() && RestoreDefaultCard.IsVisible)
+        if (IsPesaLensStillDefault())
         {
+            // Force them to restore before proceeding
             await DisplayAlertAsync(
-                "Reminder",
-                "PesaLens is still your default SMS app. " +
-                "Remember to switch back to your preferred messaging app " +
-                "from Settings → Default SMS App.",
+                "One More Step",
+                "Please switch back to your preferred SMS app before continuing. " +
+                "Tap \"Restore Default SMS App\" below to do this.",
                 "OK");
+            return; // ← block navigation
         }
+
+        await UpdateOnboardingCompleteState();
 
         if (Application.Current?.Windows.FirstOrDefault() is Window window)
             window.Page = new AppShell();
@@ -295,8 +300,28 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
 
     private static bool IsPesaLensStillDefault()
     {
-        var defaultPkg = Telephony.Sms.GetDefaultSmsPackage(
-            Android.App.Application.Context);
-        return defaultPkg == Android.App.Application.Context.PackageName;
+        var context = Android.App.Application.Context;
+
+        // API 29+: use RoleManager — the same API used to request the role
+        if (OperatingSystem.IsAndroidVersionAtLeast(29))
+        {
+            var roleManager = context.GetSystemService(
+                Android.Content.Context.RoleService) as Android.App.Roles.RoleManager;
+
+            if (roleManager is not null)
+                return roleManager.IsRoleHeld(Android.App.Roles.RoleManager.RoleSms);
+        }
+
+        // Fallback for older APIs
+        var defaultPkg = Android.Provider.Telephony.Sms.GetDefaultSmsPackage(context);
+        return defaultPkg == context.PackageName;
+    }
+
+    private async Task UpdateOnboardingCompleteState()
+    {
+        var settings = await _appSettingsRepo.GetAsync();
+        settings.OnboardingComplete = true;
+        settings.ImportComplete = true;
+        await _appSettingsRepo.UpdateAsync(settings);
     }
 }

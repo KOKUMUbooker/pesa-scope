@@ -26,7 +26,7 @@ public class AppSettings
 
     [NotNull]
     [Column("transaction_notifications_enabled")]
-    public bool TransactionNotificationsEnabled { get; set; } = true;
+    public bool TransactionNotificationsEnabled { get; set; } = false;
 
     [NotNull]
     [Column("app_lock_enabled")]
@@ -35,6 +35,10 @@ public class AppSettings
     [NotNull]
     [Column("onboarding_complete")]
     public bool OnboardingComplete { get; set; } = false;
+
+    [NotNull]
+    [Column("import_complete")]
+    public bool ImportComplete { get; set; } = false;
 
     [NotNull]
     [Column("updated_at")]

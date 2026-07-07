@@ -59,6 +59,12 @@ public partial class SettingsPage : UraniumUI.Pages.UraniumContentPage
         SyncThemeButtons();
     }
 
+    private async void OnTransactionNotificationsToggled(object? sender, ToggledEventArgs e)
+    {
+        if (!_settingsReady) return;
+        await _vm.ToggleTransactionNotificationsCommand.ExecuteAsync(e.Value);
+    }
+
     private void SyncThemeButtons()
     {
         var active = _vm.CurrentTheme;

@@ -33,6 +33,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _currencyDisplay = "Ksh";
     [ObservableProperty] private string _lastSyncedText = "Never";
     [ObservableProperty] private bool _isSyncing;
+    [ObservableProperty] private bool _transactionNotificationsEnabled;
 
     // ── Security ──────────────────────────────────────────────────────────────
 
@@ -85,6 +86,7 @@ public partial class SettingsViewModel : ObservableObject
         CurrentTheme = _appSettings.Theme;
         BudgetNotificationsEnabled = _appSettings.BudgetNotificationsEnabled;
         AppLockEnabled = _appSettings.AppLockEnabled;
+        TransactionNotificationsEnabled = _appSettings.TransactionNotificationsEnabled;
 
         CurrencyDisplay = _appSettings.CurrencyDisplay == PesaLens.Core.Models.CurrencyDisplay.Ksh ? "Ksh" : "KES";
 
@@ -133,6 +135,29 @@ public partial class SettingsViewModel : ObservableObject
 
         BudgetNotificationsEnabled = value;
         _appSettings.BudgetNotificationsEnabled = value;
+        await _appSettingsRepo.UpdateAsync(_appSettings);
+    }
+
+    [RelayCommand]
+    public async Task ToggleTransactionNotificationsAsync(bool value)
+    {
+        if (value)
+        {
+            var status = await Permissions.RequestAsync<Permissions.PostNotifications>();
+
+            if (status != PermissionStatus.Granted)
+            {
+                TransactionNotificationsEnabled = false;
+                await Shell.Current.DisplayAlertAsync(
+                    "Permission Required",
+                    "Notification permission was denied. Enable it in your device settings to receive transaction alerts.",
+                    "OK");
+                return;
+            }
+        }
+
+        TransactionNotificationsEnabled = value;
+        _appSettings.TransactionNotificationsEnabled = value;
         await _appSettingsRepo.UpdateAsync(_appSettings);
     }
 

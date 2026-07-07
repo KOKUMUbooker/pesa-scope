@@ -1,5 +1,4 @@
-﻿using Android.Provider;
-using PesaLens.App.Data.Repositories.Interfaces;
+﻿using PesaLens.App.Data.Repositories.Interfaces;
 using PesaLens.App.Services.Interfaces;
 using PesaLens.Core.Models;
 using PesaLens.Core.Services.Interfaces;
@@ -177,10 +176,6 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
 
     private async Task FinishAsync(int importedCount, bool wasHistorical, bool noMessages = false)
     {
-        var settings = await _appSettingsRepo.GetAsync();
-        settings.OnboardingComplete = true;
-        await _appSettingsRepo.UpdateAsync(settings);
-
         await MainThread.InvokeOnMainThreadAsync(() =>
         {
             ImportProgressBar.Progress = 1.0;
@@ -268,15 +263,18 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
 
     private async void OnDoneClicked(object? sender, EventArgs e)
     {
-        if (IsPesaLensStillDefault() && RestoreDefaultCard.IsVisible)
+        if (IsPesaLensStillDefault())
         {
+            // Force them to restore before proceeding
             await DisplayAlertAsync(
-                "Reminder",
-                "PesaLens is still your default SMS app. " +
-                "Remember to switch back to your preferred messaging app " +
-                "from Settings → Default SMS App.",
+                "One More Step",
+                "Please switch back to your preferred SMS app before continuing. " +
+                "Tap \"Restore Default SMS App\" below to do this.",
                 "OK");
+            return; // ← block navigation
         }
+
+        await UpdateOnboardingCompleteState();
 
         if (Application.Current?.Windows.FirstOrDefault() is Window window)
             window.Page = new AppShell();
@@ -295,8 +293,27 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
 
     private static bool IsPesaLensStillDefault()
     {
-        var defaultPkg = Telephony.Sms.GetDefaultSmsPackage(
-            Android.App.Application.Context);
-        return defaultPkg == Android.App.Application.Context.PackageName;
+        var context = Android.App.Application.Context;
+
+        // API 29+: use RoleManager — the same API used to request the role
+        if (OperatingSystem.IsAndroidVersionAtLeast(29))
+        {
+            var roleManager = context.GetSystemService(
+                Android.Content.Context.RoleService) as Android.App.Roles.RoleManager;
+
+            if (roleManager is not null)
+                return roleManager.IsRoleHeld(Android.App.Roles.RoleManager.RoleSms);
+        }
+
+        // Fallback for older APIs
+        var defaultPkg = Android.Provider.Telephony.Sms.GetDefaultSmsPackage(context);
+        return defaultPkg == context.PackageName;
+    }
+
+    private async Task UpdateOnboardingCompleteState()
+    {
+        var settings = await _appSettingsRepo.GetAsync();
+        settings.OnboardingComplete = true;
+        await _appSettingsRepo.UpdateAsync(settings);
     }
 }

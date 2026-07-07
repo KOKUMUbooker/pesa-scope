@@ -26,7 +26,7 @@ public class AppSettings
 
     [NotNull]
     [Column("transaction_notifications_enabled")]
-    public bool TransactionNotificationsEnabled { get; set; } = true;
+    public bool TransactionNotificationsEnabled { get; set; } = false;
 
     [NotNull]
     [Column("app_lock_enabled")]

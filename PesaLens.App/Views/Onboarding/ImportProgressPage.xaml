@@ -114,10 +114,11 @@
 
                         <!-- Explanation -->
                         <Label
-                            Text="PesaLens is still your default SMS app. Tap below to restore your preferred messaging app — PesaLens will keep receiving M-Pesa notifications in the background."
-                            FontSize="13" LineHeight="1.45"
+                            Text="PesaLens is still your default SMS app. You must switch back to your preferred messaging app before continuing — PesaLens will keep capturing M-Pesa transactions in the background automatically."
+                            FontSize="13"
+                            LineHeight="1.45"
                             TextColor="{AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}"/>
-
+                        
                         <!-- Restore button -->
                         <Button
                             x:Name="RestoreDefaultButton"
@@ -128,19 +129,6 @@
                             FontSize="14" FontAttributes="Bold"
                             BackgroundColor="{AppThemeBinding Light={StaticResource Secondary}, Dark={StaticResource SecondaryDark}}"
                             TextColor="{AppThemeBinding Light={StaticResource OnSecondary}, Dark={StaticResource OnSecondaryDark}}"/>
-
-                        <!-- "I'll do it later" link -->
-                        <Label
-                            Text="I'll switch back later"
-                            FontSize="12"
-                            HorizontalOptions="Center"
-                            TextDecorations="Underline"
-                            TextColor="{AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}"
-                            Opacity="0.7">
-                            <Label.GestureRecognizers>
-                                <TapGestureRecognizer Tapped="OnRestoreLaterTapped" />
-                            </Label.GestureRecognizers>
-                        </Label>
 
                     </VerticalStackLayout>
                 </Border>

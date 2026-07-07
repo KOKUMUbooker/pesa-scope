@@ -98,7 +98,7 @@ public partial class CategoriesViewModel : ObservableObject
     // ── Categories tab: search / filter / sort state ─────────────────────────
     [ObservableProperty] private string _categorySearchText = string.Empty;
     [ObservableProperty] private CategoryTypeFilter _categoryTypeFilter = CategoryTypeFilter.All;
-    [ObservableProperty] private CategorySortOption _categorySortOption = CategorySortOption.Alphabetical;
+    [ObservableProperty] private CategorySortOption _categorySortOption = CategorySortOption.HighestAmount;
     [ObservableProperty] private decimal? _minAmountFilter;
     [ObservableProperty] private decimal? _maxAmountFilter;
     [ObservableProperty] private bool _isCategoryFilterSheetOpen;
@@ -111,7 +111,7 @@ public partial class CategoriesViewModel : ObservableObject
     [ObservableProperty] private string _draftMinAmountText = string.Empty;
     [ObservableProperty] private string _draftMaxAmountText = string.Empty;
     [ObservableProperty] private CategoryTypeFilter _draftCategoryTypeFilter = CategoryTypeFilter.All;
-    [ObservableProperty] private CategorySortOption _draftCategorySortOption = CategorySortOption.Alphabetical;
+    [ObservableProperty] private CategorySortOption _draftCategorySortOption = CategorySortOption.HighestAmount;
 
     public List<CategoryTypeFilter> CategoryTypeFilterOptions { get; } = Enum.GetValues<CategoryTypeFilter>().ToList();
     public List<CategorySortOption> CategorySortOptions { get; } = Enum.GetValues<CategorySortOption>().ToList();
@@ -397,12 +397,12 @@ public partial class CategoriesViewModel : ObservableObject
         DraftMinAmountText = string.Empty;
         DraftMaxAmountText = string.Empty;
         DraftCategoryTypeFilter = CategoryTypeFilter.All;
-        DraftCategorySortOption = CategorySortOption.Alphabetical;
+        DraftCategorySortOption = CategorySortOption.HighestAmount;
 
         MinAmountFilter = null;
         MaxAmountFilter = null;
         CategoryTypeFilter = CategoryTypeFilter.All;
-        CategorySortOption = CategorySortOption.Alphabetical;
+        CategorySortOption = CategorySortOption.HighestAmount;
 
         IsCategoryFilterSheetOpen = false;
         ApplyCategoryDisplayFilters();
@@ -446,7 +446,7 @@ public partial class CategoriesViewModel : ObservableObject
             MinAmountFilter is not null ||
             MaxAmountFilter is not null ||
             CategoryTypeFilter != CategoryTypeFilter.All ||
-            CategorySortOption != CategorySortOption.Alphabetical;
+            CategorySortOption != CategorySortOption.HighestAmount;
 
         CategoriesEmptyMessage = _allCategoryRows.Count == 0
             ? "No categories to show."

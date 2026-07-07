@@ -302,7 +302,7 @@
                                                                 <FormattedString>
                                                                     <Span Text="{Binding Type}" />
                                                                     <Span Text=" · " />
-                                                                    <Span Text="{Binding TransactionDate, StringFormat='{0:h:mm tt}'}" />
+                                                                    <Span Text="{Binding TransactionDate, Converter={StaticResource UtcToLocalDateConverter}, StringFormat='{0:h:mm tt}'}" />
                                                                 </FormattedString>
                                                             </Label.FormattedText>
                                                         </Label>
@@ -510,6 +510,7 @@
     <uranium:UraniumContentPage.Resources>
         <ResourceDictionary>
             <converters:InverseBoolConverter x:Key="InvertedBoolConverter"/>
+            <converters:UtcToLocalDateConverter x:Key="UtcToLocalDateConverter"/>
             <local:StringToBoolConverter x:Key="StringToBoolConverter"
                 xmlns:local="clr-namespace:PesaLens.App.Converters" />
             <local:TransactionTypeToIconConverter x:Key="TransactionTypeToIconConverter"

@@ -139,3 +139,19 @@ public class EqualsToColorMultiConverter : IMultiValueConverter
     public object[] ConvertBack(object value, Type[] targetTypes, object? parameter, CultureInfo culture)
         => throw new NotImplementedException();
 }
+
+public class UtcToLocalDateConverter : IValueConverter
+{
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+    {
+        if (value is DateTime utc)
+            return utc.ToLocalTime();
+
+        return value is null 
+            ? DateTime.Today.ToLocalTime()
+            : value;
+    }
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => throw new NotImplementedException();
+}

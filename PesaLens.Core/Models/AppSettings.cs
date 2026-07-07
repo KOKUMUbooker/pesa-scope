@@ -25,6 +25,10 @@ public class AppSettings
     public bool BudgetNotificationsEnabled { get; set; } = false;
 
     [NotNull]
+    [Column("transaction_notifications_enabled")]
+    public bool TransactionNotificationsEnabled { get; set; } = true;
+
+    [NotNull]
     [Column("app_lock_enabled")]
     public bool AppLockEnabled { get; set; } = false;
 

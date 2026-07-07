@@ -27,41 +27,5 @@
         android:roundIcon="@mipmap/appicon_round"
         android:supportsRtl="true">
 
-		<!-- Receiver 1: SMS_DELIVER (only fires when you ARE the default app) -->
-		<receiver
-            android:name=".SmsReceiver"
-            android:exported="true"
-            android:permission="android.permission.BROADCAST_SMS">
-			<intent-filter>
-				<action android:name="android.provider.Telephony.SMS_DELIVER" />
-			</intent-filter>
-		</receiver>
-		
-		<!-- Receiver 2: MMS -->
-		<receiver
-            android:name=".MmsReceiver"
-            android:exported="true"
-            android:permission="android.permission.BROADCAST_WAP_PUSH">
-			<intent-filter>
-				<action android:name="android.provider.Telephony.WAP_PUSH_DELIVER" />
-				<data android:mimeType="application/vnd.wap.mms-message" />
-			</intent-filter>
-		</receiver>
-
-		<!-- Service: Required for "respond via message" quick-reply -->
-		<service
-            android:name=".HeadlessSmsSendService"
-            android:exported="true"
-            android:permission="android.permission.SEND_RESPOND_VIA_MESSAGE">
-			<intent-filter>
-				<action android:name="android.intent.action.RESPOND_VIA_MESSAGE" />
-				<category android:name="android.intent.category.DEFAULT" />
-				<data android:scheme="sms" />
-				<data android:scheme="smsto" />
-				<data android:scheme="mms" />
-				<data android:scheme="mmsto" />
-			</intent-filter>
-		</service>
-
 	</application>
 </manifest>

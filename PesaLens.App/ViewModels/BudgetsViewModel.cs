@@ -1,6 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PesaLens.App.Data.Repositories.Interfaces;
+using PesaLens.App.Views.Budgets;
+using PesaLens.App.Views.Transactions;
 using PesaLens.Core.Models;
 
 namespace PesaLens.App.ViewModels;
@@ -277,7 +279,7 @@ public partial class BudgetsViewModel : ObservableObject
 
     [RelayCommand]
     private async Task GoToHistoryAsync() =>
-        await Shell.Current.GoToAsync("budgetHistory");
+        await Shell.Current.GoToAsync($"{nameof(BudgetHistoryPage)}");
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 

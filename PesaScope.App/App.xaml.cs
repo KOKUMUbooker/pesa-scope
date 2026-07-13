@@ -1,13 +1,13 @@
-﻿using PesaLens.App.Data;
-using PesaLens.App.Data.Repositories;
-using PesaLens.App.Data.Repositories.Interfaces;
-using PesaLens.App.Views.Onboarding;
-using PesaLens.App.Views.Security;
-using PesaLens.App.Views.Transactions;
+﻿using PesaScope.App.Data;
+using PesaScope.App.Data.Repositories;
+using PesaScope.App.Data.Repositories.Interfaces;
+using PesaScope.App.Views.Onboarding;
+using PesaScope.App.Views.Security;
+using PesaScope.App.Views.Transactions;
 using Plugin.LocalNotification;
 using Plugin.LocalNotification.EventArgs;
 
-namespace PesaLens.App;
+namespace PesaScope.App;
 
 public partial class App : Application
 {
@@ -73,8 +73,8 @@ public partial class App : Application
             // Apply saved theme before showing any UI
             Application.Current!.UserAppTheme = settings.Theme switch
             {
-                PesaLens.Core.Models.AppTheme.Light => Microsoft.Maui.ApplicationModel.AppTheme.Light,
-                PesaLens.Core.Models.AppTheme.Dark => Microsoft.Maui.ApplicationModel.AppTheme.Dark,
+                PesaScope.Core.Models.AppTheme.Light => Microsoft.Maui.ApplicationModel.AppTheme.Light,
+                PesaScope.Core.Models.AppTheme.Dark => Microsoft.Maui.ApplicationModel.AppTheme.Dark,
                 _ => Microsoft.Maui.ApplicationModel.AppTheme.Unspecified
             };
 

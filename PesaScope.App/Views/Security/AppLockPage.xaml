@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<uranium:UraniumContentPage x:Class="PesaLens.App.Views.Security.AppLockPage"
+<uranium:UraniumContentPage x:Class="PesaScope.App.Views.Security.AppLockPage"
              xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
@@ -28,7 +28,7 @@
                    WidthRequest="80"
                    HeightRequest="80"
                    HorizontalOptions="Center" />
-            <Label Text="PesaLens"
+            <Label Text="PesaScope"
                    FontSize="20"
                    FontAttributes="Bold"
                    HorizontalOptions="Center"

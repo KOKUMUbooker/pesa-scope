@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
-using PesaLens.Core.Models;
+using PesaScope.Core.Models;
 
-namespace PesaLens.App.Converters;
+namespace PesaScope.App.Converters;
 
 // ── Visibility helpers ────────────────────────────────────────────────────────
 

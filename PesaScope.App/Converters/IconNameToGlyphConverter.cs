@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using UraniumUI.Icons.MaterialSymbols;
 
-namespace PesaLens.App.Converters;
+namespace PesaScope.App.Converters;
 
 public class IconNameToGlyphConverter : IValueConverter
 {

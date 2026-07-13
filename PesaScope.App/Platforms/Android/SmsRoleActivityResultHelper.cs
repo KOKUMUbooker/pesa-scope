@@ -1,4 +1,4 @@
-﻿namespace PesaLens.App.Platforms.Android;
+﻿namespace PesaScope.App.Platforms.Android;
 
 public static class SmsRoleActivityResultHelper
 {

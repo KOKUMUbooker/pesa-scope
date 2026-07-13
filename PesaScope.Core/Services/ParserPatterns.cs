@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace PesaLens.Core.Services;
+namespace PesaScope.Core.Services;
 
 // <summary>
 //   Patterns used as set as per the date - 7th June 2026

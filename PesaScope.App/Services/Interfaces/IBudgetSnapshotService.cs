@@ -1,4 +1,4 @@
-﻿namespace PesaLens.App.Services.Interfaces;
+﻿namespace PesaScope.App.Services.Interfaces;
 
 public interface IBudgetSnapshotService
 {

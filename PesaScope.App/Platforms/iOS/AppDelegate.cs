@@ -1,6 +1,6 @@
 ﻿using Foundation;
 
-namespace PesaLens.App
+namespace PesaScope.App
 {
     [Register("AppDelegate")]
     public class AppDelegate : MauiUIApplicationDelegate

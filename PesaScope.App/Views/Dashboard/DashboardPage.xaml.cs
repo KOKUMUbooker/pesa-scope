@@ -1,6 +1,6 @@
-﻿using PesaLens.App.ViewModels;
+﻿using PesaScope.App.ViewModels;
 
-namespace PesaLens.App.Views.Dashboard;
+namespace PesaScope.App.Views.Dashboard;
 
 public partial class DashboardPage : UraniumUI.Pages.UraniumContentPage
 {

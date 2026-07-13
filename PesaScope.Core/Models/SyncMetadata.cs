@@ -1,6 +1,6 @@
 ﻿using SQLite;
 
-namespace PesaLens.Core.Models;
+namespace PesaScope.Core.Models;
 
 /// <summary>
 /// Single-row table that tracks the state of the last SMS import.
@@ -38,7 +38,7 @@ public class SyncMetadata
     public DateTime LastSyncTime { get; set; } = DateTime.MinValue;
 
     /// <summary>
-    /// Cumulative count of all transactions ever imported into PesaLens.
+    /// Cumulative count of all transactions ever imported into PesaScope.
     /// </summary>
     [NotNull]
     [Column("imported_transaction_count")]

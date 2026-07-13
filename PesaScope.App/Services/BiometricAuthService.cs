@@ -1,7 +1,7 @@
 ﻿using Plugin.Maui.Biometric;
-using PesaLens.App.Services.Interfaces;
+using PesaScope.App.Services.Interfaces;
 
-namespace PesaLens.App.Services;
+namespace PesaScope.App.Services;
 
 public class BiometricAuthService(IBiometric biometricAuthentication) : IBiometricAuthService
 {
@@ -22,7 +22,7 @@ public class BiometricAuthService(IBiometric biometricAuthentication) : IBiometr
         }
     }
 
-    public async Task<BiometricCheckResult> AuthenticateAsync(string reason = "Unlock PesaLens")
+    public async Task<BiometricCheckResult> AuthenticateAsync(string reason = "Unlock PesaScope")
     {
         try
         {
@@ -31,7 +31,7 @@ public class BiometricAuthService(IBiometric biometricAuthentication) : IBiometr
                 using CancellationTokenSource source = new CancellationTokenSource();
                 CancellationToken token = source.Token;
                 var result = await biometricAuthentication.AuthenticateAsync(
-                    new AuthenticationRequest () {  Title = "PesaLens",  AllowPasswordAuth = true ,Description = reason },
+                    new AuthenticationRequest () {  Title = "PesaScope",  AllowPasswordAuth = true ,Description = reason },
                     token
                 );
 

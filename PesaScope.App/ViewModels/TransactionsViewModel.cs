@@ -1,10 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using PesaLens.App.Data.Repositories.Interfaces;
-using PesaLens.Core.Models;
-using PesaLens.App.Views.Transactions;
+using PesaScope.App.Data.Repositories.Interfaces;
+using PesaScope.Core.Models;
+using PesaScope.App.Views.Transactions;
 
-namespace PesaLens.App.ViewModels;
+namespace PesaScope.App.ViewModels;
 
 [QueryProperty(nameof(InitialCategoryIdRaw), "categoryId")]
 [QueryProperty(nameof(FromDateRaw), "fromDate")]

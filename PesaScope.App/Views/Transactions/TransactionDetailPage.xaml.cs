@@ -1,6 +1,6 @@
-﻿using PesaLens.App.ViewModels;
+﻿using PesaScope.App.ViewModels;
 
-namespace PesaLens.App.Views.Transactions;
+namespace PesaScope.App.Views.Transactions;
 
 public partial class TransactionDetailPage : UraniumUI.Pages.UraniumContentPage
 {

@@ -1,4 +1,4 @@
-﻿namespace PesaLens.App.Services.Interfaces;
+﻿namespace PesaScope.App.Services.Interfaces;
 
 /// <summary>
 /// Abstracts Android SMS inbox access so the rest of the app

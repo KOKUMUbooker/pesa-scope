@@ -1,26 +1,26 @@
 ﻿using LiveChartsCore.SkiaSharpView.Maui;
 using Mopups.Hosting;
-using PesaLens.App.Data.Repositories;
-using PesaLens.App.Data.Repositories.Interfaces;
-using PesaLens.App.Services;
-using PesaLens.App.Services.Interfaces;
-using PesaLens.App.ViewModels;
-using PesaLens.App.Views.Budgets;
-using PesaLens.App.Views.Categories;
-using PesaLens.App.Views.Dashboard;
-using PesaLens.App.Views.Onboarding;
-using PesaLens.App.Views.Security;
-using PesaLens.App.Views.Settings;
-using PesaLens.App.Views.Transactions;
-using PesaLens.Core.Services;
-using PesaLens.App.Data;
-using PesaLens.Core.Services.Interfaces;
+using PesaScope.App.Data.Repositories;
+using PesaScope.App.Data.Repositories.Interfaces;
+using PesaScope.App.Services;
+using PesaScope.App.Services.Interfaces;
+using PesaScope.App.ViewModels;
+using PesaScope.App.Views.Budgets;
+using PesaScope.App.Views.Categories;
+using PesaScope.App.Views.Dashboard;
+using PesaScope.App.Views.Onboarding;
+using PesaScope.App.Views.Security;
+using PesaScope.App.Views.Settings;
+using PesaScope.App.Views.Transactions;
+using PesaScope.Core.Services;
+using PesaScope.App.Data;
+using PesaScope.Core.Services.Interfaces;
 using Plugin.LocalNotification;
 using SkiaSharp.Views.Maui.Controls.Hosting;
 using Plugin.Maui.Biometric;
 using UraniumUI;
 
-namespace PesaLens.App
+namespace PesaScope.App
 {
     public static class MauiProgram
     {
@@ -46,7 +46,7 @@ namespace PesaLens.App
                 .ConfigureMauiHandlers(handlers =>
                 {
 #if ANDROID
-                    handlers.AddHandler(typeof(Shell), typeof(PesaLens.App.Platforms.Android.PesaLensShellHandler));
+                    handlers.AddHandler(typeof(Shell), typeof(PesaScope.App.Platforms.Android.PesaLensShellHandler));
 #endif
                 });
             builder.Services.AddMopupsDialogs();
@@ -80,7 +80,7 @@ namespace PesaLens.App
             builder.Services.AddTransient<ExportViewModel>();
 
             // DatabaseService registered as singleton — App.cs resolves and inits it
-            var dbPath = Path.Combine(FileSystem.AppDataDirectory, "pesalens.db");
+            var dbPath = Path.Combine(FileSystem.AppDataDirectory, "pesascope.db");
             builder.Services.AddSingleton(new DatabaseService(dbPath));
             builder.Services.AddSingleton<IBiometricAuthService, BiometricAuthService>();
             builder.Services.AddSingleton<ITransactionRepository, TransactionRepository>();

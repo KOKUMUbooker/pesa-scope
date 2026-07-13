@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace PesaLens.App.Converters;
+namespace PesaScope.App.Converters;
 
 // <summary>
 // Compares the bound integer value against <see cref="CompareValue"/> and

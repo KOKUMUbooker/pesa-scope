@@ -1,6 +1,6 @@
 ﻿using SQLite;
 
-namespace PesaLens.Core.Models;
+namespace PesaScope.Core.Models;
 
 /// <summary>
 /// A single-row table that stores the user's global monthly spending limit.

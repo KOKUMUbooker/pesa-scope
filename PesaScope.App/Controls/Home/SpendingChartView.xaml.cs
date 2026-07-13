@@ -1,7 +1,7 @@
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 
-namespace PesaLens.App.Controls.Home;
+namespace PesaScope.App.Controls.Home;
 
 public partial class SpendingChartView : ContentView
 {

@@ -1,4 +1,4 @@
-namespace PesaLens.App.Controls.Home;
+namespace PesaScope.App.Controls.Home;
 
 public partial class BalanceCardView : ContentView
 {

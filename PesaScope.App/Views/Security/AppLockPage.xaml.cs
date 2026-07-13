@@ -1,6 +1,6 @@
-﻿using PesaLens.App.Services.Interfaces;
+﻿using PesaScope.App.Services.Interfaces;
 
-namespace PesaLens.App.Views.Security;
+namespace PesaScope.App.Views.Security;
 
 public partial class AppLockPage : UraniumUI.Pages.UraniumContentPage
 {

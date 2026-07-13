@@ -1,8 +1,8 @@
 ﻿using Android.App;
 using Android.Content.PM;
-using PesaLens.App.Platforms.Android;
+using PesaScope.App.Platforms.Android;
 
-namespace PesaLens.App
+namespace PesaScope.App
 {
     [Activity(
         Theme = "@style/Maui.SplashTheme",

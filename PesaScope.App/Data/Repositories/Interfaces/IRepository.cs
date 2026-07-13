@@ -1,4 +1,4 @@
-﻿namespace PesaLens.App.Data.Repositories.Interfaces;
+﻿namespace PesaScope.App.Data.Repositories.Interfaces;
 
 /// <summary>
 /// Generic base repository interface. All entity-specific interfaces extend this.

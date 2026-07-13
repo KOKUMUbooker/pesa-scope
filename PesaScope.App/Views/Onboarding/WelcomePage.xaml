@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <uranium:UraniumContentPage
-    x:Class="PesaLens.App.Views.Onboarding.WelcomePage"
+    x:Class="PesaScope.App.Views.Onboarding.WelcomePage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
-    xmlns:local="clr-namespace:PesaLens.App.Views.Onboarding"
-    xmlns:v="clr-namespace:PesaLens.App.Views.Onboarding"
+    xmlns:local="clr-namespace:PesaScope.App.Views.Onboarding"
+    xmlns:v="clr-namespace:PesaScope.App.Views.Onboarding"
     x:DataType="v:WelcomePage"
     SafeAreaEdges="All"
     NavigationPage.HasNavigationBar="False"
@@ -39,7 +39,7 @@
                 FontAttributes="Bold"
                 TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
                 HorizontalOptions="Center"
-                Text="PesaLens"
+                Text="PesaScope"
                 />
 
             <Button

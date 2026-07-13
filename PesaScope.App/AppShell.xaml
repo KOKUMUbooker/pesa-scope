@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <Shell
     x:DataType="Application"
-    x:Class="PesaLens.App.AppShell"
+    x:Class="PesaScope.App.AppShell"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:dashboard="clr-namespace:PesaLens.App.Views.Dashboard"
-    xmlns:transactions="clr-namespace:PesaLens.App.Views.Transactions"
-    xmlns:categories="clr-namespace:PesaLens.App.Views.Categories"
-    xmlns:budgets="clr-namespace:PesaLens.App.Views.Budgets"
-    xmlns:settings="clr-namespace:PesaLens.App.Views.Settings"
+    xmlns:dashboard="clr-namespace:PesaScope.App.Views.Dashboard"
+    xmlns:transactions="clr-namespace:PesaScope.App.Views.Transactions"
+    xmlns:categories="clr-namespace:PesaScope.App.Views.Categories"
+    xmlns:budgets="clr-namespace:PesaScope.App.Views.Budgets"
+    xmlns:settings="clr-namespace:PesaScope.App.Views.Settings"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     Shell.FlyoutBehavior="Disabled" >
 

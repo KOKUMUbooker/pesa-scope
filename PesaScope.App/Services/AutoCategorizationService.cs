@@ -1,6 +1,6 @@
-﻿using PesaLens.App.Data.Repositories.Interfaces;
-using PesaLens.App.Services.Interfaces;
-using PesaLens.Core.Models;
+﻿using PesaScope.App.Data.Repositories.Interfaces;
+using PesaScope.App.Services.Interfaces;
+using PesaScope.Core.Models;
 
 public class AutoCategorizationService : IAutoCategorizationService
 {

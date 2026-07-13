@@ -1,6 +1,6 @@
-﻿using PesaLens.App.ViewModels;
+﻿using PesaScope.App.ViewModels;
 
-namespace PesaLens.App.Views.Budgets;
+namespace PesaScope.App.Views.Budgets;
 
 public partial class BudgetHistoryPage : UraniumUI.Pages.UraniumContentPage
 {

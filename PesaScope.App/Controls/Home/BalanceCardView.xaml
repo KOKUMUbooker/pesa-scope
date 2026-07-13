@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
         xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-        x:Class="PesaLens.App.Controls.Home.BalanceCardView"
-        xmlns:controls="clr-namespace:PesaLens.App.Controls.Home"
+        x:Class="PesaScope.App.Controls.Home.BalanceCardView"
+        xmlns:controls="clr-namespace:PesaScope.App.Controls.Home"
         x:DataType="controls:BalanceCardView"
         xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
         x:Name="this">

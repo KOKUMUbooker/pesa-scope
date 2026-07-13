@@ -1,10 +1,10 @@
-﻿using PesaLens.App.Data.Repositories.Interfaces;
-using PesaLens.App.Services.Interfaces;
-using PesaLens.Core.Models;
+﻿using PesaScope.App.Data.Repositories.Interfaces;
+using PesaScope.App.Services.Interfaces;
+using PesaScope.Core.Models;
 using Plugin.LocalNotification;
 using Plugin.LocalNotification.Core.Models;
 
-namespace PesaLens.App.Services;
+namespace PesaScope.App.Services;
 
 public class BudgetNotificationService(
     IAppSettingsRepository settingsRepo,

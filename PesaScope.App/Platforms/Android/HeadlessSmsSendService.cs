@@ -2,12 +2,12 @@
 using Android.Content;
 using Android.OS;
 
-namespace PesaLens.App;
+namespace PesaScope.App;
 
 // HeadlessSmsSendService.cs
 [Service(
     Exported = true,
-    Name = "com.bkokumu.pesalens.HeadlessSmsSendService",
+    Name = "com.bkokumu.pesascope.HeadlessSmsSendService",
     Permission = "android.permission.SEND_RESPOND_VIA_MESSAGE")]
 [IntentFilter(
     ["android.intent.action.RESPOND_VIA_MESSAGE"],

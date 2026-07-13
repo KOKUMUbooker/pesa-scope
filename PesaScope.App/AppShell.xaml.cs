@@ -1,9 +1,9 @@
-﻿using PesaLens.App.Services.Interfaces;
-using PesaLens.App.Views.Budgets;
-using PesaLens.App.Views.Settings;
-using PesaLens.App.Views.Transactions;
+﻿using PesaScope.App.Services.Interfaces;
+using PesaScope.App.Views.Budgets;
+using PesaScope.App.Views.Settings;
+using PesaScope.App.Views.Transactions;
 
-namespace PesaLens.App
+namespace PesaScope.App
 {
     public partial class AppShell : Shell
     {

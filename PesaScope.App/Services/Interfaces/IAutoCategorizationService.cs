@@ -1,6 +1,6 @@
-﻿using PesaLens.Core.Models;
+﻿using PesaScope.Core.Models;
 
-namespace PesaLens.App.Services.Interfaces;
+namespace PesaScope.App.Services.Interfaces;
 
 public interface IAutoCategorizationService
 {

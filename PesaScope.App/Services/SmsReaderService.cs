@@ -1,6 +1,6 @@
-﻿using PesaLens.App.Services.Interfaces;
+﻿using PesaScope.App.Services.Interfaces;
 
-namespace PesaLens.App.Services;
+namespace PesaScope.App.Services;
 
 /// <summary>
 /// Android implementation of ISmsReaderService.
@@ -17,24 +17,24 @@ public class SmsReaderService : ISmsReaderService
         Permissions.CheckStatusAsync<Permissions.Sms>()
                    .ContinueWith(t => t.Result == PermissionStatus.Granted);
 
-    public Task<List<PesaLens.App.Services.Interfaces.SmsMessage>> GetAllMpesaMessagesAsync() =>
+    public Task<List<PesaScope.App.Services.Interfaces.SmsMessage>> GetAllMpesaMessagesAsync() =>
         Task.Run(() => QueryInbox(selection: "address = ?",
                                   selectionArgs: [MpesaSender],
                                   sortOrder: "_id ASC"));
 
-    public Task<List<PesaLens.App.Services.Interfaces.SmsMessage>> GetNewMpesaMessagesAsync(long lastSmsId) =>
+    public Task<List<PesaScope.App.Services.Interfaces.SmsMessage>> GetNewMpesaMessagesAsync(long lastSmsId) =>
         Task.Run(() => QueryInbox(selection: "address = ? AND _id > ?",
                                   selectionArgs: [MpesaSender, lastSmsId.ToString()],
                                   sortOrder: "_id ASC"));
 
     // ── Private ───────────────────────────────────────────────────────────────
 
-    private static List<PesaLens.App.Services.Interfaces.SmsMessage> QueryInbox(
+    private static List<PesaScope.App.Services.Interfaces.SmsMessage> QueryInbox(
         string selection,
         string[] selectionArgs,
         string sortOrder)
     {
-        var results = new List<PesaLens.App.Services.Interfaces.SmsMessage>();
+        var results = new List<PesaScope.App.Services.Interfaces.SmsMessage>();
         var context = Android.App.Application.Context;
         var contentUri = Android.Net.Uri.Parse(SmsInboxUri);
 
@@ -61,7 +61,7 @@ public class SmsReaderService : ISmsReaderService
             if (string.IsNullOrWhiteSpace(body))
                 continue;
 
-            results.Add(new PesaLens.App.Services.Interfaces.SmsMessage(
+            results.Add(new PesaScope.App.Services.Interfaces.SmsMessage(
                 SmsId: cursor.GetLong(idIndex),
                 Timestamp: cursor.GetLong(dateIndex),
                 Body: body));

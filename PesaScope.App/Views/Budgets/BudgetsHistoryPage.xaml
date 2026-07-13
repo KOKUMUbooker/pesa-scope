@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <uranium:UraniumContentPage
-    x:Class="PesaLens.App.Views.Budgets.BudgetHistoryPage"
+    x:Class="PesaScope.App.Views.Budgets.BudgetHistoryPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
-    xmlns:vm="clr-namespace:PesaLens.App.ViewModels"
-    xmlns:converters="clr-namespace:PesaLens.App.Converters"
+    xmlns:vm="clr-namespace:PesaScope.App.ViewModels"
+    xmlns:converters="clr-namespace:PesaScope.App.Converters"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     x:DataType="vm:BudgetHistoryViewModel"
     Shell.TabBarIsVisible="False"

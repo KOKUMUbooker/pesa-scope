@@ -1,7 +1,7 @@
-﻿using PesaLens.App.Data.Repositories.Interfaces;
-using PesaLens.Core.Models;
+﻿using PesaScope.App.Data.Repositories.Interfaces;
+using PesaScope.Core.Models;
 
-namespace PesaLens.App.Data.Repositories;
+namespace PesaScope.App.Data.Repositories;
 
 public class ExportHistoryRepository(DatabaseService databaseService)
     : BaseRepository<ExportHistory>(databaseService), IExportHistoryRepository

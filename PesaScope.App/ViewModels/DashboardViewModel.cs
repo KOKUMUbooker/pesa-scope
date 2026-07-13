@@ -3,12 +3,12 @@ using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
-using PesaLens.App.Data.Repositories.Interfaces;
-using PesaLens.App.Views.Transactions;
-using PesaLens.Core.Models;
+using PesaScope.App.Data.Repositories.Interfaces;
+using PesaScope.App.Views.Transactions;
+using PesaScope.Core.Models;
 using SkiaSharp;
 
-namespace PesaLens.App.ViewModels;
+namespace PesaScope.App.ViewModels;
 
 public enum DashboardViewMode
 {

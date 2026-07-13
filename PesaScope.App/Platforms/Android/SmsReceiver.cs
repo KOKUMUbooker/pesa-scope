@@ -2,21 +2,21 @@
 using Android.Content;
 using Android.Provider;
 
-namespace PesaLens.App;
+namespace PesaScope.App;
 
 /// <summary>
 /// Required stub for Default SMS App role eligibility.
 /// Real-time capture is handled by MpesaSmsReceiver (SMS_RECEIVED),
 /// which fires regardless of default app status.
 /// </summary>
-[BroadcastReceiver(Exported = true, Name = "com.bkokumu.pesalens.SmsReceiver", Permission = "android.permission.BROADCAST_SMS")]
+[BroadcastReceiver(Exported = true, Name = "com.bkokumu.pesascope.SmsReceiver", Permission = "android.permission.BROADCAST_SMS")]
 [IntentFilter(["android.provider.Telephony.SMS_DELIVER"])]
 public class SmsReceiver : BroadcastReceiver
 {
     public override void OnReceive(Context? context, Intent? intent)
     {
         // Forward to the user's real SMS app so messages aren't lost
-        // while PesaLens is temporarily the default during onboarding.
+        // while PesaScope is temporarily the default during onboarding.
         var messages = Telephony.Sms.Intents.GetMessagesFromIntent(intent);
         if (messages is null) return;
 

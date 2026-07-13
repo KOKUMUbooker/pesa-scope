@@ -1,20 +1,20 @@
 ﻿using Android.App;
 using Android.Content;
 using Android.Provider;
-using PesaLens.App.Data.Repositories.Interfaces;
-using PesaLens.App.Services.Interfaces;
-using PesaLens.Core.Models;
-using PesaLens.Core.Services.Interfaces;
+using PesaScope.App.Data.Repositories.Interfaces;
+using PesaScope.App.Services.Interfaces;
+using PesaScope.Core.Models;
+using PesaScope.Core.Services.Interfaces;
 using Plugin.LocalNotification;
 using Plugin.LocalNotification.Core.Models;
 
-namespace PesaLens.App;
+namespace PesaScope.App;
 
 /// <summary>
 /// Listens for incoming SMS messages at all times (not just when default app).
 /// Filters for MPESA sender, parses, and saves to the local DB.
 /// </summary>
-[BroadcastReceiver(Exported = true, Name = "com.bkokumu.pesalens.MpesaSmsReceiver")]
+[BroadcastReceiver(Exported = true, Name = "com.bkokumu.pesascope.MpesaSmsReceiver")]
 [IntentFilter(["android.provider.Telephony.SMS_RECEIVED"], Priority = 999)]
 public class MpesaSmsReceiver : BroadcastReceiver
 {

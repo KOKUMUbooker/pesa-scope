@@ -3,14 +3,14 @@ using CommunityToolkit.Mvvm.Input;
 using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
-using PesaLens.App.Data.Repositories.Interfaces;
-using PesaLens.Core.Models;
+using PesaScope.App.Data.Repositories.Interfaces;
+using PesaScope.Core.Models;
 using SkiaSharp;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Globalization;
 
-namespace PesaLens.App.ViewModels;
+namespace PesaScope.App.ViewModels;
 
 public enum CategoryTypeFilter
 {

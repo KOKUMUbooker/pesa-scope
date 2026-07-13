@@ -1,7 +1,7 @@
-﻿using PesaLens.App.ViewModels;
+﻿using PesaScope.App.ViewModels;
 using System.Globalization;
 
-namespace PesaLens.App.Converters;
+namespace PesaScope.App.Converters;
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Already defined in DashboardConverters.cs — kept here for completeness.

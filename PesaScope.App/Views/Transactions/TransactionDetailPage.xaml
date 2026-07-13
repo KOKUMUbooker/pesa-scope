@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <uranium:UraniumContentPage
-    x:Class="PesaLens.App.Views.Transactions.TransactionDetailPage"
+    x:Class="PesaScope.App.Views.Transactions.TransactionDetailPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
     xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
-    xmlns:vm="clr-namespace:PesaLens.App.ViewModels"
-    xmlns:models="clr-namespace:PesaLens.Core.Models;assembly=PesaLens.Core"
-    xmlns:converters="clr-namespace:PesaLens.App.Converters"
+    xmlns:vm="clr-namespace:PesaScope.App.ViewModels"
+    xmlns:models="clr-namespace:PesaScope.Core.Models;assembly=PesaScope.Core"
+    xmlns:converters="clr-namespace:PesaScope.App.Converters"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     x:DataType="vm:TransactionDetailViewModel"
     Shell.TabBarIsVisible="False"

@@ -1,6 +1,6 @@
-﻿using PesaLens.App.ViewModels;
+﻿using PesaScope.App.ViewModels;
 
-namespace PesaLens.App.Views.Settings;
+namespace PesaScope.App.Views.Settings;
 
 public partial class ExportPage : UraniumUI.Pages.UraniumContentPage
 {

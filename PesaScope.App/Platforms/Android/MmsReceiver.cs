@@ -1,10 +1,10 @@
 ﻿using Android.App;
 using Android.Content;
 
-namespace PesaLens.App;
+namespace PesaScope.App;
 
 // MmsReceiver.cs
-[BroadcastReceiver(Exported = true, Name = "com.bkokumu.pesalens.MmsReceiver", Permission = "android.permission.BROADCAST_WAP_PUSH")]
+[BroadcastReceiver(Exported = true, Name = "com.bkokumu.pesascope.MmsReceiver", Permission = "android.permission.BROADCAST_WAP_PUSH")]
 [IntentFilter(["android.provider.Telephony.WAP_PUSH_DELIVER"], DataMimeType = "application/vnd.wap.mms-message")]
 public class MmsReceiver : BroadcastReceiver
 {

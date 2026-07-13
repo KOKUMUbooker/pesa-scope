@@ -1,9 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using PesaLens.App.Data.Repositories.Interfaces;
-using PesaLens.Core.Models;
+using PesaScope.App.Data.Repositories.Interfaces;
+using PesaScope.Core.Models;
 
-namespace PesaLens.App.ViewModels.Categories;
+namespace PesaScope.App.ViewModels.Categories;
 
 /// <summary>
 /// Drives both "Add category" (categoryId == null) and

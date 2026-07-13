@@ -1,6 +1,6 @@
-﻿using PesaLens.App.ViewModels;
+﻿using PesaScope.App.ViewModels;
 
-namespace PesaLens.App.Views.Settings;
+namespace PesaScope.App.Views.Settings;
 
 public partial class SettingsPage : UraniumUI.Pages.UraniumContentPage
 {
@@ -43,19 +43,19 @@ public partial class SettingsPage : UraniumUI.Pages.UraniumContentPage
 
     private async void OnSystemThemeSelected(object? sender, EventArgs e)
     {
-        await _vm.SetThemeCommand.ExecuteAsync(PesaLens.Core.Models.AppTheme.System);
+        await _vm.SetThemeCommand.ExecuteAsync(PesaScope.Core.Models.AppTheme.System);
         SyncThemeButtons();
     }
 
     private async void OnLightThemeSelected(object? sender, EventArgs e)
     {
-        await _vm.SetThemeCommand.ExecuteAsync(PesaLens.Core.Models.AppTheme.Light);
+        await _vm.SetThemeCommand.ExecuteAsync(PesaScope.Core.Models.AppTheme.Light);
         SyncThemeButtons();
     }
 
     private async void OnDarkThemeSelected(object? sender, EventArgs e)
     {
-        await _vm.SetThemeCommand.ExecuteAsync(PesaLens.Core.Models.AppTheme.Dark);
+        await _vm.SetThemeCommand.ExecuteAsync(PesaScope.Core.Models.AppTheme.Dark);
         SyncThemeButtons();
     }
 
@@ -80,9 +80,9 @@ public partial class SettingsPage : UraniumUI.Pages.UraniumContentPage
             label.FontAttributes = isActive ? FontAttributes.Bold : FontAttributes.None;
         }
 
-        Apply(SystemThemeButton, SystemThemeLabel, active == PesaLens.Core.Models.AppTheme.System);
-        Apply(LightThemeButton, LightThemeLabel, active == PesaLens.Core.Models.AppTheme.Light);
-        Apply(DarkThemeButton, DarkThemeLabel, active == PesaLens.Core.Models.AppTheme.Dark);
+        Apply(SystemThemeButton, SystemThemeLabel, active == PesaScope.Core.Models.AppTheme.System);
+        Apply(LightThemeButton, LightThemeLabel, active == PesaScope.Core.Models.AppTheme.Light);
+        Apply(DarkThemeButton, DarkThemeLabel, active == PesaScope.Core.Models.AppTheme.Dark);
     }
 
     // ── Currency picker ───────────────────────────────────────────────────────

@@ -3,8 +3,8 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
-    x:Class="PesaLens.App.Controls.Home.SpendingChartView"
-    xmlns:controls="clr-namespace:PesaLens.App.Controls.Home"
+    x:Class="PesaScope.App.Controls.Home.SpendingChartView"
+    xmlns:controls="clr-namespace:PesaScope.App.Controls.Home"
     x:DataType="controls:SpendingChartView"
     x:Name="this">
 

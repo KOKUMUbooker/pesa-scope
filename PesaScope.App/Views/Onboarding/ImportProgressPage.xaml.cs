@@ -1,9 +1,9 @@
-﻿using PesaLens.App.Data.Repositories.Interfaces;
-using PesaLens.App.Services.Interfaces;
-using PesaLens.Core.Models;
-using PesaLens.Core.Services.Interfaces;
+﻿using PesaScope.App.Data.Repositories.Interfaces;
+using PesaScope.App.Services.Interfaces;
+using PesaScope.Core.Models;
+using PesaScope.Core.Services.Interfaces;
 
-namespace PesaLens.App.Views.Onboarding;
+namespace PesaScope.App.Views.Onboarding;
 
 public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
 {
@@ -18,7 +18,7 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
 
     /// <summary>
     /// Set by PermissionPage before navigating here.
-    /// True  → user set PesaLens as default; we can bulk-import history.
+    /// True  → user set PesaScope as default; we can bulk-import history.
     /// False → user skipped; we only capture future transactions.
     /// </summary>
     public bool HistoricalImportEnabled { get; set; }
@@ -90,7 +90,7 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
         }
     }
 
-    // ── Historical import (user set PesaLens as default) ─────────────────────
+    // ── Historical import (user set PesaScope as default) ─────────────────────
 
     private async Task RunHistoricalImportAsync()
     {
@@ -115,7 +115,7 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
 
     private async Task RunSkippedImportAsync()
     {
-        await SetStatusAsync("Setting up PesaLens...");
+        await SetStatusAsync("Setting up PesaScope...");
 
         await MainThread.InvokeOnMainThreadAsync(() =>
         {
@@ -129,7 +129,7 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
     // ── Parse + insert ────────────────────────────────────────────────────────
 
     private async Task<int> ParseAndImportAsync(
-        List<PesaLens.App.Services.Interfaces.SmsMessage> messages)
+        List<PesaScope.App.Services.Interfaces.SmsMessage> messages)
     {
         var transactions = new List<Transaction>();
         int total = messages.Count;
@@ -197,7 +197,7 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
                 StatusIcon.Text = "⚡";
                 TitleLabel.Text = "Ready to Go!";
                 SubtitleLabel.Text =
-                    "PesaLens will automatically capture new M-Pesa transactions as they arrive.";
+                    "PesaScope will automatically capture new M-Pesa transactions as they arrive.";
                 StatusLabel.Text =
                     "Tip: you can import your history later from Settings → Sync.";
                 CountLabel.IsVisible = false;
@@ -214,7 +214,7 @@ public partial class ImportProgressPage : UraniumUI.Pages.UraniumContentPage
                     $"{importedCount} transaction{(importedCount == 1 ? "" : "s")} imported";
             }
 
-            // Show restore card whenever PesaLens was set as default,
+            // Show restore card whenever PesaScope was set as default,
             // even if the inbox was empty — it's still the default app.
             if (wasHistorical || showRestoreCard)
                 RestoreDefaultCard.IsVisible = true;

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <uranium:UraniumContentPage
-    x:Class="PesaLens.App.Views.Onboarding.ImportProgressPage"
+    x:Class="PesaScope.App.Views.Onboarding.ImportProgressPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
     NavigationPage.HasNavigationBar="False"
-    xmlns:v="clr-namespace:PesaLens.App.Views.Onboarding"
+    xmlns:v="clr-namespace:PesaScope.App.Views.Onboarding"
     x:DataType="v:ImportProgressPage"
     BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 
@@ -89,7 +89,7 @@
                 <!-- ══════════════════════════════════════════════════════
                      RESTORE DEFAULT SMS APP CARD
                      Only visible after a successful historical import,
-                     i.e. when PesaLens was temporarily set as default.
+                     i.e. when PesaScope was temporarily set as default.
                 ══════════════════════════════════════════════════════ -->
                 <Border
                     x:Name="RestoreDefaultCard"
@@ -114,7 +114,7 @@
 
                         <!-- Explanation -->
                         <Label
-                            Text="PesaLens is still your default SMS app. You must switch back to your preferred messaging app before continuing — PesaLens will keep capturing M-Pesa transactions in the background automatically."
+                            Text="PesaScope is still your default SMS app. You must switch back to your preferred messaging app before continuing — PesaScope will keep capturing M-Pesa transactions in the background automatically."
                             FontSize="13"
                             LineHeight="1.45"
                             TextColor="{AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}"/>

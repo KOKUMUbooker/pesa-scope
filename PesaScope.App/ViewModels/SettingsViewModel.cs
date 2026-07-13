@@ -1,15 +1,15 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using PesaLens.App.Data;
-using PesaLens.App.Data.Repositories.Interfaces;
-using PesaLens.App.Services.Interfaces;
-using PesaLens.App.Views.Onboarding;
-using PesaLens.App.Views.Settings;
-using PesaLens.Core.Models;
-using PesaLens.Core.Services.Interfaces;
-using AppTheme = PesaLens.Core.Models.AppTheme;
+using PesaScope.App.Data;
+using PesaScope.App.Data.Repositories.Interfaces;
+using PesaScope.App.Services.Interfaces;
+using PesaScope.App.Views.Onboarding;
+using PesaScope.App.Views.Settings;
+using PesaScope.Core.Models;
+using PesaScope.Core.Services.Interfaces;
+using AppTheme = PesaScope.Core.Models.AppTheme;
 
-namespace PesaLens.App.ViewModels;
+namespace PesaScope.App.ViewModels;
 
 public partial class SettingsViewModel : ObservableObject
 {
@@ -88,7 +88,7 @@ public partial class SettingsViewModel : ObservableObject
         AppLockEnabled = _appSettings.AppLockEnabled;
         TransactionNotificationsEnabled = _appSettings.TransactionNotificationsEnabled;
 
-        CurrencyDisplay = _appSettings.CurrencyDisplay == PesaLens.Core.Models.CurrencyDisplay.Ksh ? "Ksh" : "KES";
+        CurrencyDisplay = _appSettings.CurrencyDisplay == PesaScope.Core.Models.CurrencyDisplay.Ksh ? "Ksh" : "KES";
 
         LastSyncedText = syncMeta.LastSyncTime == DateTime.MinValue
             ? "Never"
@@ -166,8 +166,8 @@ public partial class SettingsViewModel : ObservableObject
     {
         CurrencyDisplay = value;
         _appSettings.CurrencyDisplay = value == "Ksh"
-            ? PesaLens.Core.Models.CurrencyDisplay.Ksh
-            : PesaLens.Core.Models.CurrencyDisplay.KES;
+            ? PesaScope.Core.Models.CurrencyDisplay.Ksh
+            : PesaScope.Core.Models.CurrencyDisplay.KES;
         await _appSettingsRepo.UpdateAsync(_appSettings);
     }
 
@@ -209,7 +209,7 @@ public partial class SettingsViewModel : ObservableObject
             {
                 await Shell.Current.DisplayAlertAsync(
                     "Permission Needed",
-                    "PesaLens needs SMS read permission to sync your M-Pesa messages. " +
+                    "PesaScope needs SMS read permission to sync your M-Pesa messages. " +
                     "Please grant it in your device's app settings.",
                     "OK");
                 return;
@@ -297,9 +297,9 @@ public partial class SettingsViewModel : ObservableObject
     [RelayCommand]
     public async Task SendFeedbackAsync()
     {
-        //const string email = "feedback@pesalens.app";
+        //const string email = "feedback@pesascope.app";
         const string email = "booker20dev@gmail.com";
-        const string subject = "PesaLens Feedback";
+        const string subject = "PesaScope Feedback";
 
         var body =
             $"\n\n---\n" +

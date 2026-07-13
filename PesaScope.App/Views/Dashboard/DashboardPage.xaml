@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <uranium:UraniumContentPage
-    x:Class="PesaLens.App.Views.Dashboard.DashboardPage"
+    x:Class="PesaScope.App.Views.Dashboard.DashboardPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
-    xmlns:vm="clr-namespace:PesaLens.App.ViewModels"
-    xmlns:models="clr-namespace:PesaLens.Core.Models;assembly=PesaLens.Core"
+    xmlns:vm="clr-namespace:PesaScope.App.ViewModels"
+    xmlns:models="clr-namespace:PesaScope.Core.Models;assembly=PesaScope.Core"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
-    xmlns:HomeControls="clr-namespace:PesaLens.App.Controls.Home"
+    xmlns:HomeControls="clr-namespace:PesaScope.App.Controls.Home"
     x:DataType="vm:DashboardViewModel"
     Shell.NavBarIsVisible="True"
     SafeAreaEdges="All"

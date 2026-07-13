@@ -1,7 +1,7 @@
 ﻿using Android.App;
 using Android.Runtime;
 
-namespace PesaLens.App
+namespace PesaScope.App
 {
     [Application]
     public class MainApplication : MauiApplication

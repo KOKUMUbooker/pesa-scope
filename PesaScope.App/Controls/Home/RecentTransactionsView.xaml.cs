@@ -1,7 +1,7 @@
 using System.Windows.Input;
-using PesaLens.Core.Models;
+using PesaScope.Core.Models;
 
-namespace PesaLens.App.Controls.Home;
+namespace PesaScope.App.Controls.Home;
 
 public partial class RecentTransactionsView : ContentView
 {

@@ -1,11 +1,11 @@
 ﻿using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using PesaLens.App.Data.Repositories.Interfaces;
-using PesaLens.App.Services.Interfaces;
-using PesaLens.Core.Models;
+using PesaScope.App.Data.Repositories.Interfaces;
+using PesaScope.App.Services.Interfaces;
+using PesaScope.Core.Models;
 
-namespace PesaLens.App.ViewModels;
+namespace PesaScope.App.ViewModels;
 
 /// <summary>
 /// Display wrapper around ExportHistory for the Recent Exports list.

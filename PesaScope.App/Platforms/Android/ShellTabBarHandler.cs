@@ -3,7 +3,7 @@ using Google.Android.Material.BottomNavigation;
 using Microsoft.Maui.Controls.Handlers.Compatibility;
 using Microsoft.Maui.Controls.Platform.Compatibility;
 
-namespace PesaLens.App.Platforms.Android;
+namespace PesaScope.App.Platforms.Android;
 
 public class PesaLensShellHandler : ShellRenderer
 {

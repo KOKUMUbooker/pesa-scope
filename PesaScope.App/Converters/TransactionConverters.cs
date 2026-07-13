@@ -1,8 +1,8 @@
 ﻿using System.Globalization;
-using PesaLens.Core.Models;
+using PesaScope.Core.Models;
 using AppTheme = Microsoft.Maui.ApplicationModel.AppTheme;
 
-namespace PesaLens.App.Converters;
+namespace PesaScope.App.Converters;
 
 /// <summary>
 /// Returns true when a string is non-null and non-empty.

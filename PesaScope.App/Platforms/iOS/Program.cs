@@ -1,7 +1,7 @@
 ﻿using ObjCRuntime;
 using UIKit;
 
-namespace PesaLens.App
+namespace PesaScope.App
 {
     public class Program
     {

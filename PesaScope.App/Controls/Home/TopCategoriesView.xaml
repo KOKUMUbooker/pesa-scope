@@ -2,10 +2,10 @@
 <ContentView
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:converters="clr-namespace:PesaLens.App.Converters"
-    xmlns:controls="clr-namespace:PesaLens.App.Controls.Home"
-    x:Class="PesaLens.App.Controls.Home.TopCategoriesView"
-    xmlns:vm="clr-namespace:PesaLens.App.ViewModels"
+    xmlns:converters="clr-namespace:PesaScope.App.Converters"
+    xmlns:controls="clr-namespace:PesaScope.App.Controls.Home"
+    x:Class="PesaScope.App.Controls.Home.TopCategoriesView"
+    xmlns:vm="clr-namespace:PesaScope.App.ViewModels"
     x:DataType="controls:TopCategoriesView"
     x:Name="this">
 

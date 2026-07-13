@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <uranium:UraniumContentPage
-    x:Class="PesaLens.App.Views.Onboarding.PermissionPage"
+    x:Class="PesaScope.App.Views.Onboarding.PermissionPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
     NavigationPage.HasNavigationBar="False"
-    xmlns:v="clr-namespace:PesaLens.App.Views.Onboarding"
+    xmlns:v="clr-namespace:PesaScope.App.Views.Onboarding"
     x:DataType="v:PermissionPage"
     BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
 
@@ -75,7 +75,7 @@
                         Margin="0,0,0,12" />
 
                     <Label
-                        Text="PesaLens needs permission to receive SMS so it can automatically capture new M-Pesa transactions."
+                        Text="PesaScope needs permission to receive SMS so it can automatically capture new M-Pesa transactions."
                         FontSize="15" LineHeight="1.5"
                         HorizontalTextAlignment="Center"
                         TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
@@ -148,7 +148,7 @@
 
                             <Label
                                 Grid.Column="1"
-                                Text="PesaLens only reads MPESA messages. Nothing leaves your device."
+                                Text="PesaScope only reads MPESA messages. Nothing leaves your device."
                                 FontSize="13"
                                 LineHeight="1.4"
                                 LineBreakMode="WordWrap"
@@ -185,7 +185,7 @@
                         Margin="0,0,0,12" />
 
                     <Label
-                        Text="To import your existing M-Pesa history, PesaLens needs to temporarily become your default SMS app. This is only needed to read your past messages. Once imported, PesaLens captures new transactions in the background automatically — no default app required."
+                        Text="To import your existing M-Pesa history, PesaScope needs to temporarily become your default SMS app. This is only needed to read your past messages. Once imported, PesaScope captures new transactions in the background automatically — no default app required."
                         FontSize="15" LineHeight="1.5"
                         HorizontalTextAlignment="Center"
                         TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
@@ -218,10 +218,10 @@
                                         HorizontalOptions="Center" VerticalOptions="Center" />
                                 </Border>
                                 <VerticalStackLayout Grid.Column="1" Spacing="2">
-                                    <Label Text="Set PesaLens as default"
+                                    <Label Text="Set PesaScope as default"
                                         FontSize="14" FontAttributes="Bold"
                                         TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
-                                    <Label Text="Android will show a system dialog — tap PesaLens to confirm."
+                                    <Label Text="Android will show a system dialog — tap PesaScope to confirm."
                                         FontSize="13" LineHeight="1.4"
                                         TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
                                 </VerticalStackLayout>
@@ -247,7 +247,7 @@
                                     <Label Text="We import your M-Pesa history"
                                         FontSize="14" FontAttributes="Bold"
                                         TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
-                                    <Label Text="PesaLens reads all past MPESA messages and categorizes them."
+                                    <Label Text="PesaScope reads all past MPESA messages and categorizes them."
                                         FontSize="13" LineHeight="1.4"
                                         TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
                                 </VerticalStackLayout>
@@ -273,7 +273,7 @@
                                     <Label Text="Switch back — we remind you"
                                         FontSize="14" FontAttributes="Bold"
                                         TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
-                                    <Label Text="After import, PesaLens prompts you to restore your preferred SMS app."
+                                    <Label Text="After import, PesaScope prompts you to restore your preferred SMS app."
                                         FontSize="13" LineHeight="1.4"
                                         TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
                                 </VerticalStackLayout>
@@ -328,7 +328,7 @@
                         FontSize="14" FontAttributes="Bold"
                         TextColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}" />
                     <Label x:Name="DeniedMessage"
-                        Text="PesaLens cannot capture new transactions without this. Tap Try Again or go to Settings → Apps → PesaLens → Permissions."
+                        Text="PesaScope cannot capture new transactions without this. Tap Try Again or go to Settings → Apps → PesaScope → Permissions."
                         FontSize="13" LineHeight="1.4"
                         TextColor="{AppThemeBinding Light={StaticResource OnErrorContainer}, Dark={StaticResource OnErrorContainerDark}}" />
                 </VerticalStackLayout>

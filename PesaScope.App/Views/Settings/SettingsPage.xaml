@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <uranium:UraniumContentPage
-    x:Class="PesaLens.App.Views.Settings.SettingsPage"
+    x:Class="PesaScope.App.Views.Settings.SettingsPage"
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
-    xmlns:vm="clr-namespace:PesaLens.App.ViewModels"
+    xmlns:vm="clr-namespace:PesaScope.App.ViewModels"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     x:DataType="vm:SettingsViewModel"
     SafeAreaEdges="All"
@@ -587,7 +587,7 @@
                                 FontSize="15"
                                 TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
                                 <Label
-                                    Text="PesaLens is open source — enjoying it? Leave a star ⭐"
+                                    Text="PesaScope is open source — enjoying it? Leave a star ⭐"
                                     FontSize="11"
                                     TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
                             </VerticalStackLayout>

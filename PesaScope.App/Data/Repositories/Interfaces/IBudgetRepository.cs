@@ -1,6 +1,6 @@
-﻿using PesaLens.Core.Models;
+﻿using PesaScope.Core.Models;
 
-namespace PesaLens.App.Data.Repositories.Interfaces;
+namespace PesaScope.App.Data.Repositories.Interfaces;
 
 public interface IBudgetRepository : IRepository<Budget>
 {

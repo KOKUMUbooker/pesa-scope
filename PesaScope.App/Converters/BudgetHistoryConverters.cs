@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace PesaLens.App.Converters;
+namespace PesaScope.App.Converters;
 
 /// <summary>
 /// Returns true only when ALL bound bool values are true.

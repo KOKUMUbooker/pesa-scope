@@ -1,7 +1,7 @@
-﻿using PesaLens.Core.Models;
+﻿using PesaScope.Core.Models;
 using SQLite;
 
-namespace PesaLens.App.Data;
+namespace PesaScope.App.Data;
 
 /// <summary>
 /// Owns the single SQLiteAsyncConnection for the app.

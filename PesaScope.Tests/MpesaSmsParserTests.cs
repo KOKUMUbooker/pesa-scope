@@ -1,8 +1,8 @@
-﻿using PesaLens.Core.Models;
-using PesaLens.Core.Services;
+﻿using PesaScope.Core.Models;
+using PesaScope.Core.Services;
 using Xunit;
 
-namespace PesaLens.Tests;
+namespace PesaScope.Tests;
 
 /// <summary>
 /// Tests for MpesaSmsParser covering all M-Pesa message types.

@@ -1,7 +1,7 @@
 ﻿using Android.App.Roles;
-using PesaLens.App.Platforms.Android;
+using PesaScope.App.Platforms.Android;
 
-namespace PesaLens.App.Views.Onboarding;
+namespace PesaScope.App.Views.Onboarding;
 
 public partial class PermissionPage : UraniumUI.Pages.UraniumContentPage
 {
@@ -62,8 +62,8 @@ public partial class PermissionPage : UraniumUI.Pages.UraniumContentPage
         {
             ShowDeniedBanner(
                 title: "Permission denied",
-                message: "PesaLens cannot capture new M-Pesa transactions without this. " +
-                         "Tap Try Again or go to Settings → Apps → PesaLens → Permissions → SMS.");
+                message: "PesaScope cannot capture new M-Pesa transactions without this. " +
+                         "Tap Try Again or go to Settings → Apps → PesaScope → Permissions → SMS.");
             PrimaryButton.Text = "Try Again";
         }
     }
@@ -129,7 +129,7 @@ public partial class PermissionPage : UraniumUI.Pages.UraniumContentPage
             {
                 ShowDeniedBanner(
                     title: "Default app not set",
-                    message: "Without this, PesaLens can only capture future transactions. " +
+                    message: "Without this, PesaScope can only capture future transactions. " +
                              "Tap 'Set as Default' to try again, or skip to continue without history.");
                 PrimaryButton.Text = "Set as Default";
             }

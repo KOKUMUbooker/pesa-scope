@@ -1,10 +1,10 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using PesaLens.App.Data.Repositories.Interfaces;
-using PesaLens.Core.Models;
+using PesaScope.App.Data.Repositories.Interfaces;
+using PesaScope.Core.Models;
 using UraniumUI.Icons.MaterialSymbols;
 
-namespace PesaLens.App.ViewModels;
+namespace PesaScope.App.ViewModels;
 
 /// <summary>
 /// Represents a single category row in the history view.

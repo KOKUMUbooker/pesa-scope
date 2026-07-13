@@ -1,4 +1,4 @@
-﻿namespace PesaLens.App.Services.Interfaces;
+﻿namespace PesaScope.App.Services.Interfaces;
 
 public enum BiometricCheckResult
 {
@@ -12,5 +12,5 @@ public enum BiometricCheckResult
 public interface IBiometricAuthService
 {
     Task<bool> IsAvailableAsync();
-    Task<BiometricCheckResult> AuthenticateAsync(string reason = "Unlock PesaLens");
+    Task<BiometricCheckResult> AuthenticateAsync(string reason = "Unlock PesaScope");
 }

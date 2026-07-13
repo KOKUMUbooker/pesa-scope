@@ -1,4 +1,4 @@
-﻿namespace PesaLens.App;
+﻿namespace PesaScope.App;
 
 /// <summary>
 /// Thin bridge that lets platform components (BroadcastReceiver, etc.)

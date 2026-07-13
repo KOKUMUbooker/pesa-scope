@@ -1,15 +1,15 @@
 ﻿using System.Globalization;
 using CsvHelper;
 using CsvHelper.Configuration;
-using PesaLens.App.Data.Repositories.Interfaces;
-using PesaLens.App.Services.Interfaces;
-using PesaLens.Core.Models;
+using PesaScope.App.Data.Repositories.Interfaces;
+using PesaScope.App.Services.Interfaces;
+using PesaScope.Core.Models;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using IContainer = QuestPDF.Infrastructure.IContainer;
 using Colors = QuestPDF.Helpers.Colors;
 
-namespace PesaLens.App.Services;
+namespace PesaScope.App.Services;
 
 public class ReportExportService(
     ITransactionRepository transactionRepo,
@@ -414,7 +414,7 @@ public class ReportExportService(
 
             row.RelativeItem().Column(col =>
             {
-                col.Item().Text("PesaLens").FontSize(11).FontColor(Colors.Grey.Darken1);
+                col.Item().Text("PesaScope").FontSize(11).FontColor(Colors.Grey.Darken1);
                 col.Item().Text(title).FontSize(16).Bold();
                 col.Item().Text(subtitle).FontSize(10).FontColor(Colors.Grey.Darken2);
             });
@@ -428,7 +428,7 @@ public class ReportExportService(
     {
         container.AlignCenter().Text(text =>
         {
-            text.Span("PesaLens — Page ").FontSize(8).FontColor(Colors.Grey.Medium);
+            text.Span("PesaScope — Page ").FontSize(8).FontColor(Colors.Grey.Medium);
             text.CurrentPageNumber().FontSize(8).FontColor(Colors.Grey.Medium);
             text.Span(" of ").FontSize(8).FontColor(Colors.Grey.Medium);
             text.TotalPages().FontSize(8).FontColor(Colors.Grey.Medium);

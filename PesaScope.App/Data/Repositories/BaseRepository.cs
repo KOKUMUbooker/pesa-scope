@@ -1,7 +1,7 @@
-﻿using PesaLens.App.Data.Repositories.Interfaces;
+﻿using PesaScope.App.Data.Repositories.Interfaces;
 using SQLite;
 
-namespace PesaLens.App.Data.Repositories;
+namespace PesaScope.App.Data.Repositories;
 
 /// <summary>
 /// Generic base repository wiring up common CRUD operations against SQLiteAsyncConnection.

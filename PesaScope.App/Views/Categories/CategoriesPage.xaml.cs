@@ -1,7 +1,7 @@
-﻿using PesaLens.App.ViewModels;
-using PesaLens.Core.Models;
+﻿using PesaScope.App.ViewModels;
+using PesaScope.Core.Models;
 
-namespace PesaLens.App.Views.Categories;
+namespace PesaScope.App.Views.Categories;
 
 public partial class CategoriesPage : UraniumUI.Pages.UraniumContentPage
 {

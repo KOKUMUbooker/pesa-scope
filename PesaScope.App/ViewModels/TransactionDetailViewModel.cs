@@ -1,11 +1,11 @@
 ﻿using Android.Widget;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using PesaLens.App.Data.Repositories.Interfaces;
-using PesaLens.Core.Models;
+using PesaScope.App.Data.Repositories.Interfaces;
+using PesaScope.Core.Models;
 using System.Collections.ObjectModel;
 
-namespace PesaLens.App.ViewModels;
+namespace PesaScope.App.ViewModels;
 
 [QueryProperty(nameof(MpesaCode), "code")]
 public partial class TransactionDetailViewModel : ObservableObject

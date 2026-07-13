@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<uranium:UraniumContentPage
+    x:Class="PesaScope.App.Views.Settings.ExportPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
+    xmlns:vm="clr-namespace:PesaScope.App.ViewModels"
+    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
+    xmlns:converters="clr-namespace:PesaScope.App.Converters"
+    x:DataType="vm:ExportViewModel"
+    Shell.TabBarIsVisible="False"
+    SafeAreaEdges="All"
+    BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
+
+    <uranium:UraniumContentPage.Resources>
+        <converters:InverseBoolConverter x:Key="InvertedBool"/>
+    </uranium:UraniumContentPage.Resources>
+
+    <!-- ── Title bar ─────────────────────────────────────────────────────── -->
+    <Shell.TitleView>
+        <Grid Padding="5,10">
+            <Label Text="Export &amp; Reports" FontSize="22" FontAttributes="Bold"
+                   VerticalOptions="Center"
+                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+        </Grid>
+    </Shell.TitleView>
+
+    <Grid RowDefinitions="*,Auto">
+
+        <!-- ── Scrollable body ───────────────────────────────────────────── -->
+        <ScrollView Grid.Row="0">
+            <VerticalStackLayout Spacing="24" Padding="20,20,20,40">
+
+                <!-- ── Global loading indicator ──────────────────────────── -->
+                <VerticalStackLayout IsVisible="{Binding IsLoading}"
+                                     Spacing="12" HorizontalOptions="Center"
+                                     Padding="0,40">
+                    <ActivityIndicator IsRunning="{Binding IsLoading}"
+                                       Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                       WidthRequest="36" HeightRequest="36"
+                                       HorizontalOptions="Center"/>
+                    <Label Text="Loading…" FontSize="14" HorizontalOptions="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                </VerticalStackLayout>
+
+                <VerticalStackLayout Spacing="24" IsVisible="{Binding IsPickerReady}">
+
+                    <!-- ══════════════════════════════════════════════════════
+                         Export Transactions (CSV / PDF)
+                         ══════════════════════════════════════════════════════ -->
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="TRANSACTIONS" FontSize="11" FontAttributes="Bold"
+                               CharacterSpacing="1.2"
+                               TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+
+                        <Border BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                                Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                StrokeThickness="1" StrokeShape="RoundRectangle 14" Padding="16">
+                            <VerticalStackLayout Spacing="14">
+
+                                <Label Text="Export raw transaction records for a date range."
+                                       FontSize="12"
+                                       TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+
+                                <!-- Date range -->
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                                    <Border Grid.Column="0"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                                            StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="12,0">
+                                        <DatePicker Date="{Binding RangeFrom}" FontSize="14" HeightRequest="44"
+                                                    TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"
+                                                    BackgroundColor="Transparent"/>
+                                    </Border>
+                                    <Border Grid.Column="1"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                                            StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="12,0">
+                                        <DatePicker Date="{Binding RangeTo}" FontSize="14" HeightRequest="44"
+                                                    TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"
+                                                    BackgroundColor="Transparent"/>
+                                    </Border>
+                                </Grid>
+
+                                <!-- Export buttons -->
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                                    <Button Grid.Column="0" Text="Export CSV"
+                                            Command="{Binding ExportTransactionsCsvCommand}"
+                                            IsEnabled="{Binding IsExporting, Converter={StaticResource InvertedBool}}"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
+                                            TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"
+                                            CornerRadius="10" FontSize="13" HeightRequest="42"/>
+                                    <Button Grid.Column="1" Text="Export PDF"
+                                            Command="{Binding ExportTransactionsPdfCommand}"
+                                            IsEnabled="{Binding IsExporting, Converter={StaticResource InvertedBool}}"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                            TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"
+                                            CornerRadius="10" FontSize="13" HeightRequest="42"/>
+                                </Grid>
+
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- ══════════════════════════════════════════════════════
+                         Spending Summary (CSV / PDF)
+                         ══════════════════════════════════════════════════════ -->
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="SPENDING SUMMARY" FontSize="11" FontAttributes="Bold"
+                               CharacterSpacing="1.2"
+                               TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+
+                        <Border BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                                Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                StrokeThickness="1" StrokeShape="RoundRectangle 14" Padding="16">
+                            <VerticalStackLayout Spacing="14">
+
+                                <Label Text="Totals and category breakdown for the same date range above."
+                                       FontSize="12"
+                                       TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                                    <Button Grid.Column="0" Text="Export CSV"
+                                            Command="{Binding ExportSpendingSummaryCsvCommand}"
+                                            IsEnabled="{Binding IsExporting, Converter={StaticResource InvertedBool}}"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
+                                            TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"
+                                            CornerRadius="10" FontSize="13" HeightRequest="42"/>
+                                    <Button Grid.Column="1" Text="Export PDF"
+                                            Command="{Binding ExportSpendingSummaryPdfCommand}"
+                                            IsEnabled="{Binding IsExporting, Converter={StaticResource InvertedBool}}"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                            TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"
+                                            CornerRadius="10" FontSize="13" HeightRequest="42"/>
+                                </Grid>
+
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- ══════════════════════════════════════════════════════
+                         Budget Compliance (CSV / PDF)
+                         ══════════════════════════════════════════════════════ -->
+                    <VerticalStackLayout Spacing="10">
+                        <Label Text="BUDGET COMPLIANCE" FontSize="11" FontAttributes="Bold"
+                               CharacterSpacing="1.2"
+                               TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+
+                        <Border BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                                Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                StrokeThickness="1" StrokeShape="RoundRectangle 14" Padding="16">
+                            <VerticalStackLayout Spacing="14">
+
+                                <Label Text="Limit vs spend for a year, or a single month."
+                                       FontSize="12"
+                                       TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+
+                                <!-- Year / Month pickers -->
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                                    <Border Grid.Column="0"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                                            StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14,0">
+                                        <Picker Title="Year"
+                                                ItemsSource="{Binding AvailableYears}"
+                                                SelectedItem="{Binding SelectedYear}"
+                                                FontSize="14" HeightRequest="44"
+                                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"
+                                                TitleColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                                                BackgroundColor="Transparent"/>
+                                    </Border>
+                                    <Border Grid.Column="1"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                                            StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14,0">
+                                        <Picker Title="Month"
+                                                ItemsSource="{Binding AvailableMonths}"
+                                                SelectedItem="{Binding SelectedMonthName}"
+                                                FontSize="14" HeightRequest="44"
+                                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"
+                                                TitleColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                                                BackgroundColor="Transparent"/>
+                                    </Border>
+                                </Grid>
+
+                                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                                    <Button Grid.Column="0" Text="Export CSV"
+                                            Command="{Binding ExportBudgetComplianceCsvCommand}"
+                                            IsEnabled="{Binding IsExporting, Converter={StaticResource InvertedBool}}"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
+                                            TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"
+                                            CornerRadius="10" FontSize="13" HeightRequest="42"/>
+                                    <Button Grid.Column="1" Text="Export PDF"
+                                            Command="{Binding ExportBudgetCompliancePdfCommand}"
+                                            IsEnabled="{Binding IsExporting, Converter={StaticResource InvertedBool}}"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                            TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"
+                                            CornerRadius="10" FontSize="13" HeightRequest="42"/>
+                                </Grid>
+
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <!-- ══════════════════════════════════════════════════════
+                         Recent Exports
+                         ══════════════════════════════════════════════════════ -->
+                    <VerticalStackLayout Spacing="10">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <Label Grid.Column="0" Text="RECENT EXPORTS" FontSize="11" FontAttributes="Bold"
+                                   CharacterSpacing="1.2" VerticalOptions="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                            <Label Grid.Column="1" Text="Clear All" FontSize="11" FontAttributes="Bold"
+                                   VerticalOptions="Center"
+                                   IsVisible="{Binding HasRecentExports}"
+                                   TextColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}">
+                                <Label.GestureRecognizers>
+                                    <TapGestureRecognizer Command="{Binding ClearAllExportsCommand}"/>
+                                </Label.GestureRecognizers>
+                            </Label>
+                        </Grid>
+
+                        <!-- Empty state -->
+                        <Border BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                                Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                StrokeThickness="1" StrokeShape="RoundRectangle 14" Padding="20"
+                                IsVisible="{Binding HasRecentExports, Converter={StaticResource InvertedBool}}">
+                            <Label Text="Exports you generate will show up here for quick re-sharing."
+                                   FontSize="13" HorizontalTextAlignment="Center"
+                                   TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                        </Border>
+
+                        <!-- List -->
+                        <Border BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                                Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                StrokeThickness="1" StrokeShape="RoundRectangle 14" Padding="0"
+                                IsVisible="{Binding HasRecentExports}">
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecentExports}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ExportHistoryRow">
+                                        <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,12" ColumnSpacing="14">
+                                            <Grid.GestureRecognizers>
+                                                <TapGestureRecognizer
+                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ExportViewModel}}, Path=ShareExistingCommand}"
+                                                    CommandParameter="{Binding .}"/>
+                                            </Grid.GestureRecognizers>
+
+                                            <Image Grid.Column="0" VerticalOptions="Center" WidthRequest="24" HeightRequest="24">
+                                                <Image.Source>
+                                                    <FontImageSource FontFamily="MaterialSharp"
+                                                                     Glyph="{x:Static m:MaterialSharp.Description}"
+                                                                     Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                                                     Size="22"/>
+                                                </Image.Source>
+                                            </Image>
+
+                                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                                <Label FontSize="14"
+                                                       TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}">
+                                                    <Label.FormattedText>
+                                                        <FormattedString>
+                                                            <Span Text="{Binding Title}" FontAttributes="Bold"/>
+                                                            <Span Text="  ·  "/>
+                                                            <Span Text="{Binding FormatLabel}"/>
+                                                        </FormattedString>
+                                                    </Label.FormattedText>
+                                                </Label>
+                                                <Label Text="{Binding Subtitle}" FontSize="11"
+                                                       TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                                            </VerticalStackLayout>
+
+                                            <Image Grid.Column="2" VerticalOptions="Center" WidthRequest="20" HeightRequest="20">
+                                                <Image.Source>
+                                                    <FontImageSource FontFamily="MaterialSharp"
+                                                                     Glyph="{x:Static m:MaterialSharp.Ios_share}"
+                                                                     Color="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                                                                     Size="18"/>
+                                                </Image.Source>
+                                            </Image>
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </Border>
+                    </VerticalStackLayout>
+
+                </VerticalStackLayout>
+                <!-- end IsPickerReady content -->
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ── Exporting overlay ─────────────────────────────────────────── -->
+        <Grid Grid.Row="0" Grid.RowSpan="2"
+              IsVisible="{Binding IsExporting}"
+              BackgroundColor="{AppThemeBinding Light=#80000000, Dark=#80000000}">
+            <VerticalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="12">
+                <ActivityIndicator IsRunning="{Binding IsExporting}" Color="White" WidthRequest="36" HeightRequest="36"/>
+                <Label Text="Generating report…" FontSize="14" TextColor="White"/>
+            </VerticalStackLayout>
+        </Grid>
+
+    </Grid>
+
+</uranium:UraniumContentPage>

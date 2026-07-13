@@ -1,0 +1,608 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<uranium:UraniumContentPage
+    x:Class="PesaScope.App.Views.Settings.SettingsPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
+    xmlns:vm="clr-namespace:PesaScope.App.ViewModels"
+    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
+    x:DataType="vm:SettingsViewModel"
+    SafeAreaEdges="All"
+    NavigationPage.HasNavigationBar="False"
+    BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
+
+    <Shell.TitleView>
+        <Grid
+          Grid.Row="0"
+          ColumnDefinitions="*,Auto"
+          Padding="5,10,5,10">
+            <Label
+              Grid.Column="0"
+              Text="Settings"
+              FontSize="22"
+              FontAttributes="Bold"
+              VerticalOptions="Center"
+              TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+        </Grid>
+    </Shell.TitleView>
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20,20,20,100" Spacing="24">
+            <!-- ── General Settings ──────────────────────────────────── -->
+            <VerticalStackLayout Spacing="10">
+                <Label
+                    Text="GENERAL"
+                    FontSize="11"
+                    FontAttributes="Bold"
+                    CharacterSpacing="1.2"
+                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+
+                <Border
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                    Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                    StrokeThickness="1"
+                    Padding="0">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="14" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout>
+
+                        <!-- Theme -->
+                        <VerticalStackLayout Padding="16,14" Spacing="10">
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                                <Image Grid.Column="0" VerticalOptions="Center">
+                                    <Image.Source>
+                                        <FontImageSource
+                                            FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Colors}"
+                                            Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                            Size="24" />
+                                    </Image.Source>
+                                </Image>
+                                <Label
+                                    Grid.Column="1"
+                                    Text="Theme"
+                                    FontSize="15"
+                                    VerticalOptions="Center"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                                <Border x:Name="SystemThemeButton" Grid.Column="0" Padding="0,8" StrokeThickness="1">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="10" />
+                                    </Border.StrokeShape>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnSystemThemeSelected" />
+                                    </Border.GestureRecognizers>
+                                    <Label x:Name="SystemThemeLabel" Text="System" FontSize="13" HorizontalOptions="Center" />
+                                </Border>
+
+                                <Border x:Name="LightThemeButton" Grid.Column="1" Padding="0,8" StrokeThickness="1">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="10" />
+                                    </Border.StrokeShape>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnLightThemeSelected" />
+                                    </Border.GestureRecognizers>
+                                    <Label x:Name="LightThemeLabel" Text="Light" FontSize="13" HorizontalOptions="Center" />
+                                </Border>
+
+                                <Border x:Name="DarkThemeButton" Grid.Column="2" Padding="0,8" StrokeThickness="1">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="10" />
+                                    </Border.StrokeShape>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Tapped="OnDarkThemeSelected" />
+                                    </Border.GestureRecognizers>
+                                    <Label x:Name="DarkThemeLabel" Text="Dark" FontSize="13" HorizontalOptions="Center" />
+                                </Border>
+                            </Grid>
+                        </VerticalStackLayout>
+
+                        <BoxView HeightRequest="1" Margin="8,0"
+                            Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                            Opacity="0.5" />
+
+
+                        <!-- Budget Notifications -->
+                        <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,14" ColumnSpacing="14">
+                             
+                            <Image Grid.Column="0" VerticalOptions="Center">
+                                <Image.Source>
+                                    <FontImageSource
+                                      FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Notifications}"
+                                      Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                      Size="24" />
+                                </Image.Source>
+                            </Image>
+                            <Label
+                                Grid.Column="1"
+                                Text="Budget Notifications"
+                                FontSize="15"
+                                VerticalOptions="Center"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                            <Switch
+                                Grid.Column="2"
+                                IsToggled="{Binding BudgetNotificationsEnabled}"
+                                Toggled="OnBudgetNotificationsToggled"
+                                OnColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                ThumbColor="White"
+                                VerticalOptions="Center" />
+                        </Grid>
+
+                        <BoxView HeightRequest="1" Margin="8,0"
+                            Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                            Opacity="0.5" />
+
+                        <!-- Transaction Notifications -->
+                        <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,14" ColumnSpacing="14">
+                            <Image Grid.Column="0" VerticalOptions="Center">
+                                <Image.Source>
+                                    <FontImageSource
+                                        FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Sms}"
+                                        Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                        Size="24" />
+                                </Image.Source>
+                            </Image>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                <Label
+                                    Text="Transaction Notifications"
+                                    FontSize="15"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                                <Label
+                                    Text="Get notified when a new M-Pesa transaction is detected"
+                                    FontSize="11"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                            </VerticalStackLayout>
+                            <Switch
+                                Grid.Column="2"
+                                IsToggled="{Binding TransactionNotificationsEnabled}"
+                                Toggled="OnTransactionNotificationsToggled"
+                                OnColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                ThumbColor="White"
+                                VerticalOptions="Center" />
+                        </Grid>
+
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- ── Reports ───────────────────────────────────────────── -->
+            <VerticalStackLayout Spacing="10">
+                <Label
+                    Text="REPORTS"
+                    FontSize="11"
+                    FontAttributes="Bold"
+                    CharacterSpacing="1.2"
+                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+
+                <Border
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                    Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                    StrokeThickness="1"
+                    Padding="0">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="14" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout>
+
+                        <!-- Export & Reports -->
+                        <Grid
+                            ColumnDefinitions="Auto,*,Auto"
+                            Padding="16,14"
+                            ColumnSpacing="14">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenExportsCommand}" />
+                            </Grid.GestureRecognizers>
+                            <Image Grid.Column="0" VerticalOptions="Center">
+                                <Image.Source>
+                                    <FontImageSource
+                                        FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Ios_share}"
+                                        Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                        Size="24" />
+                                </Image.Source>
+                            </Image>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                <Label
+                                    Text="Export &amp; Reports"
+                                    FontSize="15"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                                <Label
+                                    Text="Export transactions, spending summaries, and budget reports"
+                                    FontSize="11"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                            </VerticalStackLayout>
+                            <Label
+                                Grid.Column="2"
+                                Text="›"
+                                FontSize="20"
+                                VerticalOptions="Center"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                        </Grid>
+
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+
+
+
+            <!-- ── Security ──────────────────────────────────────────── -->
+            <VerticalStackLayout Spacing="10">
+                <Label
+                    Text="SECURITY"
+                    FontSize="11"
+                    FontAttributes="Bold"
+                    CharacterSpacing="1.2"
+                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+
+                <Border
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                    Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                    StrokeThickness="1"
+                    Padding="0">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="14" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout>
+
+                        <!-- App Lock -->
+                        <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,14" ColumnSpacing="14">
+                            <Image Grid.Column="0" VerticalOptions="Center">
+                                <Image.Source>
+                                    <FontImageSource
+                                       FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Security}"
+                                       Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                       Size="24" />
+                                </Image.Source>
+                            </Image>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                <Label
+                                    Text="App Lock"
+                                    FontSize="15"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                                <Label
+                                    Text="Require fingerprint, face, or device PIN to open"
+                                    FontSize="11"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                            </VerticalStackLayout>
+                            <Switch
+                                Grid.Column="2"
+                                IsToggled="{Binding AppLockEnabled}"
+                                Toggled="OnAppLockToggled"
+                                OnColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                ThumbColor="White"
+                                VerticalOptions="Center" />
+                        </Grid>
+
+                        <BoxView HeightRequest="1" Margin="16,0"
+                            Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                            Opacity="0.5" />
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- ── Data Management ───────────────────────────────────── -->
+            <VerticalStackLayout Spacing="10">
+                <Label
+                    Text="DATA MANAGEMENT"
+                    FontSize="11"
+                    FontAttributes="Bold"
+                    CharacterSpacing="1.2"
+                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+
+                <Border
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                    Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                    StrokeThickness="1"
+                    Padding="0">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="14" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout>
+
+                        <!-- Sync Now -->
+                        <Grid
+                            ColumnDefinitions="Auto,*,Auto"
+                            Padding="16,14"
+                            ColumnSpacing="14">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SyncNowCommand}" />
+                            </Grid.GestureRecognizers>
+                            <Image Grid.Column="0" VerticalOptions="Center">
+                                <Image.Source>
+                                    <FontImageSource
+                                       FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Sync_saved_locally}"
+                                       Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                       Size="24" />
+                                </Image.Source>
+                            </Image>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                <Label
+                                    Text="Sync Now"
+                                    FontSize="15"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                                <Label
+                                    Text="{Binding LastSyncedText, StringFormat='Last synced: {0}'}"
+                                    FontSize="11"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                            </VerticalStackLayout>
+                            <Label
+                                Grid.Column="2"
+                                Text="›"
+                                FontSize="20"
+                                VerticalOptions="Center"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                        </Grid>
+
+                        <BoxView HeightRequest="1" Margin="16,0"
+                            Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                            Opacity="0.5" />
+
+                        <!-- Clear All Data -->
+                        <Grid
+                            ColumnDefinitions="Auto,*,Auto"
+                            Padding="16,14"
+                            ColumnSpacing="14">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding ClearAllDataCommand}" />
+                            </Grid.GestureRecognizers>
+                            <Image Grid.Column="0" VerticalOptions="Center">
+                                <Image.Source>
+                                    <FontImageSource
+                                         FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Delete}"
+                                         Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                         Size="24" />
+                                </Image.Source>
+                            </Image>
+                            <Label
+                                Grid.Column="1"
+                                Text="Clear All Data"
+                                FontSize="15"
+                                VerticalOptions="Center"
+                                TextColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}" />
+                            <Image Grid.Column="2" VerticalOptions="Center">
+                                <Image.Source>
+                                    <FontImageSource
+                                       FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Warning}"
+                                       Color="{AppThemeBinding Light={StaticResource Yellow100Accent}, Dark={StaticResource Yellow100Accent}}"
+                                       Size="24" />
+                                </Image.Source>
+                            </Image>
+                        </Grid>
+
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- ── About ─────────────────────────────────────────────── -->
+            <VerticalStackLayout Spacing="10">
+                <Label
+                    Text="ABOUT"
+                    FontSize="11"
+                    FontAttributes="Bold"
+                    CharacterSpacing="1.2"
+                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+
+                <Border
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                    Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                    StrokeThickness="1"
+                    Padding="0">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="14" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout>
+
+                        <!-- App Version -->
+                        <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,14" ColumnSpacing="14">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding CopyVersionInfoCommand}" />
+                            </Grid.GestureRecognizers>
+                            
+                            <Image Grid.Column="0" VerticalOptions="Center">
+                                <Image.Source>
+                                    <FontImageSource
+                                      FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Apk_document}"
+                                      Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                      Size="24" />
+                                </Image.Source>
+                            </Image>
+                            <Label
+                                Grid.Column="1"
+                                Text="App Version"
+                                FontSize="15"
+                                VerticalOptions="Center"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                            <Label
+                                Grid.Column="2"
+                                Text="{Binding AppVersion}"
+                                FontSize="12"
+                                FontAttributes="Bold"
+                                VerticalOptions="Center"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                        </Grid>
+
+                        <BoxView HeightRequest="1" Margin="16,0"
+                            Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                            Opacity="0.5" />
+
+                        <!-- Send Feedback -->
+                        <Grid
+                            ColumnDefinitions="Auto,*,Auto"
+                            Padding="16,14"
+                            ColumnSpacing="14">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding SendFeedbackCommand}" />
+                            </Grid.GestureRecognizers>
+                            <Image Grid.Column="0" VerticalOptions="Center">
+                                <Image.Source>
+                                    <FontImageSource
+                                       FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Chat_bubble}"
+                                       Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                       Size="24" />
+                                </Image.Source>
+                            </Image>
+                            <Label
+                                Grid.Column="1"
+                                Text="Send Feedback"
+                                FontSize="15"
+                                VerticalOptions="Center"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                            <Label
+                                Grid.Column="2"
+                                Text="↗"
+                                FontSize="18"
+                                VerticalOptions="Center"
+                                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                        </Grid>
+
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+
+            <!-- ── Developer ─────────────────────────────────────────── -->
+            <VerticalStackLayout Spacing="10">
+                <Label
+                    Text="DEVELOPER"
+                    FontSize="11"
+                    FontAttributes="Bold"
+                    CharacterSpacing="1.2"
+                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+
+                <Border
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                    Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                    StrokeThickness="1"
+                    Padding="0">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="14" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout>
+
+                        <!-- Name header (non-tappable) -->
+                        <Grid ColumnDefinitions="Auto,*" Padding="16,14" ColumnSpacing="14">
+                            <Image Grid.Column="0" VerticalOptions="Center">
+                                <Image.Source>
+                                    <FontImageSource
+                                       FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Person}"
+                                       Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                       Size="24" />
+                                </Image.Source>
+                            </Image>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                <Label
+                                    Text="{Binding DeveloperName}"
+                                    FontSize="15"
+                                    FontAttributes="Bold"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                                <Label
+                                    Text="Built &amp; maintained by"
+                                    FontSize="11"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                            </VerticalStackLayout>
+                        </Grid>
+
+                        <BoxView HeightRequest="1" Margin="16,0"
+                            Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                            Opacity="0.5" />
+
+                        <!-- Portfolio -->
+                        <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,14" ColumnSpacing="14">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenPortfolioCommand}" />
+                            </Grid.GestureRecognizers>
+                            <Image Grid.Column="0" VerticalOptions="Center">
+                                <Image.Source>
+                                    <FontImageSource
+                                       FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Public}"
+                                       Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                       Size="24" />
+                                </Image.Source>
+                            </Image>
+                            <Label
+                                Grid.Column="1"
+                                Text="Portfolio"
+                                FontSize="15"
+                                VerticalOptions="Center"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                            <Label
+                                Grid.Column="2"
+                                Text="↗"
+                                FontSize="18"
+                                VerticalOptions="Center"
+                                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                        </Grid>
+
+                        <BoxView HeightRequest="1" Margin="16,0"
+                            Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                            Opacity="0.5" />
+
+                        <!-- LinkedIn -->
+                        <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,14" ColumnSpacing="14">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenLinkedInCommand}" />
+                            </Grid.GestureRecognizers>
+                            <Image Grid.Column="0" VerticalOptions="Center">
+                                <Image.Source>
+                                    <FontImageSource
+                                       FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Link}"
+                                       Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                       Size="24" />
+                                </Image.Source>
+                            </Image>
+                            <Label
+                                Grid.Column="1"
+                                Text="LinkedIn"
+                                FontSize="15"
+                                VerticalOptions="Center"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                            <Label
+                                Grid.Column="2"
+                                Text="↗"
+                                FontSize="18"
+                                VerticalOptions="Center"
+                                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                        </Grid>
+
+                        <BoxView HeightRequest="1" Margin="16,0"
+                            Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                            Opacity="0.5" />
+
+                        <!-- GitHub / Star the project -->
+                        <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,14" ColumnSpacing="14">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenGitHubCommand}" />
+                            </Grid.GestureRecognizers>
+                            <Image Grid.Column="0" VerticalOptions="Center">
+                                <Image.Source>
+                                    <FontImageSource
+                                       FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Code}"
+                                       Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                       Size="24" />
+                                </Image.Source>
+                            </Image>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                <Label
+                                Text="Star on GitHub"
+                                FontSize="15"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                                <Label
+                                    Text="PesaScope is open source — enjoying it? Leave a star ⭐"
+                                    FontSize="11"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                            </VerticalStackLayout>
+                            <Label
+                                Grid.Column="2"
+                                Text="↗"
+                                FontSize="18"
+                                VerticalOptions="Center"
+                                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                        </Grid>
+
+                    </VerticalStackLayout>
+                </Border>
+            </VerticalStackLayout>
+        </VerticalStackLayout>
+    </ScrollView>
+
+</uranium:UraniumContentPage>

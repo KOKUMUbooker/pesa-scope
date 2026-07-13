@@ -1,0 +1,363 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<uranium:UraniumContentPage
+    x:Class="PesaScope.App.Views.Transactions.TransactionDetailPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:uranium="http://schemas.enisn-projects.io/dotnet/maui/uraniumui"
+    xmlns:material="http://schemas.enisn-projects.io/dotnet/maui/uraniumui/material"
+    xmlns:vm="clr-namespace:PesaScope.App.ViewModels"
+    xmlns:models="clr-namespace:PesaScope.Core.Models;assembly=PesaScope.Core"
+    xmlns:converters="clr-namespace:PesaScope.App.Converters"
+    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
+    x:DataType="vm:TransactionDetailViewModel"
+    Shell.TabBarIsVisible="False"
+    x:Name="NTransactionDetailPage"
+    SafeAreaEdges="All"
+    BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
+
+    <uranium:UraniumContentPage.Resources>
+        <converters:InverseBoolConverter x:Key="InvertedBool"/>
+        <converters:IconNameToGlyphConverter x:Key="IconNameToGlyph"/>
+        <converters:TransactionTypeToIconConverter x:Key="TypeToEmoji" />
+        <converters:StringToBoolConverter x:Key="StringToBoolConverter"/>
+        <converters:IsEqualConverter x:Key="IsEqualConverter"/>
+        <converters:EqualsToColorMultiConverter x:Key="EqualsToColorMultiConverter"/>
+    </uranium:UraniumContentPage.Resources>
+
+    <!-- ── Title bar ─────────────────────────────────────────────────────── -->
+    <Shell.TitleView>
+        <HorizontalStackLayout Padding="0,10" >
+           
+            <Label Text="Transaction detail" FontSize="20" FontAttributes="Bold"
+                   VerticalOptions="Center"
+                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+        </HorizontalStackLayout>
+    </Shell.TitleView>
+
+    <!-- ── Bottom sheets ─────────────────────────────────────────────────── -->
+    <uranium:UraniumContentPage.Attachments>
+
+        <!-- Note sheet (3.9) -->
+        <material:BottomSheetView
+            x:Name="NoteSheet"
+            IsPresented="{Binding IsNoteSheetOpen}"
+            IsVisible="{Binding IsNoteSheetOpen}"
+            CloseOnTapOutside="False"
+            BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
+            <VerticalStackLayout Padding="24,12,24,48" Spacing="16">
+                <Label Text="Add a note" FontSize="18" FontAttributes="Bold"
+                       HorizontalOptions="Center"
+                       TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                <Label Text="Add a personal note to help you remember what this transaction was for."
+                       FontSize="13" HorizontalTextAlignment="Center"
+                       TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                <Border
+                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                    StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14,8">
+                    <Editor Text="{Binding EditNote}"
+                            Placeholder="e.g. Rent for June, groceries for the week..."
+                            FontSize="14" HeightRequest="100"
+                            AutoSize="TextChanges"
+                            BackgroundColor="Transparent"
+                            PlaceholderColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                            TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                </Border>
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <Button Grid.Column="0" Text="Cancel" Command="{Binding CloseSheetCommand}"
+                            HeightRequest="50" CornerRadius="25" FontSize="15" FontAttributes="Bold"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                            TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                    <Button Grid.Column="1" Text="Save" Command="{Binding SaveNoteCommand}"
+                            HeightRequest="50" CornerRadius="25" FontSize="15" FontAttributes="Bold"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"/>
+                </Grid>
+            </VerticalStackLayout>
+        </material:BottomSheetView>
+
+        <!-- Category sheet (3.8) -->
+        <material:BottomSheetView
+            x:Name="CategorySheet"
+            IsPresented="{Binding IsCategorySheetOpen}"
+            IsVisible="{Binding IsCategorySheetOpen}"
+            CloseOnTapOutside="False"
+            BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
+            <VerticalStackLayout Padding="24,12,24,48" Spacing="16">
+                <Label Text="Change category" FontSize="18" FontAttributes="Bold"
+                       HorizontalOptions="Center"
+                       TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+
+                <ScrollView HeightRequest="320">
+                    <VerticalStackLayout
+                        BindableLayout.ItemsSource="{Binding Categories}"
+                        Spacing="4">
+                        <BindableLayout.ItemTemplate>
+                            <DataTemplate x:DataType="models:Category">
+                                <Border
+                                    StrokeThickness="0"
+                                    StrokeShape="RoundRectangle 12"
+                                    Padding="14,12">
+                                    <Border.BackgroundColor>
+                                        <MultiBinding Converter="{StaticResource EqualsToColorMultiConverter}">
+                                            <Binding Source="{RelativeSource AncestorType={x:Type vm:TransactionDetailViewModel}}" Path="SelectedCategory.Id"/>
+                                            <Binding Path="Id"/>
+                                        </MultiBinding>
+                                    </Border.BackgroundColor>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer
+                                            Command="{Binding BindingContext.SelectCategoryForEditCommand, Source={x:Reference NTransactionDetailPage}}"
+                                            CommandParameter="{Binding .}"/>
+                                    </Border.GestureRecognizers>
+                                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                                        <Border
+                                          WidthRequest="40"
+                                          HeightRequest="40"
+                                          StrokeShape="RoundRectangle 20"
+                                          StrokeThickness="0"
+                                          BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}">
+                                            <Image HorizontalOptions="Center" VerticalOptions="Center"
+                                                WidthRequest="20" HeightRequest="20">
+                                                <Image.Source>
+                                                    <FontImageSource
+                                                      FontFamily="MaterialSharp"
+                                                      Glyph="{Binding Icon, Converter={StaticResource IconNameToGlyph}}"
+                                                      Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                                      Size="20"/>
+                                                </Image.Source>
+                                            </Image>
+                                        </Border>
+                                        <Label Grid.Column="1" Text="{Binding Name}"
+                                               FontSize="15" VerticalOptions="Center"
+                                               TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                                        <Image Grid.Column="2" VerticalOptions="Center"
+                                               IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:TransactionDetailViewModel}},
+                                                Path=SelectedCategory.Id,
+                                                Converter={StaticResource IsEqualConverter},
+                                                ConverterParameter={Binding Id}}">
+                                            <Image.Source>
+                                                <FontImageSource FontFamily="MaterialSharp"
+                                                    Glyph="{x:Static m:MaterialSharp.Check_circle}"
+                                                    Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                                    Size="20"/>
+                                            </Image.Source>
+                                        </Image>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </BindableLayout.ItemTemplate>
+                    </VerticalStackLayout>
+                </ScrollView>
+
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                    <Button Grid.Column="0" Text="Cancel" Command="{Binding CloseSheetCommand}"
+                            HeightRequest="50" CornerRadius="25" FontSize="15" FontAttributes="Bold"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                            TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                    <Button Grid.Column="1" Text="Save" Command="{Binding SaveCategoryCommand}"
+                            HeightRequest="50" CornerRadius="25" FontSize="15" FontAttributes="Bold"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"/>
+                </Grid>
+            </VerticalStackLayout>
+        </material:BottomSheetView>
+
+    </uranium:UraniumContentPage.Attachments>
+
+    <!-- ── Main content ───────────────────────────────────────────────────── -->
+    <ScrollView>
+        <VerticalStackLayout Spacing="16" Padding="20,16,20,40">
+
+            <!-- ── Amount hero card ──────────────────────────────────────── -->
+            <Border
+                BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                StrokeThickness="1" StrokeShape="RoundRectangle 20" Padding="24">
+                <VerticalStackLayout Spacing="6" HorizontalOptions="Center">
+
+                    <!-- Type emoji -->
+                    <Label Text="{Binding Transaction.Type, Converter={StaticResource TypeToEmoji}}"
+                           FontSize="40" HorizontalOptions="Center"/>
+
+                    <!-- Amount -->
+                    <Label HorizontalOptions="Center" FontSize="36" FontAttributes="Bold"
+                           TextColor="{Binding AmountColor}">
+                        <Label.Text>
+                            <MultiBinding StringFormat="{}{0}Ksh {1}">
+                                <Binding Path="AmountPrefix"/>
+                                <Binding Path="Transaction.Amount" StringFormat="{}{0:N0}"/>
+                            </MultiBinding>
+                        </Label.Text>
+                    </Label>
+
+                    <!-- Type label -->
+                    <Label Text="{Binding Transaction.Type}"
+                           FontSize="14"
+                           HorizontalOptions="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+
+                    <!-- Date -->
+                    <Label Text="{Binding FormattedDate}"
+                           FontSize="13"
+                           HorizontalOptions="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ── Details card (3.2, 3.7) ───────────────────────────────── -->
+            <Border
+                BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="0">
+                <VerticalStackLayout Spacing="0">
+
+                    <!-- Counterparty -->
+                    <Grid Padding="16,14" ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="Counterparty" FontSize="12"
+                                   TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                            <Label Text="{Binding Transaction.CounterpartyName}"
+                                   FontSize="15" FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                            <Label Text="{Binding Transaction.CounterpartyNumber}"
+                                   FontSize="13"
+                                   IsVisible="{Binding Transaction.CounterpartyNumber, Converter={StaticResource StringToBoolConverter}}"
+                                   TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <BoxView HeightRequest="1" Margin="16,0"
+                             Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"/>
+
+                    <!-- M-Pesa code -->
+                    <Grid Padding="16,14" ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="Transaction code" FontSize="12"
+                                   TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                            <Label Text="{Binding Transaction.MpesaCode}"
+                                   FontSize="15" FontAttributes="Bold"
+                                   FontFamily="OpenSansRegular"
+                                   TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <BoxView HeightRequest="1" Margin="16,0"
+                             Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"/>
+
+                    <!-- Balance after -->
+                    <Grid Padding="16,14">
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="Balance after transaction" FontSize="12"
+                                   TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                            <Label Text="{Binding FormattedBalance}"
+                                   FontSize="15" FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                        </VerticalStackLayout>
+                    </Grid>
+
+                    <BoxView HeightRequest="1" Margin="16,0"
+                             Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"/>
+
+                    <!-- Category (3.8) -->
+                    <Grid Padding="16,14" ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                        <VerticalStackLayout Grid.Column="0" Spacing="2">
+                            <Label Text="Category" FontSize="12"
+                                   TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                            <Label Text="{Binding SelectedCategory.Name}"
+                                   FontSize="15" FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                        </VerticalStackLayout>
+                        <Border Grid.Column="1"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
+                                StrokeThickness="0" StrokeShape="RoundRectangle 16"
+                                Padding="12,6" VerticalOptions="Center">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenCategorySheetCommand}"/>
+                            </Border.GestureRecognizers>
+                            <Label Text="Change" FontSize="13" FontAttributes="Bold"
+                                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                        </Border>
+                    </Grid>
+
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ── Note card (3.9) ────────────────────────────────────────── -->
+            <Border
+                BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="16">
+                <VerticalStackLayout Spacing="10">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="Note" FontSize="16" FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                        <Border Grid.Column="1"
+                                BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
+                                StrokeThickness="0" StrokeShape="RoundRectangle 16"
+                                Padding="12,6" VerticalOptions="Center">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenNoteSheetCommand}"/>
+                            </Border.GestureRecognizers>
+
+                            <Image>
+                                <Image.Source>
+                                    <FontImageSource
+                                      FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Edit}"
+                                      Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                      Size="16" />
+                                </Image.Source>
+                            </Image>
+                           
+                        </Border>
+                    </Grid>
+
+                    <Label Text="{Binding Transaction.Note}"
+                           FontSize="14" LineBreakMode="WordWrap"
+                           IsVisible="{Binding Transaction.Note, Converter={StaticResource StringToBoolConverter}}"
+                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+
+                    <Label Text="No note added yet."
+                           FontSize="14"
+                           IsVisible="{Binding Transaction.Note, Converter={StaticResource StringToBoolConverter},
+                                       FallbackValue=True}"
+                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                           Opacity="0.6"/>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- ── Original SMS (3.7) ─────────────────────────────────────── -->
+            <Border
+                BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="16">
+                <VerticalStackLayout Spacing="10">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <Label Grid.Column="0" Text="Original SMS" FontSize="16" FontAttributes="Bold"
+                           VerticalOptions="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                        <ImageButton Grid.Column="1"
+                             Command="{Binding CopySmsCommand}"
+                             BackgroundColor="Transparent" Padding="6"
+                             WidthRequest="32" HeightRequest="32">
+                            <ImageButton.Source>
+                                <FontImageSource
+                                   FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Content_copy}"
+                                   Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                   Size="18" />
+                            </ImageButton.Source>
+                        </ImageButton>
+                    </Grid>
+                    <Border
+                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                        StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="14">
+                        <Label Text="{Binding Transaction.OriginalSms}"
+                           FontSize="13" LineBreakMode="WordWrap"
+                           FontFamily="OpenSansRegular"
+                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                    </Border>
+                </VerticalStackLayout>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+
+</uranium:UraniumContentPage>

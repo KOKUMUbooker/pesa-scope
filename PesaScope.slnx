@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="PesaScope.App/PesaScope.App.csproj">
+    <Deploy />
+  </Project>
+  <Project Path="PesaScope.Core/PesaScope.Core.csproj" />
+  <Project Path="PesaScope.Tests/PesaScope.Tests.csproj" />
+
+</Solution>

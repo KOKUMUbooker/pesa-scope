@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<uranium:UraniumContentPage
+    x:Class="PesaScope.App.Views.Onboarding.ImportProgressPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
+    NavigationPage.HasNavigationBar="False"
+    xmlns:v="clr-namespace:PesaScope.App.Views.Onboarding"
+    x:DataType="v:ImportProgressPage"
+    BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
+
+    <Grid RowDefinitions="*, Auto" >
+
+        <!-- ── Main content ───────────────────────────────────────────── -->
+        <ScrollView Grid.Row="0 ">
+            <VerticalStackLayout VerticalOptions="Center" Spacing="0" Padding="32,64,32,48">
+
+                <!-- Icon -->
+                <Border
+                    HorizontalOptions="Center"
+                    WidthRequest="96" HeightRequest="96"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
+                    StrokeThickness="0"
+                    Margin="0,0,0,32">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="28" />
+                    </Border.StrokeShape>
+                    <Label
+                        x:Name="StatusIcon"
+                        Text="📥"
+                        FontSize="40"
+                        HorizontalOptions="Center"
+                        VerticalOptions="Center" />
+                </Border>
+
+                <!-- Title -->
+                <Label
+                    x:Name="TitleLabel"
+                    Text="Importing Your Transactions"
+                    FontSize="24"
+                    FontAttributes="Bold"
+                    HorizontalTextAlignment="Center"
+                    TextColor="{AppThemeBinding Light={StaticResource OnBackground}, Dark={StaticResource OnBackgroundDark}}"
+                    Margin="0,0,0,12" />
+
+                <!-- Subtitle -->
+                <Label
+                    x:Name="SubtitleLabel"
+                    Text="This only happens once. Sit tight while we read your M-Pesa messages."
+                    FontSize="14" LineHeight="1.5"
+                    HorizontalTextAlignment="Center"
+                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                    Margin="0,0,0,48" />
+
+                <!-- Progress bar — hidden after import completes -->
+                <ProgressBar
+                    x:Name="ImportProgressBar"
+                    Progress="0"
+                    ProgressColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                    HeightRequest="6"
+                    Margin="0,0,0,16" />
+
+                <!-- Imported count -->
+                <Label
+                    x:Name="CountLabel"
+                    Text="0 transactions imported"
+                    FontSize="13"
+                    HorizontalTextAlignment="Center"
+                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                    Margin="0,0,0,24" />
+
+                <!-- Status message -->
+                <Border
+                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                    StrokeThickness="0"
+                    Margin="0,0,0,24">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="12" />
+                    </Border.StrokeShape>
+                    <Label
+                        x:Name="StatusLabel"
+                        Text="Reading messages from MPESA..."
+                        FontSize="13" LineHeight="1.4"
+                        HorizontalTextAlignment="Center"
+                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                        Padding="16,12" />
+                </Border>
+
+                <!-- ══════════════════════════════════════════════════════
+                     RESTORE DEFAULT SMS APP CARD
+                     Only visible after a successful historical import,
+                     i.e. when PesaScope was temporarily set as default.
+                ══════════════════════════════════════════════════════ -->
+                <Border
+                    x:Name="RestoreDefaultCard"
+                    IsVisible="False"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource SecondaryContainer}, Dark={StaticResource SecondaryContainerDark}}"
+                    StrokeThickness="0"
+                    Margin="0,0,0,0">
+                    <Border.StrokeShape>
+                        <RoundRectangle CornerRadius="16" />
+                    </Border.StrokeShape>
+                    <VerticalStackLayout Padding="20" Spacing="14">
+
+                        <!-- Header -->
+                        <HorizontalStackLayout Spacing="10">
+                            <Label Text="↩️" FontSize="22" VerticalOptions="Center" />
+                            <Label
+                                Text="Switch back to your SMS app"
+                                FontSize="15" FontAttributes="Bold"
+                                VerticalOptions="Center"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}"/>
+                        </HorizontalStackLayout>
+
+                        <!-- Explanation -->
+                        <Label
+                            Text="PesaScope is still your default SMS app. You must switch back to your preferred messaging app before continuing — PesaScope will keep capturing M-Pesa transactions in the background automatically."
+                            FontSize="13"
+                            LineHeight="1.45"
+                            TextColor="{AppThemeBinding Light={StaticResource OnSecondaryContainer}, Dark={StaticResource OnSecondaryContainerDark}}"/>
+                        
+                        <!-- Restore button -->
+                        <Button
+                            x:Name="RestoreDefaultButton"
+                            Text="Restore Default SMS App"
+                            Clicked="OnRestoreDefaultClicked"
+                            HeightRequest="46"
+                            CornerRadius="10"
+                            FontSize="14" FontAttributes="Bold"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Secondary}, Dark={StaticResource SecondaryDark}}"
+                            TextColor="{AppThemeBinding Light={StaticResource OnSecondary}, Dark={StaticResource OnSecondaryDark}}"/>
+
+                    </VerticalStackLayout>
+                </Border>
+
+            </VerticalStackLayout>
+        </ScrollView>
+
+        <!-- ── Bottom: Done button (hidden until import completes) ─────── -->
+        <VerticalStackLayout VerticalOptions="Center" Spacing="0" Padding="32,64,32,48">
+            <Button
+                x:Name="DoneButton"
+                Grid.Row="1"
+                Text="Go to Dashboard"
+                IsVisible="False"
+                Clicked="OnDoneClicked"
+                HorizontalOptions="Fill"
+                HeightRequest="52"
+                CornerRadius="14"
+                FontSize="16" FontAttributes="Bold"
+                BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}" />
+        </VerticalStackLayout>
+
+    </Grid>
+
+</uranium:UraniumContentPage>

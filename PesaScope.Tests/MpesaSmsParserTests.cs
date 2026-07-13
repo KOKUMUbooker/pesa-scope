@@ -1,0 +1,678 @@
+﻿using PesaScope.Core.Models;
+using PesaScope.Core.Services;
+using Xunit;
+
+namespace PesaScope.Tests;
+
+/// <summary>
+/// Tests for MpesaSmsParser covering all M-Pesa message types.
+/// All SMS samples match the real-world format captured from actual messages.
+/// </summary>
+public class MpesaSmsParserTests
+{
+    private readonly MpesaSmsParser _parser = new();
+
+    private const long SmsId = 12345L;
+    private const long SmsTimestamp = 1_700_000_000_000L;
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Null / empty guards
+    // ─────────────────────────────────────────────────────────────────────────
+
+    [Fact]
+    public void Parse_NullBody_ReturnsNull()
+    {
+        var result = _parser.Parse(null!, SmsId, SmsTimestamp);
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void Parse_EmptyBody_ReturnsNull()
+    {
+        var result = _parser.Parse(string.Empty, SmsId, SmsTimestamp);
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void Parse_WhitespaceBody_ReturnsNull()
+    {
+        var result = _parser.Parse("   ", SmsId, SmsTimestamp);
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public void Parse_UnrelatedSms_ReturnsNull()
+    {
+        var result = _parser.Parse("Your OTP is 123456. Do not share.", SmsId, SmsTimestamp);
+        Assert.Null(result);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Send Money
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private const string SendMoneySms =
+        "UF7K26WRWG Confirmed. Ksh5.00 sent to Booker Okumu 0712345678 on 7/6/26 " +
+        "at 4:36 PM. New M-PESA balance is Ksh0.00. Transaction cost, Ksh0.00. " +
+        "Amount you can transact within the day is 499,995.00.";
+
+    [Fact]
+    public void Parse_SendMoney_ReturnsCorrectType()
+    {
+        var result = _parser.Parse(SendMoneySms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(TransactionType.SendMoney, result.Type);
+    }
+
+    [Fact]
+    public void Parse_SendMoney_ExtractsAmount()
+    {
+        var result = _parser.Parse(SendMoneySms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(5.00m, result.Amount);
+    }
+
+    [Fact]
+    public void Parse_SendMoney_ExtractsCounterpartyName()
+    {
+        var result = _parser.Parse(SendMoneySms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal("Booker Okumu", result.CounterpartyName);
+    }
+
+    [Fact]
+    public void Parse_SendMoney_ExtractsCounterpartyNumber()
+    {
+        var result = _parser.Parse(SendMoneySms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal("0712345678", result.CounterpartyNumber);
+    }
+
+    [Fact]
+    public void Parse_SendMoney_ExtractsMpesaCode()
+    {
+        var result = _parser.Parse(SendMoneySms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal("UF7K26WRWG", result.MpesaCode);
+    }
+
+    [Fact]
+    public void Parse_SendMoney_ExtractsBalance()
+    {
+        var result = _parser.Parse(SendMoneySms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(0.00m, result.BalanceAfterTransaction);
+    }
+
+    [Fact]
+    public void Parse_SendMoney_AmountWithCommas_ParsesCorrectly()
+    {
+        const string sms =
+            "AB12CD3456 Confirmed. Ksh1,200.00 sent to Jane Doe 0700000000 " +
+            "on 5/6/26 at 2:00 PM. New M-PESA balance is Ksh8,000.00. " +
+            "Transaction cost, Ksh0.00.";
+
+        var result = _parser.Parse(sms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(1200.00m, result.Amount);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Receive Money
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private const string ReceiveMoneySms =
+        "UF5MK6QNPR Confirmed.You have received Ksh40.00 from Booker  Okumu " +
+        "0799***013 on 5/6/26 at 12:56 PM  New M-PESA balance is Ksh45.00. " +
+        "Download My OneApp on https://saf.cx/lPKcC";
+
+    [Fact]
+    public void Parse_ReceiveMoney_ReturnsCorrectType()
+    {
+        var result = _parser.Parse(ReceiveMoneySms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(TransactionType.ReceiveMoney, result.Type);
+    }
+
+    [Fact]
+    public void Parse_ReceiveMoney_ExtractsAmount()
+    {
+        var result = _parser.Parse(ReceiveMoneySms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(40.00m, result.Amount);
+    }
+
+    [Fact]
+    public void Parse_ReceiveMoney_ExtractsSenderName_NormalisedWhitespace()
+    {
+        // Double space between first/last name must be collapsed to single space
+        var result = _parser.Parse(ReceiveMoneySms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal("Booker Okumu", result.CounterpartyName);
+    }
+
+    [Fact]
+    public void Parse_ReceiveMoney_ExtractsMaskedPhone()
+    {
+        var result = _parser.Parse(ReceiveMoneySms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal("0799***013", result.CounterpartyNumber);
+    }
+
+    [Fact]
+    public void Parse_ReceiveMoney_ExtractsBalance()
+    {
+        var result = _parser.Parse(ReceiveMoneySms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(45.00m, result.BalanceAfterTransaction);
+    }
+
+    [Fact]
+    public void Parse_ReceiveMoney_ExtractsMpesaCode()
+    {
+        var result = _parser.Parse(ReceiveMoneySms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal("UF5MK6QNPR", result.MpesaCode);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Airtime
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private const string AirtimeSms =
+        "UF4K26LILB confirmed.You bought Ksh5.00 of airtime on 4/6/26 at 10:57 PM." +
+        "New M-PESA balance is Ksh5.00. Transaction cost, Ksh0.00. " +
+        "Amount you can transact within the day is 499,990.00.";
+
+    [Fact]
+    public void Parse_Airtime_ReturnsCorrectType()
+    {
+        var result = _parser.Parse(AirtimeSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(TransactionType.AirtimePurchase, result.Type);
+    }
+
+    [Fact]
+    public void Parse_Airtime_ExtractsAmount()
+    {
+        var result = _parser.Parse(AirtimeSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(5.00m, result.Amount);
+    }
+
+    [Fact]
+    public void Parse_Airtime_CounterpartyIsSafaricom()
+    {
+        var result = _parser.Parse(AirtimeSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal("Safaricom Airtime", result.CounterpartyName);
+    }
+
+    [Fact]
+    public void Parse_Airtime_ExtractsBalance()
+    {
+        var result = _parser.Parse(AirtimeSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(5.00m, result.BalanceAfterTransaction);
+    }
+
+    [Fact]
+    public void Parse_Airtime_LowercaseConfirmed_StillParses()
+    {
+        // "confirmed" (lowercase) is a real Safaricom variant
+        var result = _parser.Parse(AirtimeSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Withdrawal
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private const string WithdrawalSms =
+        "UERMK5P6JM Confirmed.on 27/5/26 at 1:16 PMWithdraw Ksh100.00 from " +
+        "164654 - Neovilla Management Ltd Jubilee Shop Kithimani mkt " +
+        "New M-PESA balance is Ksh153.06. Transaction cost, Ksh11.00. " +
+        "Amount you can transact within the day is 499,730.00.";
+
+    [Fact]
+    public void Parse_Withdrawal_ReturnsCorrectType()
+    {
+        var result = _parser.Parse(WithdrawalSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(TransactionType.Withdrawal, result.Type);
+    }
+
+    [Fact]
+    public void Parse_Withdrawal_ExtractsAmount()
+    {
+        var result = _parser.Parse(WithdrawalSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(100.00m, result.Amount);
+    }
+
+    [Fact]
+    public void Parse_Withdrawal_ExtractsAgentAndLocation()
+    {
+        var result = _parser.Parse(WithdrawalSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(
+            "164654 - Neovilla Management Ltd Jubilee Shop Kithimani mkt",
+            result.CounterpartyName);
+    }
+
+    [Fact]
+    public void Parse_Withdrawal_ExtractsBalance()
+    {
+        var result = _parser.Parse(WithdrawalSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(153.06m, result.BalanceAfterTransaction);
+    }
+
+    [Fact]
+    public void Parse_Withdrawal_ExtractsMpesaCode()
+    {
+        var result = _parser.Parse(WithdrawalSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal("UERMK5P6JM", result.MpesaCode);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Buy Goods
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private const string BuyGoodsSms =
+        "UEAMK3TXN2 Confirmed. Ksh180.00 paid to GLORY OF GOD TRADERS. " +
+        "on 10/5/26 at 6:59 PM.New M-PESA balance is Ksh1,955.78. " +
+        "Transaction cost, Ksh0.00.";
+
+    [Fact]
+    public void Parse_BuyGoods_ReturnsCorrectType()
+    {
+        var result = _parser.Parse(BuyGoodsSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(TransactionType.BuyGoods, result.Type);
+    }
+
+    [Fact]
+    public void Parse_BuyGoods_ExtractsAmount()
+    {
+        var result = _parser.Parse(BuyGoodsSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(180.00m, result.Amount);
+    }
+
+    [Fact]
+    public void Parse_BuyGoods_ExtractsMerchantName_WithoutTrailingPeriod()
+    {
+        // The trailing period after the merchant name must NOT be included
+        var result = _parser.Parse(BuyGoodsSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal("GLORY OF GOD TRADERS", result.CounterpartyName);
+    }
+
+    [Fact]
+    public void Parse_BuyGoods_ExtractsBalance()
+    {
+        var result = _parser.Parse(BuyGoodsSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(1955.78m, result.BalanceAfterTransaction);
+    }
+
+    [Fact]
+    public void Parse_BuyGoods_ExtractsMpesaCode()
+    {
+        var result = _parser.Parse(BuyGoodsSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal("UEAMK3TXN2", result.MpesaCode);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Paybill
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private const string PayBillSms =
+        "UE4MK35CKT Confirmed. Ksh50.00 sent to KPLC PREPAID for account " +
+        "32170712657 on 4/5/26 at 8:23 PM New M-PESA balance is Ksh3,170.78. " +
+        "Transaction cost, Ksh0.00.Amount you can transact within the day is 499,580.00.";
+
+    [Fact]
+    public void Parse_PayBill_ReturnsCorrectType()
+    {
+        var result = _parser.Parse(PayBillSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(TransactionType.PayBill, result.Type);
+    }
+
+    [Fact]
+    public void Parse_PayBill_ExtractsAmount()
+    {
+        var result = _parser.Parse(PayBillSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(50.00m, result.Amount);
+    }
+
+    [Fact]
+    public void Parse_PayBill_ExtractsMerchantName()
+    {
+        var result = _parser.Parse(PayBillSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal("KPLC PREPAID", result.CounterpartyName);
+    }
+
+    [Fact]
+    public void Parse_PayBill_ExtractsAccountNumber()
+    {
+        var result = _parser.Parse(PayBillSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal("32170712657", result.CounterpartyNumber);
+    }
+
+    [Fact]
+    public void Parse_PayBill_ExtractsBalance()
+    {
+        var result = _parser.Parse(PayBillSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(3170.78m, result.BalanceAfterTransaction);
+    }
+
+    [Fact]
+    public void Parse_PayBill_ExtractsMpesaCode()
+    {
+        var result = _parser.Parse(PayBillSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal("UE4MK35CKT", result.MpesaCode);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Deposit
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private const string DepositSms =
+        "UCSMKAR8VZ Confirmed. On 28/3/26 at 8:31 AM Give Ksh2,000.00 cash to " +
+        "TUKO NET LIMITED Ernest enterprises shop elgons building " +
+        "New M-PESA balance is Ksh2,419.87. You can now access M-PESA via *334#";
+
+    [Fact]
+    public void Parse_Deposit_ReturnsCorrectType()
+    {
+        var result = _parser.Parse(DepositSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(TransactionType.Deposit, result.Type);
+    }
+
+    [Fact]
+    public void Parse_Deposit_ExtractsAmount()
+    {
+        var result = _parser.Parse(DepositSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(2000.00m, result.Amount);
+    }
+
+    [Fact]
+    public void Parse_Deposit_ExtractsBalance()
+    {
+        var result = _parser.Parse(DepositSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(2419.87m, result.BalanceAfterTransaction);
+    }
+
+    [Fact]
+    public void Parse_Deposit_ExtractsMpesaCode()
+    {
+        var result = _parser.Parse(DepositSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal("UCSMKAR8VZ", result.MpesaCode);
+    }
+
+    [Fact]
+    public void Parse_Deposit_CounterpartyIsDeposit()
+    {
+        var result = _parser.Parse(DepositSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal("M-PESA Deposit", result.CounterpartyName);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Fuliza
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private const string FulizaSms =
+        "UERMK5QVVY Confirmed. Ksh 7.01 from your M-PESA has been used to fully " +
+        "pay your outstanding Fuliza M-PESA. " +
+        "Available Fuliza M-PESA limit is Ksh 1200.00.Ksh0.00.";
+
+    [Fact]
+    public void Parse_Fuliza_ReturnsCorrectType()
+    {
+        var result = _parser.Parse(FulizaSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(TransactionType.Fuliza, result.Type);
+    }
+
+    [Fact]
+    public void Parse_Fuliza_ExtractsAmount()
+    {
+        var result = _parser.Parse(FulizaSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(7.01m, result.Amount);
+    }
+
+    [Fact]
+    public void Parse_Fuliza_CounterpartyIsFuliza()
+    {
+        var result = _parser.Parse(FulizaSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal("Fuliza M-PESA", result.CounterpartyName);
+    }
+
+    [Fact]
+    public void Parse_Fuliza_ExtractsMpesaCode()
+    {
+        var result = _parser.Parse(FulizaSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal("UERMK5QVVY", result.MpesaCode);
+    }
+
+    [Fact]
+    public void Parse_Fuliza_FallsBackToTimestampForDate()
+    {
+        // Fuliza SMSs have no date — TransactionDate should be derived from SmsTimestamp
+        var result = _parser.Parse(FulizaSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        var expected = DateTimeOffset.FromUnixTimeMilliseconds(SmsTimestamp).UtcDateTime;
+        Assert.Equal(expected.Date, result.TransactionDate.Date);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Reversal
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private const string ReversalSms =
+        "UF7MKM7FTT confirmed. Reversal of transaction UF7MK70VIL has been " +
+        "successfully reversed on 7/6/26 at 5:56 PM and Ksh30.00 is credited " +
+        "to your M-PESA account. New M-PESA account balance is Ksh1,956.99.";
+
+    [Fact]
+    public void Parse_Reversal_ReturnsCorrectType()
+    {
+        var result = _parser.Parse(ReversalSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(TransactionType.Reversal, result.Type);
+    }
+
+    [Fact]
+    public void Parse_Reversal_ExtractsAmount()
+    {
+        var result = _parser.Parse(ReversalSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(30.00m, result.Amount);
+    }
+
+    [Fact]
+    public void Parse_Reversal_ExtractsBalance()
+    {
+        var result = _parser.Parse(ReversalSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(1956.99m, result.BalanceAfterTransaction);
+    }
+
+    [Fact]
+    public void Parse_Reversal_ExtractsMpesaCode()
+    {
+        var result = _parser.Parse(ReversalSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal("UF7MKM7FTT", result.MpesaCode);
+    }
+
+    [Fact]
+    public void Parse_Reversal_CounterpartyIsReversal()
+    {
+        var result = _parser.Parse(ReversalSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal("M-PESA Reversal", result.CounterpartyName);
+    }
+
+    [Fact]
+    public void Parse_Reversal_LowercaseConfirmed_StillParses()
+    {
+        var result = _parser.Parse(ReversalSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Common fields — all transaction types
+    // ─────────────────────────────────────────────────────────────────────────
+
+    [Fact]
+    public void Parse_AnyTransaction_SmsIdIsPreserved()
+    {
+        var result = _parser.Parse(SendMoneySms, smsId: 99L, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(99L, result.SmsId);
+    }
+
+    [Fact]
+    public void Parse_AnyTransaction_CategoryIdIsZero()
+    {
+        var result = _parser.Parse(BuyGoodsSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(0, result.CategoryId);
+    }
+
+    [Fact]
+    public void Parse_AnyTransaction_IsEditedIsFalse()
+    {
+        var result = _parser.Parse(BuyGoodsSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.False(result.IsEdited);
+    }
+
+    [Fact]
+    public void Parse_AnyTransaction_MpesaCodeIsUpperCase()
+    {
+        // NormalizeSms + ToUpperInvariant in BuildTransaction guarantees uppercase
+        var result = _parser.Parse(SendMoneySms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(result.MpesaCode, result.MpesaCode.ToUpperInvariant());
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Whitespace / formatting edge cases
+    // ─────────────────────────────────────────────────────────────────────────
+
+    [Fact]
+    public void Parse_SmsWithNewlines_StillParses()
+    {
+        const string sms =
+            "UF7K26WRWG Confirmed.\nKsh5.00 sent to Booker Okumu 0712345678\n" +
+            "on 7/6/26 at 4:36 PM.\nNew M-PESA balance is Ksh0.00.\n" +
+            "Transaction cost, Ksh0.00.";
+
+        var result = _parser.Parse(sms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(TransactionType.SendMoney, result.Type);
+    }
+
+    [Fact]
+    public void Parse_SmsWithLeadingTrailingWhitespace_StillParses()
+    {
+        var sms = "  " + SendMoneySms + "  ";
+        var result = _parser.Parse(sms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(5.00m, result.Amount);
+    }
+
+    [Fact]
+    public void Parse_ReceiveMoney_DoubleSpaceInName_NormalisedToSingleSpace()
+    {
+        // "Booker  Okumu" (double space) must become "Booker Okumu"
+        var result = _parser.Parse(ReceiveMoneySms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.DoesNotContain("  ", result.CounterpartyName);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Date parsing
+    // ─────────────────────────────────────────────────────────────────────────
+
+    [Fact]
+    public void Parse_SendMoney_ParsesTransactionDateCorrectly()
+    {
+        var result = _parser.Parse(SendMoneySms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        // 7/6/26 → 7 June 2026
+        Assert.Equal(2026, result.TransactionDate.Year);
+        Assert.Equal(6, result.TransactionDate.Month);
+        Assert.Equal(7, result.TransactionDate.Day);
+    }
+
+    [Fact]
+    public void Parse_UnparsableDate_FallsBackToSmsTimestamp_DoesNotThrow()
+    {
+        const string sms =
+            "QH82J3L9Z Confirmed. Ksh500.00 paid to SOME SHOP. on ?? at ??." +
+            "New M-PESA balance is Ksh1,000.00. Transaction cost, Ksh0.00.";
+
+        var ex = Record.Exception(() => _parser.Parse(sms, SmsId, SmsTimestamp));
+        Assert.Null(ex);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Theory: real samples return expected types
+    // ─────────────────────────────────────────────────────────────────────────
+
+    [Theory]
+    [InlineData(
+        "UF7K26WRWG Confirmed. Ksh5.00 sent to Booker Okumu 0712345678 on 7/6/26 at 4:36 PM. New M-PESA balance is Ksh0.00. Transaction cost, Ksh0.00.",
+        TransactionType.SendMoney)]
+    [InlineData(
+        "UF5MK6QNPR Confirmed.You have received Ksh40.00 from Booker  Okumu 0799***013 on 5/6/26 at 12:56 PM  New M-PESA balance is Ksh45.00.",
+        TransactionType.ReceiveMoney)]
+    [InlineData(
+        "UE4MK35CKT Confirmed. Ksh50.00 sent to KPLC PREPAID for account 32170712657 on 4/5/26 at 8:23 PM New M-PESA balance is Ksh3,170.78. Transaction cost, Ksh0.00.",
+        TransactionType.PayBill)]
+    [InlineData(
+        "UEAMK3TXN2 Confirmed. Ksh180.00 paid to GLORY OF GOD TRADERS. on 10/5/26 at 6:59 PM.New M-PESA balance is Ksh1,955.78. Transaction cost, Ksh0.00.",
+        TransactionType.BuyGoods)]
+    [InlineData(
+        "UERMK5P6JM Confirmed.on 27/5/26 at 1:16 PMWithdraw Ksh100.00 from 164654 - Neovilla Management Ltd Jubilee Shop Kithimani mkt New M-PESA balance is Ksh153.06. Transaction cost, Ksh11.00.",
+        TransactionType.Withdrawal)]
+    [InlineData(
+        "UF4K26LILB confirmed.You bought Ksh5.00 of airtime on 4/6/26 at 10:57 PM.New M-PESA balance is Ksh5.00. Transaction cost, Ksh0.00.",
+        TransactionType.AirtimePurchase)]
+    [InlineData(
+        "UCSMKAR8VZ Confirmed. On 28/3/26 at 8:31 AM Give Ksh2,000.00 cash to TUKO NET LIMITED Ernest enterprises shop elgons building New M-PESA balance is Ksh2,419.87.",
+        TransactionType.Deposit)]
+    [InlineData(
+        "UERMK5QVVY Confirmed. Ksh 7.01 from your M-PESA has been used to fully pay your outstanding Fuliza M-PESA. Available Fuliza M-PESA limit is Ksh 1200.00.Ksh0.00.",
+        TransactionType.Fuliza)]
+    [InlineData(
+        "UF7MKM7FTT confirmed. Reversal of transaction UF7MK70VIL has been successfully reversed on 7/6/26 at 5:56 PM and Ksh30.00 is credited to your M-PESA account. New M-PESA account balance is Ksh1,956.99.",
+        TransactionType.Reversal)]
+    public void Parse_RealSamples_ReturnsCorrectType(string sms, TransactionType expectedType)
+    {
+        var result = _parser.Parse(sms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(expectedType, result.Type);
+    }
+}

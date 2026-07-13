@@ -84,6 +84,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\PesaLens.Core\PesaLens.Core.csproj" />
+	  <ProjectReference Include="..\PesaScope.Core\PesaScope.Core.csproj" />
 	</ItemGroup>
 </Project>

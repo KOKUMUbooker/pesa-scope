@@ -1,8 +1,8 @@
-# 📱 PesaLens — Features & User Stories
+# 📱 PesaScope — Features & User Stories
 
 ## 1. 🔐 Onboarding & Permissions
 
-**1.1** As a new user, I want a simple welcome screen that explains what PesaLens does so I know what to expect
+**1.1** As a new user, I want a simple welcome screen that explains what PesaScope does so I know what to expect
 
 **1.2** As a user, I want to be prompted to grant SMS read permission with a clear explanation of why it's needed
 

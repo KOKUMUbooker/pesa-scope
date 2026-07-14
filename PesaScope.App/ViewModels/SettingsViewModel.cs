@@ -48,7 +48,7 @@ public partial class SettingsViewModel : ObservableObject
     public string DeveloperName => "Booker Okumu";
     private const string PortfolioUrl = "https://bkokumu.com";
     private const string LinkedInUrl = "https://linkedin.com/in/booker-ochieng";
-    private const string GitHubUrl = "https://github.com/KOKUMUbooker/pesa-lens";
+    private const string GitHubUrl = "https://github.com/KOKUMUbooker/pesa-scope";
 
     public SettingsViewModel(
         IAppSettingsRepository appSettingsRepo,

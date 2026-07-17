@@ -47,8 +47,8 @@ public partial class SettingsViewModel : ObservableObject
 
     public string DeveloperName => "Booker Okumu";
     private const string PortfolioUrl = "https://bkokumu.com";
-    private const string LinkedInUrl = "https://linkedin.com/in/booker-ochieng";
-    private const string GitHubUrl = "https://github.com/KOKUMUbooker/pesa-scope";
+    private const string GitHubUrl = "https://github.com/KOKUMUbooker";
+    private const string AppGitHubUrl = "https://github.com/KOKUMUbooker/pesa-scope";
 
     public SettingsViewModel(
         IAppSettingsRepository appSettingsRepo,
@@ -356,10 +356,10 @@ public partial class SettingsViewModel : ObservableObject
     public async Task OpenPortfolioAsync() => await OpenLinkAsync(PortfolioUrl);
 
     [RelayCommand]
-    public async Task OpenLinkedInAsync() => await OpenLinkAsync(LinkedInUrl);
+    public async Task OpenGitHubAsync() => await OpenLinkAsync(GitHubUrl);
 
     [RelayCommand]
-    public async Task OpenGitHubAsync() => await OpenLinkAsync(GitHubUrl);
+    public async Task OpenAppGitHubAsync() => await OpenLinkAsync(AppGitHubUrl);
 
     private static async Task OpenLinkAsync(string url)
     {

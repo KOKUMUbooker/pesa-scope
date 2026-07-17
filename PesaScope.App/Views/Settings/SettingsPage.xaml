@@ -115,12 +115,19 @@
                                       Size="24" />
                                 </Image.Source>
                             </Image>
-                            <Label
-                                Grid.Column="1"
-                                Text="Budget Notifications"
-                                FontSize="15"
-                                VerticalOptions="Center"
-                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                            
+                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                <Label
+                                    Grid.Column="1"
+                                    Text="Budget Notifications"
+                                    FontSize="15"
+                                    VerticalOptions="Center"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                                <Label
+                                    Text="Get notified when you exceed any of your set budgets."
+                                    FontSize="11"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                            </VerticalStackLayout>
                             <Switch
                                 Grid.Column="2"
                                 IsToggled="{Binding BudgetNotificationsEnabled}"
@@ -537,10 +544,10 @@
                             Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
                             Opacity="0.5" />
 
-                        <!-- LinkedIn -->
+                        <!-- GitHub -->
                         <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,14" ColumnSpacing="14">
                             <Grid.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding OpenLinkedInCommand}" />
+                                <TapGestureRecognizer Command="{Binding OpenGitHubCommand}" />
                             </Grid.GestureRecognizers>
                             <Image Grid.Column="0" VerticalOptions="Center">
                                 <Image.Source>
@@ -552,7 +559,7 @@
                             </Image>
                             <Label
                                 Grid.Column="1"
-                                Text="LinkedIn"
+                                Text="GitHub"
                                 FontSize="15"
                                 VerticalOptions="Center"
                                 TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
@@ -571,7 +578,7 @@
                         <!-- GitHub / Star the project -->
                         <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,14" ColumnSpacing="14">
                             <Grid.GestureRecognizers>
-                                <TapGestureRecognizer Command="{Binding OpenGitHubCommand}" />
+                                <TapGestureRecognizer Command="{Binding OpenAppGitHubCommand}" />
                             </Grid.GestureRecognizers>
                             <Image Grid.Column="0" VerticalOptions="Center">
                                 <Image.Source>
@@ -583,7 +590,7 @@
                             </Image>
                             <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
                                 <Label
-                                Text="Star on GitHub"
+                                Text="Star project on GitHub"
                                 FontSize="15"
                                 TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
                                 <Label

@@ -51,7 +51,7 @@ public class CategoryRepository(DatabaseService databaseService)
         var defaultCategories = new List<Category>
         {
             new() { Name = "Food & Groceries",  Icon = "Shopping_cart", Color = "#D4522A", IsSystemCategory = true },
-            new() { Name = "Transport",         Icon = "Directions_car", Color = "#1A8C62", IsSystemCategory = true },
+            new() { Name = "Transport",         Icon = "Directions_car",Color = "#1976D2", IsSystemCategory = true },
             new() { Name = "Utilities",         Icon = "Bolt",          Color = "#C98A00", IsSystemCategory = true },
             new() { Name = "Airtime & Data",    Icon = "Phone_android", Color = "#5C6BC0", IsSystemCategory = true },
             new() { Name = "Entertainment",     Icon = "Movie",         Color = "#AB47BC", IsSystemCategory = true },

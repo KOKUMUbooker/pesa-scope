@@ -167,15 +167,23 @@
                     </Border>
                 </VerticalStackLayout>
 
+                <Button Text="Remove overall budget"
+                    Command="{Binding DeleteOverallBudgetCommand}"
+                    IsVisible="{Binding HasOverallBudget}"
+                    HeightRequest="40"
+                    FontSize="13" FontAttributes="Bold"
+                    BackgroundColor="Transparent"
+                    TextColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"/>
+
                 <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
                     <Button Grid.Column="0" Text="Cancel" Command="{Binding CloseSheetCommand}"
-                            HeightRequest="50" CornerRadius="25" FontSize="15" FontAttributes="Bold"
-                            BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
-                            TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                        HeightRequest="50" CornerRadius="25" FontSize="15" FontAttributes="Bold"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
                     <Button Grid.Column="1" Text="Save" Command="{Binding SaveOverallBudgetCommand}"
-                            HeightRequest="50" CornerRadius="25" FontSize="15" FontAttributes="Bold"
-                            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                            TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"/>
+                        HeightRequest="50" CornerRadius="25" FontSize="15" FontAttributes="Bold"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                        TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"/>
                 </Grid>
             </VerticalStackLayout>
         </material:BottomSheetView>

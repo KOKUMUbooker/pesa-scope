@@ -246,6 +246,24 @@ public partial class BudgetsViewModel : ObservableObject
         await LoadAsync();
     }
 
+    [RelayCommand]
+    public async Task DeleteOverallBudgetAsync()
+    {
+        bool confirm = await Shell.Current.DisplayAlertAsync(
+            "Remove overall budget",
+            "This will remove your overall monthly budget. You can set a new one anytime.",
+            "Remove", "Cancel");
+
+        if (!confirm) return;
+
+        var existing = await _overallBudgetRepo.GetAsync();
+        if (existing is not null)
+            await _overallBudgetRepo.DeleteAsync();
+
+        IsOverallSheetOpen = false;
+        await LoadOverallBudgetAsync();
+    }
+
     // ── Overall budget sheet ──────────────────────────────────────────────────
 
     [RelayCommand]

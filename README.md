@@ -32,7 +32,7 @@ dotnet publish -f net10.0-android -c Release -p:AndroidPackageFormat=apk
 The signed APK will be at:
 
 ```
-PesaScope.App/bin/Release/net10.0-android/publish/com.bkokumu.pesaScope-Signed.apk
+PesaScope.App/bin/Release/net10.0-android/publish/com.bkokumu.pesascope-Signed.apk
 ```
 
 ### 4. Install on device

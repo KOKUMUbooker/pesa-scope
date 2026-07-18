@@ -2,30 +2,81 @@
 
 A personal Android app for automatically tracking M-Pesa transactions by parsing SMS messages directly on your device. No data leaves your phone.
 
-## Requirements
+## Features
+
+#### 1. Home
+
+- View aggregated data in a weekly, monthly and yearly view
+- View top categories(based on selected view) and recent transactions
+
+#### 2. Transactions
+
+- View all transactions grouped per date
+- Filter transactions based on duration, transaction type ,transaction category or search query
+
+### 3. Transaction detail
+
+- View transaction details
+- Change auto-assigned category of a transaction
+- Attach a note to the transaction
+
+#### 4. Categories
+
+- View spending breakdown on a monthly basis in a pie chart
+- Filter, search and sort category items
+- Filter and search rule items
+- Create new category(user defined) and rule
+- View transactions tied to a specific category by pressing '>' on a category item
+
+#### 5. Budget
+
+- Assign an overall budget that tracks general spending on a monthly basis
+- Assign a category budget that tracks category spending on a monthly basis
+
+#### 6. Budget History
+
+- Meant to persist your budget compliance as those displayed on the Budget screen get reset every month
+
+#### 7. Settings
+
+- Toggle app theme
+- Toggle Budget and Transaction notifications
+- Toggle biometrics requirement on app launch
+- Sync data or delete all of it
+- View app details and links
+
+#### 8. Export & reports
+
+- Export transactions, budget compliance and categorized spending breakdown for a specified duration as pdf or csv
+- View, reuse or clear recent exports
+
+## Build & Install
+
+### Requirements
 
 - .NET 10 SDK
 - An Android device running API 29+ (Android 10 or newer)
 
-## Build & Install
-
-### 1. Clone
+#### 1. Clone
 
 ```bash
 git clone https://github.com/KOKUMUbooker/pesa-scope.git
 cd pesa-scope
 ```
 
-### 2. Restore
+#### 2. Restore
 
 ```bash
 dotnet restore
 ```
 
-### 3. Build APK
+#### 3. Build APK
 
 ```bash
 cd PesaScope.App
+```
+
+```bash
 dotnet publish -f net10.0-android -c Release -p:AndroidPackageFormat=apk
 ```
 
@@ -35,11 +86,11 @@ The signed APK will be at:
 PesaScope.App/bin/Release/net10.0-android/publish/com.bkokumu.pesascope-Signed.apk
 ```
 
-### 4. Install on device
+#### 4. Install on device
 
 Transfer the APK to your Android device and open it to install. You may need to enable **Install from unknown sources** in your device settings if prompted.
 
-## First-time Setup
+### First-time Setup
 
 PesaScope requires SMS read permission to parse M-Pesa messages. Android classifies this as a **restricted permission** and blocks it for apps installed outside the Play Store. Follow these steps to grant it:
 

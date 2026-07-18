@@ -2,6 +2,10 @@
 
 A personal Android app for automatically tracking M-Pesa transactions by parsing SMS messages directly on your device. No data leaves your phone.
 
+Demo
+
+https://github.com/user-attachments/assets/85c0c283-994b-462f-83a7-e3c2c7b94f90
+
 ## Features
 
 #### 1. Home
@@ -91,6 +95,8 @@ PesaScope.App/bin/Release/net10.0-android/publish/com.bkokumu.pesascope-Signed.a
 Transfer the APK to your Android device and open it to install. You may need to enable **Install from unknown sources** in your device settings if prompted.
 
 ### First-time Setup
+
+https://github.com/user-attachments/assets/ba66af87-92ad-4db7-a404-32e308e71fe3
 
 PesaScope requires SMS read permission to parse M-Pesa messages. Android classifies this as a **restricted permission** and blocks it for apps installed outside the Play Store. Follow these steps to grant it:
 

@@ -1,8 +1,11 @@
-# PesaScope
+<p align="center">
+<img  src="./Docs/logo.png" width="150px">
+</p>
+<h1 align="center"> PesaScope </h1>
 
 A personal Android app for automatically tracking M-Pesa transactions by parsing SMS messages directly on your device. No data leaves your phone.
 
-Demo
+## Demo
 
 https://github.com/user-attachments/assets/85c0c283-994b-462f-83a7-e3c2c7b94f90
 

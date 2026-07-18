@@ -30,6 +30,7 @@ public class MpesaSmsParser : IMpesaSmsParser
             ?? TryParseBuyGoods(body, smsId, smsTimestamp)
             ?? TryParseWithdrawal(body, smsId, smsTimestamp)
             ?? TryParseAirtime(body, smsId, smsTimestamp)
+            ?? TryParseDataBundle(body, smsId, smsTimestamp)
             ?? TryParseReversal(body, smsId, smsTimestamp)
             ?? TryParseDeposit(body, smsId, smsTimestamp)
             ?? TryParseFuliza(body, smsId, smsTimestamp);
@@ -99,6 +100,15 @@ public class MpesaSmsParser : IMpesaSmsParser
 
         return BuildTransaction(m, TransactionType.AirtimePurchase, smsId, timestamp,
             counterpartyName: "Safaricom Airtime");
+    }
+
+    private static Transaction? TryParseDataBundle(string body, long smsId, long timestamp)
+    {
+        var m = ParserPatterns.DataBundlePattern.Match(body);
+        if (!m.Success) return null;
+
+        return BuildTransaction(m, TransactionType.AirtimePurchase, smsId, timestamp,
+            counterpartyName: "Safaricom Data Bundles");
     }
 
     private static Transaction? TryParseReversal(string body, long smsId, long timestamp)

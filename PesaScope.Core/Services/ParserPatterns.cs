@@ -71,6 +71,14 @@ public static class ParserPatterns
         @"\s*Transaction cost,?\s*Ksh(?<cost>[\d,]+\.?\d*)\.",
         RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
+    public static readonly Regex DataBundlePattern = new(
+        @"^(?<code>[A-Z0-9]{8,12}) Confirmed\.\s*" +
+        @"Ksh(?<amount>[\d,]+\.?\d*) sent to SAFARICOM DATA BUNDLES for account SAFARICOM DATA BUNDLES on " +
+        @"(?<date>[\d/]+) at (?<time>[\d:]+\s*[AP]M)\." +
+        @"\s*New M-PESA balance is Ksh(?<balance>[\d,]+\.?\d*)\." +
+        @"\s*Transaction cost,?\s*Ksh(?<cost>[\d,]+\.?\d*)\.",
+        RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
+
     public static readonly Regex FulizaPattern = new(
        @"^(?<code>[A-Z0-9]{8,12})\s*" +
        @"Confirmed\.\s*" +

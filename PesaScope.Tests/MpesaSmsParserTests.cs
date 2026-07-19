@@ -225,6 +225,75 @@ public class MpesaSmsParserTests
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // Data Bundle (USSD purchase via M-Pesa, categorized as Airtime)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private const string DataBundleSms =
+        "UGIK2BOBR0 Confirmed. Ksh15.00 sent to SAFARICOM DATA BUNDLES for account " +
+        "SAFARICOM DATA BUNDLES on 18/7/26 at 11:03 PM. New M-PESA balance is Ksh88.00. " +
+        "Transaction cost, Ksh0.00.";
+
+    [Fact]
+    public void Parse_DataBundle_ReturnsAirtimeType()
+    {
+        var result = _parser.Parse(DataBundleSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(TransactionType.AirtimePurchase, result.Type);
+    }
+
+    [Fact]
+    public void Parse_DataBundle_ExtractsAmount()
+    {
+        var result = _parser.Parse(DataBundleSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(15.00m, result.Amount);
+    }
+
+    [Fact]
+    public void Parse_DataBundle_CounterpartyIsSafaricomDataBundles()
+    {
+        var result = _parser.Parse(DataBundleSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal("Safaricom Data Bundles", result.CounterpartyName);
+    }
+
+    [Fact]
+    public void Parse_DataBundle_ExtractsBalance()
+    {
+        var result = _parser.Parse(DataBundleSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(88.00m, result.BalanceAfterTransaction);
+    }
+
+    [Fact]
+    public void Parse_DataBundle_ExtractsMpesaCode()
+    {
+        var result = _parser.Parse(DataBundleSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal("UGIK2BOBR0", result.MpesaCode);
+    }
+
+    [Fact]
+    public void Parse_DataBundle_ExtractsTransactionDate()
+    {
+        var result = _parser.Parse(DataBundleSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(2026, result.TransactionDate.Year);
+        Assert.Equal(7, result.TransactionDate.Month);
+        Assert.Equal(18, result.TransactionDate.Day);
+    }
+
+    [Fact]
+    public void Parse_DataBundle_DoesNotMatchAsPayBill()
+    {
+        // Regression guard: DataBundlePattern must be checked before PayBillPattern
+        // in the Parse() chain, otherwise this SMS could be misrouted.
+        var result = _parser.Parse(DataBundleSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.NotEqual(TransactionType.PayBill, result.Type);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // Withdrawal
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -659,6 +728,9 @@ public class MpesaSmsParserTests
         TransactionType.Withdrawal)]
     [InlineData(
         "UF4K26LILB confirmed.You bought Ksh5.00 of airtime on 4/6/26 at 10:57 PM.New M-PESA balance is Ksh5.00. Transaction cost, Ksh0.00.",
+        TransactionType.AirtimePurchase)]
+    [InlineData(
+        "UGIK2BOBR0 Confirmed. Ksh15.00 sent to SAFARICOM DATA BUNDLES for account SAFARICOM DATA BUNDLES on 18/7/26 at 11:03 PM. New M-PESA balance is Ksh88.00. Transaction cost, Ksh0.00.",
         TransactionType.AirtimePurchase)]
     [InlineData(
         "UCSMKAR8VZ Confirmed. On 28/3/26 at 8:31 AM Give Ksh2,000.00 cash to TUKO NET LIMITED Ernest enterprises shop elgons building New M-PESA balance is Ksh2,419.87.",

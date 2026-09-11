@@ -3,6 +3,12 @@
 </p>
 <h1 align="center"> PesaScope </h1>
 
+<p align="center">
+  <a href="https://play.google.com/store/apps/details?id=com.bkokumu.pesascope">
+    <img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png" height="60">
+  </a>
+</p>
+
 A personal Android app for automatically tracking M-Pesa transactions by parsing SMS messages directly on your device. No data leaves your phone.
 
 ## Demo
@@ -65,6 +71,9 @@ https://github.com/user-attachments/assets/85c0c283-994b-462f-83a7-e3c2c7b94f90
 #### 6. Budget History
 
 - Meant to persist your budget compliance as those displayed on the Budget screen get reset every month
+<p align="center">
+  <img src="./Docs/screenshots/budget-history.png" width="260px">
+</p>
 
 #### 7. Settings
 
@@ -119,7 +128,6 @@ dotnet publish -f net10.0-android -c Release -p:AndroidPackageFormat=apk
 
 The signed APK will be at:
 `PesaScope.App/bin/Release/net10.0-android/publish/com.bkokumu.pesascope-Signed.apk`
-
 
 #### 4. Install on device
 

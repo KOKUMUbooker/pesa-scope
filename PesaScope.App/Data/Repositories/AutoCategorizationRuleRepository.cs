@@ -87,7 +87,9 @@ public class AutoCategorizationRuleRepository(DatabaseService databaseService)
             (RuleType.PaybillNumber,   "100",              "Airtime & Data", 10), // Safaricom
             (RuleType.TransactionType, "AirtimePurchase",  "Airtime & Data", 10),
             (RuleType.ContainsText,    "TUNUKIWA",         "Airtime & Data", 8),
+            (RuleType.ContainsText,    "Safaricom",        "Airtime & Data", 8),
             (RuleType.ContainsText,    "Safaricom Offer",  "Airtime & Data", 8),
+            (RuleType.ContainsText,    "Safaricom Postpaid Bundles",  "Airtime & Data", 8),
 
             // Transport
             (RuleType.ContainsText, "UBER",   "Transport", 9),

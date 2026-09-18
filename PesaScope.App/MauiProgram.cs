@@ -35,7 +35,6 @@ namespace PesaScope.App
                 .ConfigureMopups()
                 .UseUraniumUI()
                 .UseUraniumUIMaterial()
-                .UseUraniumUIBlurs()
                 .UseLocalNotification()
                 .ConfigureFonts(fonts =>
                 {

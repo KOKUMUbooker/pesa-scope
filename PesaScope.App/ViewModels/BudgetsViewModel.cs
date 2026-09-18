@@ -141,14 +141,13 @@ public partial class BudgetsViewModel : ObservableObject
 
             PeriodLabel = thisFrom.ToString("MMMM yyyy");
 
-            var categories = await _categoryRepo.GetAllActiveAsync();
+            var categories = await _categoryRepo.GetBudgetableCategoriesAsync();
             var budgets = await _budgetRepo.GetAllWithCategoryAsync();
             var spendThis = await _transactionRepo.GetSpendingByCategoryAsync(thisFrom, thisTo);
             var spendLast = await _transactionRepo.GetSpendingByCategoryAsync(lastFrom, lastTo);
             var budgetMap = budgets.ToDictionary(b => b.CategoryId);
 
             BudgetRows = categories
-                .Where(c => c.Name != "Uncategorized")
                 .OrderByDescending(c => budgetMap.ContainsKey(c.Id))
                 .ThenBy(c => c.Name)
                 .Select(c => new BudgetRow

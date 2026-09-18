@@ -39,6 +39,11 @@
                             StrokeThickness="1"
                             StrokeShape="RoundRectangle 14"
                             Padding="14">
+                            <Border.GestureRecognizers>
+                                <TapGestureRecognizer
+                                    Command="{Binding Source={RelativeSource AncestorType={x:Type controls:TopCategoriesView}}, Path=OpenCategoryCommand}"
+                                    CommandParameter="{Binding .}"/>
+                            </Border.GestureRecognizers>
                             <VerticalStackLayout Spacing="8">
 
                                 <Border

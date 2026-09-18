@@ -321,7 +321,8 @@
 
                         <!-- ── TOP CATEGORIES ────────────────────────────────── -->
                     <HomeControls:TopCategoriesView
-                        Categories="{Binding TopCategories}"/>
+                        Categories="{Binding TopCategories}"
+                        OpenCategoryCommand="{Binding OpenCategoryCommand}"/>
 
                     <!-- ── RECENT TRANSACTIONS ───────────────────────────── -->
                         <HomeControls:RecentTransactionsView

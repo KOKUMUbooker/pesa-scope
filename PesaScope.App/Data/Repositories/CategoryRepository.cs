@@ -24,6 +24,16 @@ public class CategoryRepository(DatabaseService databaseService)
                  .Where(c => c.Name.ToLower() == name.ToLower())
                  .FirstOrDefaultAsync();
 
+    // Categories that budgets can meaningfully be set against:
+    // all user-created categories, plus system categories that represent
+    // actual spending. Income and Uncategorized are excluded — you can't
+    // budget "income", and Uncategorized is a catch-all, not a spending category.
+    public Task<List<Category>> GetBudgetableCategoriesAsync() =>
+        _db.Table<Category>()
+           .Where(c => c.Name != "Income" && c.Name != "Uncategorized")
+           .OrderBy(c => c.Name)
+           .ToListAsync();
+
     public async Task<bool> TryInsertAsync(Category category)
     {
         try

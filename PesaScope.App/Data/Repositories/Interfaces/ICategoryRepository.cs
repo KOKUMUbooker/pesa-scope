@@ -38,6 +38,8 @@ public interface ICategoryRepository : IRepository<Category>
     /// </summary>
     Task DeleteAndReassignAsync(int categoryId);
 
+    Task<List<Category>> GetBudgetableCategoriesAsync();
+
     Task<bool> TryInsertAsync(Category category);
 
     Task<bool> TryUpdateAsync(Category category);

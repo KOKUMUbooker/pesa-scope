@@ -9,6 +9,10 @@
   </a>
 </p>
 
+<p align="center">
+  🌐 <a href="https://pesascope.bkokumu.com/">Companion Website</a>
+</p>
+
 A personal Android app for automatically tracking M-Pesa transactions by parsing SMS messages directly on your device. No data leaves your phone.
 
 ## SMS Capture Demo

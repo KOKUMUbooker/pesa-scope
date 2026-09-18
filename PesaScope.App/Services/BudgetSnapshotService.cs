@@ -69,7 +69,7 @@ public class BudgetSnapshotService(
     private async Task SnapshotCategoriesAsync(
         int year, int month, Dictionary<int, decimal> spendingByCategory)
     {
-        var categories = await _categoryRepo.GetAllActiveAsync();
+        var categories = await _categoryRepo.GetBudgetableCategoriesAsync();
         var budgets = await _budgetRepo.GetAllWithCategoryAsync();
         var budgetMap = budgets.ToDictionary(b => b.CategoryId);
 

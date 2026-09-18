@@ -41,6 +41,7 @@ public partial class ChartDetailItem
 
 public partial class CategorySpendItem
 {
+    public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string Icon { get; set; } = string.Empty;
     public string Color { get; set; } = string.Empty;
@@ -57,6 +58,8 @@ public partial class DashboardViewModel : ObservableObject
     // Guards against partial-property-changed hooks firing while we're
     // programmatically initializing state (e.g. when switching view modes).
     private bool _isInitializingSelection;
+
+    private (DateTime from, DateTime to) _currentPeriod;
 
     // ── View mode ──────────────────────────────────────────────────────────
     [ObservableProperty] private DashboardViewMode _viewMode = DashboardViewMode.Weekly;
@@ -320,6 +323,16 @@ public partial class DashboardViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task OpenCategoryAsync(CategorySpendItem category)
+    {
+        if (category is null) return;
+
+        await Shell.Current.GoToAsync(
+            $"//Transactions/TransactionsPage?categoryId={category.Id}" +
+            $"&fromDate={_currentPeriod.from:yyyy-MM-dd}&toDate={_currentPeriod.to:yyyy-MM-dd}");
+    }
+
+    [RelayCommand]
     private static async Task NavigateToTransactionsAsync() =>
         await Shell.Current.GoToAsync("//TransactionsPage");
 
@@ -333,6 +346,7 @@ public partial class DashboardViewModel : ObservableObject
     private async Task RefreshDashboardAsync()
     {
         var period = ResolveCurrentPeriod();
+        _currentPeriod = period;
         PeriodLabel = ResolvePeriodLabel(period);
         ChartTitle = ViewMode == DashboardViewMode.Yearly ? "Monthly spending" : "Daily spending";
 
@@ -506,6 +520,7 @@ public partial class DashboardViewModel : ObservableObject
             .Take(3)
             .Select(kvp => new CategorySpendItem
             {
+                Id = catMap[kvp.Key].Id,
                 Name = catMap[kvp.Key].Name,
                 Icon = catMap[kvp.Key].Icon,
                 Color = catMap[kvp.Key].Color,

@@ -162,7 +162,7 @@ public static class ParserPatterns
         @"^(?<code>[A-Z0-9]{8,12}) Confirmed\.\s*" +
         @"Ksh(?<amount>[\d,]+\.?\d*) sent to " +
         @"(?<name>M-PESA CARD) for account " +
-        @"(?<account>[A-Z0-9\*\s]+?) on " +
+        @"(?<account>[A-Z0-9\*\+\s]+?) on " +
         @"(?<date>[\d/]+) at (?<time>[\d:]+\s*[AP]M)\s*" +
         @"New M-PESA balance is Ksh(?<balance>[\d,]+\.?\d*)\." +
         @"\s*Transaction cost,?\s*Ksh(?<cost>[\d,]+\.?\d*)\.",

@@ -933,6 +933,41 @@ public class MpesaSmsParserTests
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // Global Payment — Mpesa card
+    // ─────────────────────────────────────────────────────────────────────────
+    private const string AmazonRetailCardSms =
+        "UILMK7D3FT Confirmed. Ksh22,801.78 sent to M-PESA CARD for account " +
+        "AMAZON RETAIL            +14018657948 US on 21/9/26 at 2:22 AM New " +
+        "M-PESA balance is Ksh1,951.72. Transaction cost, Ksh0.00.";
+
+    [Fact]
+    public void Parse_AmazonRetailCard_ReturnsGlobalPaymentTypeAndOutgoing()
+    {
+        var result = _parser.Parse(AmazonRetailCardSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(TransactionType.GlobalPayment, result.Type);
+        Assert.Equal(TransactionDirection.Outgoing, result.Direction);
+    }
+
+    [Fact]
+    public void Parse_AmazonRetailCard_ExtractsAmount()
+    {
+        var result = _parser.Parse(AmazonRetailCardSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(22801.78m, result.Amount);
+    }
+
+    [Fact]
+    public void Parse_AmazonRetailCard_RegressionGuard_ExistingPayPalSampleStillWorks()
+    {
+        // Widening the account class to allow '+' must not break the original
+        // asterisk-based PayPal/DigitalOcean sample.
+        var result = _parser.Parse(GlobalPaymentCardSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal("M-PESA CARD", result.CounterpartyName);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // Global Payment — M-Pesa Global receive
     // ─────────────────────────────────────────────────────────────────────────
 
@@ -1371,6 +1406,9 @@ public class MpesaSmsParserTests
         TransactionType.MShwari)]
     [InlineData(
         "SH56ABC123 Confirmed. Ksh 5,500.00 sent to John Doe via Western Union (MTCN: 1234567890) on 14/8/26 at 10:45 AM. Fee: Ksh 250.00. New M-PESA balance is Ksh 12,400.00.",
+        TransactionType.GlobalPayment)]
+    [InlineData(
+        "UILMK7D3FT Confirmed. Ksh22,801.78 sent to M-PESA CARD for account AMAZON RETAIL            +14018657948 US on 21/9/26 at 2:22 AM New M-PESA balance is Ksh1,951.72. Transaction cost, Ksh0.00.",
         TransactionType.GlobalPayment)]
     [InlineData(
         "SH56CAR987 Confirmed. Ksh 1,940.00 paid to Netflix US using M-PESA GlobalPay virtual card ending *4321 on 14/8/26 at 6:30 PM. Exch Rate: 1 USD = Ksh 130.00. Fee: Ksh 0.00. New M-PESA balance is Ksh 16,310.00.",

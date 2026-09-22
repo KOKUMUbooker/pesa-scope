@@ -9,10 +9,15 @@
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     xmlns:lvc="clr-namespace:LiveChartsCore.SkiaSharpView.Maui;assembly=LiveChartsCore.SkiaSharpView.Maui"
     xmlns:HomeControls="clr-namespace:PesaScope.App.Controls.Home"
+    xmlns:converters="clr-namespace:PesaScope.App.Converters"
     x:DataType="vm:DashboardViewModel"
     Shell.NavBarIsVisible="True"
     SafeAreaEdges="All"
     BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
+
+    <uranium:UraniumContentPage.Resources>
+        <converters:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
+    </uranium:UraniumContentPage.Resources>
 
     <Shell.TitleView>
         <Grid

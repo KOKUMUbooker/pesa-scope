@@ -1,7 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using PesaScope.App.Data.Repositories.Interfaces;
-using PesaScope.Core.Models;
 using UraniumUI.Icons.MaterialSymbols;
 
 namespace PesaScope.App.ViewModels;

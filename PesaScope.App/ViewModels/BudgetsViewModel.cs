@@ -2,7 +2,6 @@
 using CommunityToolkit.Mvvm.Input;
 using PesaScope.App.Data.Repositories.Interfaces;
 using PesaScope.App.Views.Budgets;
-using PesaScope.App.Views.Transactions;
 using PesaScope.Core.Models;
 
 namespace PesaScope.App.ViewModels;
@@ -56,11 +55,29 @@ public partial class BudgetsViewModel : ObservableObject
     private readonly ICategoryRepository _categoryRepo;
     private readonly ITransactionRepository _transactionRepo;
     private readonly IOverallBudgetRepository _overallBudgetRepo;
+    private readonly IAppSettingsRepository _appSettingsRepo;
+    private AppSettings _appSettings = new();
+
+    // backing state, not observable — just used to compute HasAnyCategoryBudget
+    private bool _hasCategoryBudgetRows;
+    private bool _hasOverallBudgetSet;
 
     // ── Page state ────────────────────────────────────────────────────────────
     [ObservableProperty] private bool _isBusy;
     [ObservableProperty] private string _periodLabel = string.Empty;
     [ObservableProperty] private List<BudgetRow> _budgetRows = [];
+
+
+    // ── Notifications banner ─────────────────────────────────────────────────
+    [ObservableProperty] private bool _budgetNotificationsEnabled;   
+    [ObservableProperty] private bool _hasAnyCategoryBudget;        
+    [ObservableProperty] private bool _isEnablingNotifications;       
+
+    public bool ShowNotificationsBanner => HasAnyCategoryBudget && !BudgetNotificationsEnabled;  
+
+    partial void OnBudgetNotificationsEnabledChanged(bool value) => OnPropertyChanged(nameof(ShowNotificationsBanner));
+    partial void OnHasAnyCategoryBudgetChanged(bool value) => OnPropertyChanged(nameof(ShowNotificationsBanner));
+
 
     // ── Overall budget ────────────────────────────────────────────────────────
     [ObservableProperty] private decimal _overallLimit;
@@ -92,12 +109,14 @@ public partial class BudgetsViewModel : ObservableObject
         IBudgetRepository budgetRepo,
         ICategoryRepository categoryRepo,
         ITransactionRepository transactionRepo,
-        IOverallBudgetRepository overallBudgetRepo)
+        IOverallBudgetRepository overallBudgetRepo,
+        IAppSettingsRepository appSettingsRepository)
     {
         _budgetRepo = budgetRepo;
         _categoryRepo = categoryRepo;
         _transactionRepo = transactionRepo;
         _overallBudgetRepo = overallBudgetRepo;
+        _appSettingsRepo = appSettingsRepository;
     }
 
     // ── Load ──────────────────────────────────────────────────────────────────
@@ -109,7 +128,12 @@ public partial class BudgetsViewModel : ObservableObject
         IsBusy = true;
         try
         {
+            _appSettings = await _appSettingsRepo.GetAsync();                 
+            BudgetNotificationsEnabled = _appSettings.BudgetNotificationsEnabled;
+
             await Task.WhenAll(LoadBudgetRowsAsync(), LoadOverallBudgetAsync());
+
+            HasAnyCategoryBudget = _hasCategoryBudgetRows || _hasOverallBudgetSet;
         }
         finally
         {
@@ -158,6 +182,9 @@ public partial class BudgetsViewModel : ObservableObject
                     SpentLastMonth = spendLast.GetValueOrDefault(c.Id)
                 })
                 .ToList();
+
+            _hasCategoryBudgetRows = BudgetRows.Any(r => r.HasBudget);
+            RecomputeHasAnyBudget();
         }
         finally
         {
@@ -200,6 +227,9 @@ public partial class BudgetsViewModel : ObservableObject
                 OverallProgress = 0;
                 OverallStatusLabel = string.Empty;
             }
+
+            _hasOverallBudgetSet = HasOverallBudget;
+            RecomputeHasAnyBudget();
         }
         finally
         {
@@ -298,6 +328,34 @@ public partial class BudgetsViewModel : ObservableObject
     private async Task GoToHistoryAsync() =>
         await Shell.Current.GoToAsync($"{nameof(BudgetHistoryPage)}");
 
+    [RelayCommand]
+    public async Task EnableBudgetNotificationsAsync()
+    {
+        if (IsEnablingNotifications || BudgetNotificationsEnabled) return;
+
+        IsEnablingNotifications = true;
+        try
+        {
+            var status = await Permissions.RequestAsync<Permissions.PostNotifications>();
+            if (status != PermissionStatus.Granted)
+            {
+                await Shell.Current.DisplayAlertAsync(
+                    "Permission Required",
+                    "Notification permission was denied. Enable it in your device settings to receive budget alerts.",
+                    "OK");
+                return;
+            }
+
+            _appSettings.BudgetNotificationsEnabled = true;
+            await _appSettingsRepo.UpdateAsync(_appSettings);
+            BudgetNotificationsEnabled = true;
+        }
+        finally
+        {
+            IsEnablingNotifications = false;
+        }
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private static (DateTime from, DateTime to) CurrentMonthRange()
@@ -314,5 +372,10 @@ public partial class BudgetsViewModel : ObservableObject
         var from = new DateTime(today.Year, today.Month, 1).AddMonths(-1);
         var to = from.AddMonths(1).AddDays(-1);
         return (from, to);
+    }
+
+    private void RecomputeHasAnyBudget()
+    {
+        HasAnyCategoryBudget = _hasCategoryBudgetRows || _hasOverallBudgetSet;
     }
 }

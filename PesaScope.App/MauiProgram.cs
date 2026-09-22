@@ -101,6 +101,7 @@ namespace PesaScope.App
             builder.Services.AddSingleton<IBudgetSnapshotService,BudgetSnapshotService>();
             builder.Services.AddSingleton<IReportExportService,ReportExportService>();
             builder.Services.AddSingleton<DatabaseSeeder>();
+            builder.Services.AddSingleton<IMpesaSMSSyncService, MpesaSMSSyncService>();
 
             // Register biometric service
             builder.Services.AddSingleton<IBiometric>(BiometricAuthenticationService.Default);

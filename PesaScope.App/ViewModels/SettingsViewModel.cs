@@ -6,7 +6,6 @@ using PesaScope.App.Services.Interfaces;
 using PesaScope.App.Views.Onboarding;
 using PesaScope.App.Views.Settings;
 using PesaScope.Core.Models;
-using PesaScope.Core.Services.Interfaces;
 using AppTheme = PesaScope.Core.Models.AppTheme;
 
 namespace PesaScope.App.ViewModels;
@@ -15,14 +14,11 @@ public partial class SettingsViewModel : ObservableObject
 {
     private readonly IAppSettingsRepository _appSettingsRepo;
     private readonly ISyncMetadataRepository _syncMetadataRepo;
-    private readonly ITransactionRepository _transactionRepo;
-    private readonly ISmsReaderService _smsReader;
-    private readonly IMpesaSmsParser _mpesaSmsParser;
-    private readonly IAutoCategorizationService _autoCategorizationService;
     private readonly DatabaseSeeder _seeder;
     private readonly DatabaseService _databaseService;
     private readonly IBiometricAuthService _biometricAuthService;
     private readonly IServiceProvider _services;
+    private readonly IMpesaSMSSyncService _mpesaSyncService;
 
     private AppSettings _appSettings = new();
 
@@ -54,25 +50,19 @@ public partial class SettingsViewModel : ObservableObject
     public SettingsViewModel(
         IAppSettingsRepository appSettingsRepo,
         ISyncMetadataRepository syncMetadataRepo,
-        ITransactionRepository transactionRepo,
-        ISmsReaderService smsReader,
-        IMpesaSmsParser mpesaSmsParser,
-        IAutoCategorizationService autoCategorizationService,
         DatabaseSeeder seeder,
         IBiometricAuthService biometricAuthService,
         IServiceProvider services,
-        DatabaseService databaseService)
+        DatabaseService databaseService,
+        IMpesaSMSSyncService mpesaSMSSyncService)
     {
         _appSettingsRepo = appSettingsRepo;
         _syncMetadataRepo = syncMetadataRepo;
-        _transactionRepo = transactionRepo;
-        _smsReader = smsReader;
-        _mpesaSmsParser = mpesaSmsParser;
-        _autoCategorizationService = autoCategorizationService;
         _seeder = seeder;
         _biometricAuthService = biometricAuthService;
         _databaseService = databaseService;
         _services = services;
+        _mpesaSyncService = mpesaSMSSyncService;
     }
 
     // ── Load ──────────────────────────────────────────────────────────────────
@@ -196,76 +186,46 @@ public partial class SettingsViewModel : ObservableObject
 
 
     // ── Data management ───────────────────────────────────────────────────────
-
     [RelayCommand]
     public async Task SyncNowAsync()
     {
         if (IsSyncing) return;
         IsSyncing = true;
-
         try
         {
-            var hasPermission = await _smsReader.HasPermissionAsync();
-            if (!hasPermission)
+            var result = await _mpesaSyncService.SyncAsync();
+
+            if (result.NoPermission)
             {
-                await Shell.Current.DisplayAlertAsync(
-                    "Permission Needed",
+                await Shell.Current.DisplayAlertAsync("Permission Needed",
                     "PesaScope needs SMS read permission to sync your M-Pesa messages. " +
-                    "Please grant it in your device's app settings.",
-                    "OK");
+                    "Please grant it in your device's app settings.", "OK");
                 return;
             }
 
-            var syncMeta = await _syncMetadataRepo.GetAsync();
-            var newMessages = await _smsReader.GetNewMpesaMessagesAsync(syncMeta.LastSmsId);
-
-            if (newMessages is null || newMessages.Count == 0)
+            if (!result.Success)
             {
-                LastSyncedText = FormatSyncTime(DateTime.UtcNow);
-                await Shell.Current.DisplayAlertAsync(
-                    "Sync Complete",
-                    "You're all caught up — no new transactions found.",
-                    "OK");
+                await Shell.Current.DisplayAlertAsync("Sync Failed",
+                    "Something went wrong while syncing. Please try again.", "OK");
                 return;
             }
-
-            var transactions = new List<Transaction>();
-            foreach (var msg in newMessages)
-            {
-                var tx = _mpesaSmsParser.Parse(msg.Body, msg.SmsId, msg.Timestamp);
-                if (tx is not null)
-                    transactions.Add(tx);
-            }
-
-            var (inserted, duplicates) = await _transactionRepo.InsertManyAsync(transactions);
-            await _autoCategorizationService.CategorizeAsync(transactions);
-
-            var last = newMessages[^1];
-            await _syncMetadataRepo.UpdateAfterSyncAsync(last.SmsId, last.Timestamp, inserted);
 
             LastSyncedText = FormatSyncTime(DateTime.UtcNow);
 
-            var message = duplicates > 0
-                ? $"Found {inserted} new transaction{(inserted == 1 ? "" : "s")}. " +
-                  $"Skipped {duplicates} duplicate{(duplicates == 1 ? "" : "s")}."
-                : $"Found {inserted} new transaction{(inserted == 1 ? "" : "s")}.";
+            var message = result.Inserted == 0
+                ? "You're all caught up — no new transactions found."
+                : result.Duplicates > 0
+                    ? $"Found {result.Inserted} new transaction{(result.Inserted == 1 ? "" : "s")}. Skipped {result.Duplicates} duplicate{(result.Duplicates == 1 ? "" : "s")}."
+                    : $"Found {result.Inserted} new transaction{(result.Inserted == 1 ? "" : "s")}.";
 
             await Shell.Current.DisplayAlertAsync("Sync Complete", message, "OK");
-        }
-        catch (Exception)
-        {
-            await Shell.Current.DisplayAlertAsync(
-                "Sync Failed",
-                "Something went wrong while syncing. Please try again.",
-                "OK");
-            // TODO: route ex through whatever logging/telemetry you use elsewhere,
-            // once that's wired up — swallowing it silently here otherwise.
         }
         finally
         {
             IsSyncing = false;
         }
     }
+
 
     [RelayCommand]
     public async Task ClearAllDataAsync()

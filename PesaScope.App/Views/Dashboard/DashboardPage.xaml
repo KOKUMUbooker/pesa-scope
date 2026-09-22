@@ -17,28 +17,53 @@
     <Shell.TitleView>
         <Grid
          Padding="10,5,10,5"
-         ColumnDefinitions="Auto,*,Auto" >
+         ColumnDefinitions="Auto,*,Auto,Auto" >
 
             <HorizontalStackLayout
-             Grid.Column="0"
-             Spacing="10"
-             VerticalOptions="Center">
-
+                Grid.Column="0"
+                Spacing="10"
+                VerticalOptions="Center">
                 <Label
-                 Text="Home"
-                 FontSize="22"
-                 FontAttributes="Bold"
-                 TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                 VerticalOptions="Center"/>
-                </HorizontalStackLayout>
+                     Text="Home"
+                     FontSize="22"
+                     FontAttributes="Bold"
+                     TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                     VerticalOptions="Center"/>
+            </HorizontalStackLayout>
 
-            <!-- Sync -->
+            <!-- Sync SMS -->
+            <Border
+                Grid.Column="2"
+                BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
+                StrokeThickness="0"
+                StrokeShape="RoundRectangle 16"
+                Padding="10,6"
+                VerticalOptions="Center">
+                <Border.GestureRecognizers>
+                    <TapGestureRecognizer Command="{Binding SyncSmsCommand}"/>
+                </Border.GestureRecognizers>
+                <HorizontalStackLayout VerticalOptions="Center" Spacing="5" IsEnabled="{Binding IsSyncingSms, Converter={StaticResource InvertedBoolConverter}}">
+                    <Image VerticalOptions="Center">
+                        <Image.Source>
+                            <FontImageSource
+                               FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Sms}"
+                               Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                               Size="16" /> 
+                        </Image.Source>
+                    </Image>
+                    <Label Text="Sync SMS" FontSize="12"
+                       TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                       VerticalOptions="Center"/>
+                </HorizontalStackLayout>
+            </Border>
+
+            <!-- View refresh (existing) -->
             <ImageButton
-              Grid.Column="2"
+              Grid.Column="3"
               Command="{Binding RefreshCommand}"
               BackgroundColor="Transparent"
               Padding="8"
-              WidthRequest="44" 
+              WidthRequest="44"
               HeightRequest="44"
               CornerRadius="8"
               HorizontalOptions="End">

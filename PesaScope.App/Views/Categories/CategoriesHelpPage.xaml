@@ -138,13 +138,15 @@
                                 <Label Text="Matches an entire kind of transaction, e.g. all Airtime Purchases or all Received Money." FontSize="13"
                                     TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
                             </VerticalStackLayout>
-                            <VerticalStackLayout Spacing="2">
-                                <Label Text="Direction" FontSize="14" FontAttributes="Bold"
-                                    TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
-                                <Label Text="Matches whether money came in or went out — useful as a catch-all, e.g. filing anything incoming under 'Income' even if no other rule claims it first." FontSize="13"
-                                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
-                            </VerticalStackLayout>
+                        <VerticalStackLayout Spacing="2">
+                            <Label Text="Direction" FontSize="14" FontAttributes="Bold"
+                                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                            <Label FontSize="13"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}">
+                                <Label.Text>Matches whether money came in or went out — useful as a catch-all, e.g. filing anything incoming under 'Income' even if no other rule claims it first. For the Match Value, enter exactly "Incoming" or "Outgoing".</Label.Text>
+                            </Label>
                         </VerticalStackLayout>
+                    </VerticalStackLayout>
                 </Border>
             </VerticalStackLayout>
 

@@ -203,12 +203,38 @@
         <ScrollView>
             <VerticalStackLayout Spacing="24" Padding="20,16,20,40">
 
-                <!-- ── Overall budget card (5.5) ────────────────────────────── -->
+                <!-- ── Notifications banner ──────────────────────────────────── -->
+                <Border IsVisible="{Binding ShowNotificationsBanner}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
+                    StrokeThickness="0" StrokeShape="RoundRectangle 14" Padding="16,14">
+                    <Grid ColumnDefinitions="Auto,*,Auto" ColumnSpacing="12">
+                        <Label Grid.Column="0" FontFamily="MaterialSharp"
+                           Text="{x:Static m:MaterialSharp.Notifications}"
+                           FontSize="20" VerticalOptions="Center"
+                           TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+
+                        <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                            <Label Text="Turn on budget notifications" FontSize="14" FontAttributes="Bold"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                            <Label Text="Get alerted before you go over a category limit." FontSize="12"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                        </VerticalStackLayout>
+
+                        <Button Grid.Column="2" Text="Enable"
+                            Command="{Binding EnableBudgetNotificationsCommand}"
+                            IsEnabled="{Binding IsEnablingNotifications, Converter={StaticResource InvertedBool}}"
+                            VerticalOptions="Center" HeightRequest="36" CornerRadius="18"
+                            FontSize="13" FontAttributes="Bold" Padding="14,0"
+                            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                            TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"/>
+                    </Grid>
+                </Border>
+                
                 <!-- ── Overall budget card ────────────────────────────── -->
                 <Border
-    BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
-    Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
-    StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="20">
+                    BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                    Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                    StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="20">
 
                     <Grid>
                         <!-- Loading indicator for overall budget -->
@@ -302,16 +328,16 @@
 
                     <!-- Loading indicator for category budgets -->
                     <Border IsVisible="{Binding IsCategoryBudgetsLoading}"
-                    BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
-                    Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
-                    StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="40,30">
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                        Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                        StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="40,30">
                         <VerticalStackLayout Spacing="12" VerticalOptions="Center" HorizontalOptions="Center">
                             <ActivityIndicator IsRunning="{Binding IsCategoryBudgetsLoading}" 
                              Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
                              WidthRequest="36" HeightRequest="36"/>
                             <Label Text="Loading category budgets..."
-                   FontSize="14"
-                   TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                               FontSize="14"
+                               TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
                         </VerticalStackLayout>
                     </Border>
 
@@ -321,27 +347,27 @@
                         <BindableLayout.ItemTemplate>
                             <DataTemplate x:DataType="vm:BudgetRow">
                                 <Border
-                                BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
-                                Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
-                                StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="16">
+                                    BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}"
+                                    Stroke="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                    StrokeThickness="1" StrokeShape="RoundRectangle 16" Padding="16">
                                     <VerticalStackLayout Spacing="10">
 
                                         <!-- Category header row -->
                                         <Grid ColumnDefinitions="*,Auto,Auto" ColumnSpacing="8">
 
                                             <Label Grid.Column="0"
-                                           Text="{Binding Category.Name}"
-                                           FontSize="15" FontAttributes="Bold"
-                                           VerticalOptions="Center"
-                                           TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                                               Text="{Binding Category.Name}"
+                                               FontSize="15" FontAttributes="Bold"
+                                               VerticalOptions="Center"
+                                               TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
 
                                             <!-- Delete budget button (only if budget exists) -->
                                             <ImageButton Grid.Column="1"
-                                            BackgroundColor="Transparent"
-                                            WidthRequest="36" HeightRequest="36"
-                                            IsVisible="{Binding HasBudget}"
-                                            Command="{Binding BindingContext.DeleteBudgetCommand, Source={x:Reference NBudgetsPage}}"
-                                            CommandParameter="{Binding .}">
+                                                BackgroundColor="Transparent"
+                                                WidthRequest="36" HeightRequest="36"
+                                                IsVisible="{Binding HasBudget}"
+                                                Command="{Binding BindingContext.DeleteBudgetCommand, Source={x:Reference NBudgetsPage}}"
+                                                CommandParameter="{Binding .}">
                                                 <ImageButton.Source>
                                                     <FontImageSource FontFamily="MaterialSharp"
                                                     Glyph="{x:Static m:MaterialSharp.Delete}"
@@ -361,8 +387,8 @@
                                                     CommandParameter="{Binding .}"/>
                                                 </Border.GestureRecognizers>
                                                 <Label FontSize="12" FontAttributes="Bold"
-                                       TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                                       Text="{Binding HasBudget, Converter={StaticResource BoolToStringConverter},
+                                                   TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                                   Text="{Binding HasBudget, Converter={StaticResource BoolToStringConverter},
                                               ConverterParameter='Edit|Set limit'}"/>
                                             </Border>
                                         </Grid>
@@ -373,40 +399,40 @@
                                             <!-- Spent / limit -->
                                             <Grid ColumnDefinitions="*,Auto">
                                                 <Label Grid.Column="0" FontSize="13"
-                                       Text="{Binding Category.Name, StringFormat='{0} Budget'}"
-                                       TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}">
+                                                   Text="{Binding Category.Name, StringFormat='{0} Budget'}"
+                                                   TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}">
                                                 </Label>
                                                 <Label Grid.Column="1" FontSize="13"
-                                       Text="{Binding FormattedLimit, StringFormat='of {0}'}" 
-                                       TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}">
+                                                   Text="{Binding FormattedLimit, StringFormat='of {0}'}" 
+                                                   TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}">
                                                 </Label>
                                             </Grid>
 
                                             <!-- Progress bar (5.2) -->
                                             <ProgressBar Progress="{Binding Progress}"
-                                         ProgressColor="{Binding ProgressColor}"
-                                         BackgroundColor="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
-                                         HeightRequest="8"/>
+                                                 ProgressColor="{Binding ProgressColor}"
+                                                 BackgroundColor="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                                                 HeightRequest="8"/>
 
                                             <!-- Status + last month comparison (5.7) -->
                                             <Grid ColumnDefinitions="*,Auto">
                                                 <Label Grid.Column="0"
-                                       Text="{Binding StatusLabel}"
-                                       FontSize="12" FontAttributes="Bold"
-                                       TextColor="{Binding ProgressColor}"/>
+                                                   Text="{Binding StatusLabel}"
+                                                   FontSize="12" FontAttributes="Bold"
+                                                   TextColor="{Binding ProgressColor}"/>
                                                 <Label Grid.Column="1"
-                                       Text="{Binding LastMonthLabel}"
-                                       FontSize="11"
-                                       TextColor="{Binding LastMonthColor}"/>
+                                                   Text="{Binding LastMonthLabel}"
+                                                   FontSize="11"
+                                                   TextColor="{Binding LastMonthColor}"/>
                                             </Grid>
 
                                         </VerticalStackLayout>
 
                                         <!-- No budget set state -->
                                         <Label Text="No limit set — tap 'Set limit' to add one."
-                               FontSize="12"
-                               IsVisible="{Binding HasBudget, Converter={StaticResource InvertedBool}}"
-                               TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                                            FontSize="12"
+                                            IsVisible="{Binding HasBudget, Converter={StaticResource InvertedBool}}"
+                                            TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
 
                                     </VerticalStackLayout>
                                 </Border>

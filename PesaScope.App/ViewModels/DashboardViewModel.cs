@@ -4,6 +4,7 @@ using LiveChartsCore;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using PesaScope.App.Data.Repositories.Interfaces;
+using PesaScope.App.Services.Interfaces;
 using PesaScope.App.Views.Transactions;
 using PesaScope.Core.Models;
 using SkiaSharp;
@@ -58,6 +59,8 @@ public partial class DashboardViewModel : ObservableObject
     // Guards against partial-property-changed hooks firing while we're
     // programmatically initializing state (e.g. when switching view modes).
     private bool _isInitializingSelection;
+
+    private readonly IMpesaSMSSyncService _mpesaSyncService; 
 
     private (DateTime from, DateTime to) _currentPeriod;
 
@@ -114,6 +117,8 @@ public partial class DashboardViewModel : ObservableObject
     // ── Net balance help sheet ────────────────────────────────────────────────
     [ObservableProperty] private bool _isNetBalanceHelpOpen;
 
+    [ObservableProperty] private bool _isSyncingSms;
+
     public bool IsNetBalanceNegative => NetBalance < 0;
 
     [RelayCommand]
@@ -138,10 +143,11 @@ public partial class DashboardViewModel : ObservableObject
     private void SetChartDisplayMode(ChartDisplayMode mode) => ChartDisplayMode = mode;
 
     // ── Constructor ───────────────────────────────────────────────────────────
-    public DashboardViewModel(ITransactionRepository transactions, ICategoryRepository categories)
+    public DashboardViewModel(ITransactionRepository transactions, ICategoryRepository categories, IMpesaSMSSyncService mpesaSMSSyncService)
     {
         _transactions = transactions;
         _categories = categories;
+        _mpesaSyncService = mpesaSMSSyncService;
 
         var today = DateTime.Today;
         AvailableYears = Enumerable.Range(today.Year - 4, 5).Reverse().ToList();
@@ -340,6 +346,46 @@ public partial class DashboardViewModel : ObservableObject
     private static async Task OpenTransactionAsync(Transaction transaction) =>
         await Shell.Current.GoToAsync(
             $"{nameof(TransactionDetailPage)}?code={transaction.MpesaCode}");
+
+    [RelayCommand]
+    private async Task SyncSmsAsync()
+    {
+        if (IsSyncingSms) return;
+
+        bool confirmed = await Shell.Current.DisplayAlertAsync(
+            "Sync M-Pesa messages?",
+            "This reads new M-Pesa SMS on your device and adds any transactions found. It may take a few seconds.",
+            "Sync now",
+            "Not now");
+
+        if (!confirmed) return;
+
+        IsSyncingSms = true;
+        try
+        {
+            var result = await _mpesaSyncService.SyncAsync();
+
+            if (result.NoPermission)
+            {
+                await Shell.Current.DisplayAlertAsync("Permission Needed",
+                    "Grant SMS read permission in your device settings to sync M-Pesa messages.", "OK");
+                return;
+            }
+
+            if (!result.Success)
+            {
+                await Shell.Current.DisplayAlertAsync("Sync Failed", "Something went wrong. Please try again.", "OK");
+                return;
+            }
+
+            if (result.Inserted > 0)
+                await RefreshDashboardAsync(); // pull new data into the current view
+        }
+        finally
+        {
+            IsSyncingSms = false;
+        }
+    }
 
     // ── Core refresh logic ────────────────────────────────────────────────────
 

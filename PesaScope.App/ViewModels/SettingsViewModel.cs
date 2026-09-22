@@ -6,7 +6,6 @@ using PesaScope.App.Services.Interfaces;
 using PesaScope.App.Views.Onboarding;
 using PesaScope.App.Views.Settings;
 using PesaScope.Core.Models;
-using PesaScope.Core.Services.Interfaces;
 using AppTheme = PesaScope.Core.Models.AppTheme;
 
 namespace PesaScope.App.ViewModels;

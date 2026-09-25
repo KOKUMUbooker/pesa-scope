@@ -37,6 +37,8 @@ public interface IAutoCategorizationRuleRepository : IRepository<AutoCategorizat
     /// </summary>
     Task DeleteByCategoryAsync(int categoryId);
 
+    Task<AutoCategorizationRule?> GetByTypeAndValueAsync(RuleType ruleType, string matchValue);
+
     Task<bool> ExistsAsync(RuleType ruleType, string matchValue);
 
     Task<bool> TryInsertAsync(AutoCategorizationRule rule);

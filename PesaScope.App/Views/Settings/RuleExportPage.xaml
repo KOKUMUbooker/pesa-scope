@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<uranium:UraniumContentPage
+    x:Class="PesaScope.App.Views.Settings.RuleExportPage"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:uranium="clr-namespace:UraniumUI.Pages;assembly=UraniumUI"
+    xmlns:vm="clr-namespace:PesaScope.App.ViewModels"
+    xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
+    xmlns:models="clr-namespace:PesaScope.Core.Models;assembly=PesaScope.Core"
+    xmlns:converters="clr-namespace:PesaScope.App.Converters"
+    x:DataType="vm:RuleExportViewModel"
+    Shell.TabBarIsVisible="False"
+    BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
+
+    <uranium:UraniumContentPage.Resources>
+        <converters:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
+        <converters:IntIsGreaterThanZeroConverter x:Key="IntIsGreaterThanZeroConverter"/>
+    </uranium:UraniumContentPage.Resources>
+
+    <!-- ── Title bar ─────────────────────────────────────────────────────── -->
+    <Shell.TitleView>
+        <Grid Padding="5,10">
+            <Label Text="Export Rules"
+               VerticalOptions="Center"
+               TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+        </Grid>
+    </Shell.TitleView>
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto" Padding="16,12">
+
+        <!-- Search + category filter -->
+        <Grid Grid.Row="0" ColumnDefinitions="*,Auto" ColumnSpacing="8" Padding="0,0,0,8">
+            <Border Grid.Column="0"
+                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="12,0">
+                <Grid ColumnDefinitions="Auto,*" ColumnSpacing="8">
+                    <Image Grid.Column="0" VerticalOptions="Center">
+                        <Image.Source>
+                            <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Search}"
+                                Color="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                                Size="16"/>
+                        </Image.Source>
+                    </Image>
+                    <Entry Grid.Column="1"
+                        Text="{Binding SearchText}"
+                        Placeholder="Search rules..."
+                        FontSize="14" HeightRequest="44" BackgroundColor="Transparent"
+                        ClearButtonVisibility="WhileEditing"/>
+                </Grid>
+            </Border>
+
+            <Border Grid.Column="1"
+                BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="10,0"
+                WidthRequest="150">
+                <Grid>
+                    <Picker ItemsSource="{Binding FilterCategories}"
+                        ItemDisplayBinding="{Binding Name}"
+                        SelectedItem="{Binding SelectedCategoryFilter}"
+                        FontSize="13" HeightRequest="44" BackgroundColor="Transparent"/>
+                    <Image InputTransparent="True" HorizontalOptions="End" VerticalOptions="Center" Margin="0,0,2,0">
+                        <Image.Source>
+                            <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Keyboard_arrow_down}"
+                                Color="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"
+                                Size="16"/> 
+                        </Image.Source>
+                    </Image>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Select all / deselect all -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" Padding="0,0,0,8">
+            <Label Grid.Column="0"
+                Text="{Binding SelectedCount, StringFormat='{0} selected'}"
+                VerticalOptions="Center" FontSize="13"
+                TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+            <Button Grid.Column="1" Text="Select all" FontSize="12" Padding="10,4"
+                Command="{Binding SelectAllCommand}" BackgroundColor="Transparent"
+                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+            <Button Grid.Column="2" Text="Deselect all" FontSize="12" Padding="10,4"
+                Command="{Binding DeselectAllCommand}" BackgroundColor="Transparent"
+                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+        </Grid>
+
+        <!-- Rule list -->
+        <Grid Grid.Row="2">
+            <CollectionView ItemsSource="{Binding Rules}"
+                IsVisible="{Binding IsLoading, Converter={StaticResource InvertedBoolConverter}}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="vm:RuleSelectionItem">
+                        <Grid Padding="4,6" ColumnDefinitions="Auto,*">
+                            <CheckBox Grid.Column="0" IsChecked="{Binding IsSelected}" VerticalOptions="Center"/>
+                            <VerticalStackLayout Grid.Column="1" Spacing="2" VerticalOptions="Center">
+                                <Label Text="{Binding Rule.MatchValue}" FontSize="14" FontAttributes="Bold"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                                <Label FontSize="11"
+                                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}">
+                                    <Label.FormattedText>
+                                        <FormattedString>
+                                            <Span Text="{Binding Rule.RuleType}"/>
+                                            <Span Text=" · "/>
+                                            <Span Text="{Binding CategoryName}"/>
+                                        </FormattedString>
+                                    </Label.FormattedText>
+                                </Label>
+                            </VerticalStackLayout>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+            
+            <!-- <ActivityIndicator IsRunning="{Binding IsLoading}" IsVisible="{Binding IsLoading}"
+                HorizontalOptions="Center" VerticalOptions="Center"/> -->
+        </Grid>
+
+        <!-- Export button -->
+        <Button Grid.Row="3"
+            Text="{Binding ExportButtonText}"
+            Command="{Binding ExportSelectedCommand}"
+            IsEnabled="{Binding SelectedCount, Converter={StaticResource IntIsGreaterThanZeroConverter}}"
+            HeightRequest="50" CornerRadius="16" FontAttributes="Bold" Margin="0,8,0,0"
+            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+            TextColor="White"/>
+    </Grid>
+</uranium:UraniumContentPage>

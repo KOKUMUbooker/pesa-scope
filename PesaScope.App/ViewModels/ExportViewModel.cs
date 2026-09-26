@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Input;
 using PesaScope.App.Data.Repositories.Interfaces;
 using PesaScope.App.Services.Interfaces;
 using PesaScope.Core.Models;
+using CommunityToolkit.Maui.Storage;
 
 namespace PesaScope.App.ViewModels;
 
@@ -121,8 +122,60 @@ public partial class ExportViewModel : ObservableObject
         HasRecentExports = RecentExports.Count > 0;
     }
 
-    // ── Transactions ──────────────────────────────────────────────────────────
+    // ── Shared export+share runner ─────────────────────────────────────────
+    private async Task RunExportAsync(Func<Task<string>> exportCall)
+    {
+        IsExporting = true;
+        try
+        {
+            var path = await exportCall();
 
+            await Share.Default.RequestAsync(new ShareFileRequest
+            {
+                Title = "Share Report",
+                File = new ShareFile(path)
+            });
+
+            await LoadRecentExportsAsync();
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlertAsync("Export Failed", ex.Message, "OK");
+        }
+        finally
+        {
+            IsExporting = false;
+        }
+    }
+
+    // ── Shared save-to-device runner ─────────────────────────────────────────
+    private async Task RunSaveAsync(Func<Task<string>> exportCall)
+    {
+        IsExporting = true;
+        try
+        {
+            var path = await exportCall();
+            var fileName = Path.GetFileName(path);
+
+            await using var stream = File.OpenRead(path);
+            var result = await FileSaver.Default.SaveAsync(fileName, stream, CancellationToken.None);
+
+            if (!result.IsSuccessful && result.Exception is not null)
+                await Shell.Current.DisplayAlertAsync("Save Failed", result.Exception.Message, "OK");
+
+            await LoadRecentExportsAsync();
+        }
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlertAsync("Save Failed", ex.Message, "OK");
+        }
+        finally
+        {
+            IsExporting = false;
+        }
+    }
+
+    // ── Transactions ──────────────────────────────────────────────────────────
     [RelayCommand]
     public Task ExportTransactionsCsvAsync() =>
         RunExportAsync(() => _exportService.ExportTransactionsCsvAsync(RangeFrom, RangeTo));
@@ -131,8 +184,15 @@ public partial class ExportViewModel : ObservableObject
     public Task ExportTransactionsPdfAsync() =>
         RunExportAsync(() => _exportService.ExportTransactionsPdfAsync(RangeFrom, RangeTo));
 
-    // ── Spending Summary ──────────────────────────────────────────────────────
+    [RelayCommand]
+    public Task SaveTransactionsCsvAsync() =>
+        RunSaveAsync(() => _exportService.ExportTransactionsCsvAsync(RangeFrom, RangeTo));
 
+    [RelayCommand]
+    public Task SaveTransactionsPdfAsync() =>
+        RunSaveAsync(() => _exportService.ExportTransactionsPdfAsync(RangeFrom, RangeTo));
+
+    // ── Spending Summary ──────────────────────────────────────────────────────
     [RelayCommand]
     public Task ExportSpendingSummaryCsvAsync() =>
         RunExportAsync(() => _exportService.ExportSpendingSummaryCsvAsync(RangeFrom, RangeTo));
@@ -141,8 +201,15 @@ public partial class ExportViewModel : ObservableObject
     public Task ExportSpendingSummaryPdfAsync() =>
         RunExportAsync(() => _exportService.ExportSpendingSummaryPdfAsync(RangeFrom, RangeTo));
 
-    // ── Budget Compliance ─────────────────────────────────────────────────────
+    [RelayCommand]
+    public Task SaveSpendingSummaryCsvAsync() =>
+        RunSaveAsync(() => _exportService.ExportSpendingSummaryCsvAsync(RangeFrom, RangeTo));
 
+    [RelayCommand]
+    public Task SaveSpendingSummaryPdfAsync() =>
+        RunSaveAsync(() => _exportService.ExportSpendingSummaryPdfAsync(RangeFrom, RangeTo));
+
+    // ── Budget Compliance ─────────────────────────────────────────────────────
     [RelayCommand]
     public Task ExportBudgetComplianceCsvAsync() =>
         RunExportAsync(() => _exportService.ExportBudgetComplianceCsvAsync(SelectedYear, SelectedMonthIndex));
@@ -152,46 +219,43 @@ public partial class ExportViewModel : ObservableObject
         RunExportAsync(() => _exportService.ExportBudgetCompliancePdfAsync(SelectedYear, SelectedMonthIndex));
 
     [RelayCommand]
-    public async Task ClearAllExportsAsync()
+    public Task SaveBudgetComplianceCsvAsync() =>
+        RunSaveAsync(() => _exportService.ExportBudgetComplianceCsvAsync(SelectedYear, SelectedMonthIndex));
+
+    [RelayCommand]
+    public Task SaveBudgetCompliancePdfAsync() =>
+        RunSaveAsync(() => _exportService.ExportBudgetCompliancePdfAsync(SelectedYear, SelectedMonthIndex));
+
+    // ── Save/Share an already-generated export from Recent Exports ────────────
+    [RelayCommand]
+    public async Task SaveExistingAsync(ExportHistoryRow row)
     {
-        if (!HasRecentExports) return;
+        if (row?.Source is null) return;
+        var entry = row.Source;
 
-        bool confirmed = await Shell.Current.DisplayAlertAsync(
-            "Clear Export History",
-            "This deletes your export history and the generated files. Anything already shared or saved elsewhere (e.g. Downloads, WhatsApp) is unaffected.",
-            "Clear",
-            "Cancel");
-
-        if (!confirmed) return;
-
-        // RecentExports only holds the top 10 — fetch the full set so older,
-        // off-screen entries don't get orphaned (row deleted, file left behind).
-        var all = await _exportHistoryRepo.GetRecentAsync(int.MaxValue);
-
-        foreach (var entry in all)
+        IsExporting = true;
+        try
         {
-            var path = entry.FilePath;
-            if (string.IsNullOrEmpty(path)) continue;
+            string path = entry.FilePath ?? string.Empty;
+            if (string.IsNullOrEmpty(path) || !File.Exists(path))
+                path = await RegenerateAsync(entry);
 
-            try
-            {
-                if (File.Exists(path)) File.Delete(path);
-            }
-            catch
-            {
-                // File may already be gone (cache cleared by OS) or locked — ignore and
-                // continue, the history row is getting removed regardless.
-            }
+            var fileName = Path.GetFileName(path);
+            await using var stream = File.OpenRead(path);
+            var result = await FileSaver.Default.SaveAsync(fileName, stream, CancellationToken.None);
+
+            if (!result.IsSuccessful && result.Exception is not null)
+                await Shell.Current.DisplayAlertAsync("Save Failed", result.Exception.Message, "OK");
         }
-
-        await _exportHistoryRepo.ClearAllAsync();
-        RecentExports.Clear();
-        HasRecentExports = false;
+        catch (Exception ex)
+        {
+            await Shell.Current.DisplayAlertAsync("Save Failed", ex.Message, "OK");
+        }
+        finally
+        {
+            IsExporting = false;
+        }
     }
-
-
-
-    // ── Share / re-share ──────────────────────────────────────────────────────
 
     [RelayCommand]
     public async Task ShareExistingAsync(ExportHistoryRow row)
@@ -237,30 +301,41 @@ public partial class ExportViewModel : ObservableObject
         _ => throw new InvalidOperationException("Unknown report kind/type combination.")
     };
 
-    // ── Shared export runner ─────────────────────────────────────────────────
-
-    private async Task RunExportAsync(Func<Task<string>> exportCall)
+    [RelayCommand]
+    public async Task ClearAllExportsAsync()
     {
-        IsExporting = true;
-        try
-        {
-            var path = await exportCall();
+        if (!HasRecentExports) return;
 
-            await Share.Default.RequestAsync(new ShareFileRequest
+        bool confirmed = await Shell.Current.DisplayAlertAsync(
+            "Clear Export History",
+            "This deletes your export history and the generated files. Anything already shared or saved elsewhere (e.g. Downloads, WhatsApp) is unaffected.",
+            "Clear",
+            "Cancel");
+
+        if (!confirmed) return;
+
+        // RecentExports only holds the top 10 — fetch the full set so older,
+        // off-screen entries don't get orphaned (row deleted, file left behind).
+        var all = await _exportHistoryRepo.GetRecentAsync(int.MaxValue);
+
+        foreach (var entry in all)
+        {
+            var path = entry.FilePath;
+            if (string.IsNullOrEmpty(path)) continue;
+
+            try
             {
-                Title = "Share Report",
-                File = new ShareFile(path)
-            });
+                if (File.Exists(path)) File.Delete(path);
+            }
+            catch
+            {
+                // File may already be gone (cache cleared by OS) or locked — ignore and
+                // continue, the history row is getting removed regardless.
+            }
+        }
 
-            await LoadRecentExportsAsync();
-        }
-        catch (Exception ex)
-        {
-            await Shell.Current.DisplayAlertAsync("Export Failed", ex.Message, "OK");
-        }
-        finally
-        {
-            IsExporting = false;
-        }
+        await _exportHistoryRepo.ClearAllAsync();
+        RecentExports.Clear();
+        HasRecentExports = false;
     }
 }

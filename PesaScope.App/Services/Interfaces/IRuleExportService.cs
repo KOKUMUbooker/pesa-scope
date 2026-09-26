@@ -5,7 +5,7 @@ namespace PesaScope.App.Services.Interfaces;
 public interface IRuleExportService
 {
     /// <summary>Serializes the given rules to a JSON export string.</summary>
-    Task<string> ExportAsync(IEnumerable<AutoCategorizationRule> rules);
+    Task<string> ExportAsync(IEnumerable<(AutoCategorizationRule Rule, string CategoryName)> rules);
 
     /// <summary>
     /// Parses an export file's JSON against the current DB state.

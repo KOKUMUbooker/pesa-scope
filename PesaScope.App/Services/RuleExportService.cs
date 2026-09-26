@@ -16,24 +16,25 @@ public class RuleExportService(
 
     // ── Export ───────────────────────────────────────────────────────────────
 
-    public async Task<string> ExportAsync(IEnumerable<AutoCategorizationRule> rules)
+    public async Task<string> ExportAsync(IEnumerable<(AutoCategorizationRule Rule, string CategoryName)> rules)
     {
         var envelope = new RuleExportEnvelope
         {
             SchemaVersion = 1,
             ExportedAtUtc = DateTime.UtcNow,
             AppVersion = AppInfo.VersionString is { } v ? $"{v} ({AppInfo.BuildString})" : "unknown",
-            Rules = rules.Select(r => new RuleExportDto
+            Rules = rules.Select(x => new RuleExportDto
             {
-                RuleType = r.RuleType,
-                MatchValue = r.MatchValue,
-                CategoryName = r.Category?.Name ?? string.Empty,
-                Priority = r.Priority,
-                IsEnabled = r.IsEnabled
+                RuleType = x.Rule.RuleType,
+                MatchValue = x.Rule.MatchValue,
+                CategoryName = x.CategoryName,
+                Priority = x.Rule.Priority,
+                IsEnabled = x.Rule.IsEnabled
             }).ToList()
         };
 
-        return JsonSerializer.Serialize(envelope, JsonOptions);
+        // return JsonSerializer.Serialize(envelope, JsonOptions); // Crashes in release mode since this uses reflection
+        return JsonSerializer.Serialize(envelope, RuleExportJsonContext.Default.RuleExportEnvelope);
     }
 
     // ── Parse (dry run, no writes) ──────────────────────────────────────────
@@ -43,7 +44,8 @@ public class RuleExportService(
         RuleExportEnvelope? envelope;
         try
         {
-            envelope = JsonSerializer.Deserialize<RuleExportEnvelope>(json);
+            // envelope = JsonSerializer.Deserialize<RuleExportEnvelope>(json); // Crashes in release mode since this uses reflection
+            envelope = JsonSerializer.Deserialize(json, RuleExportJsonContext.Default.RuleExportEnvelope);
         }
         catch (JsonException ex)
         {

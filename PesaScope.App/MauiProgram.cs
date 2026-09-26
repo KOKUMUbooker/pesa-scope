@@ -1,5 +1,6 @@
 ﻿using LiveChartsCore.SkiaSharpView.Maui;
 using Microsoft.Maui.Handlers;
+using CommunityToolkit.Maui;
 using Mopups.Hosting;
 using PesaScope.App.Data;
 using PesaScope.App.Data.Repositories;
@@ -36,6 +37,7 @@ namespace PesaScope.App
                 .UseUraniumUI()
                 .UseUraniumUIMaterial()
                 .UseLocalNotification()
+                .UseMauiCommunityToolkit()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -53,13 +55,15 @@ namespace PesaScope.App
 
             ConfigureHandlers();
 
-            // Onboarding pages — transient because they are created once and discarded
+            // Onboarding/Nested pages — transient because they are created once and discarded
             builder.Services.AddTransient<WelcomePage>();
             builder.Services.AddTransient<PermissionPage>();
             builder.Services.AddTransient<ImportProgressPage>();
             builder.Services.AddTransient<TransactionDetailPage>();
             builder.Services.AddTransient<BudgetHistoryPage>();
             builder.Services.AddTransient<ExportPage>();
+            builder.Services.AddTransient<RuleExportPage>();
+            builder.Services.AddTransient<RuleImportPage>();
 
             // App pages - Registered as Singleton to avoid recreation on every tab switch
             builder.Services.AddSingleton<AppLockPage>();
@@ -80,6 +84,9 @@ namespace PesaScope.App
             builder.Services.AddTransient<TransactionDetailViewModel>();
             builder.Services.AddTransient<BudgetHistoryViewModel>();
             builder.Services.AddTransient<ExportViewModel>();
+            builder.Services.AddTransient<RuleExportViewModel>();
+            builder.Services.AddTransient<RuleImportViewModel>();
+
 
             // DatabaseService registered as singleton — App.cs resolves and inits it
             var dbPath = Path.Combine(FileSystem.AppDataDirectory, "pesascope.db");
@@ -102,6 +109,8 @@ namespace PesaScope.App
             builder.Services.AddSingleton<IReportExportService,ReportExportService>();
             builder.Services.AddSingleton<DatabaseSeeder>();
             builder.Services.AddSingleton<IMpesaSMSSyncService, MpesaSMSSyncService>();
+            builder.Services.AddSingleton<IRuleExportService, RuleExportService>();
+            builder.Services.AddSingleton<IPendingRuleImportSession, PendingRuleImportSession>();
 
             // Register biometric service
             builder.Services.AddSingleton<IBiometric>(BiometricAuthenticationService.Default);

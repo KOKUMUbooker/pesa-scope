@@ -17,6 +17,8 @@ namespace PesaScope.App
             Routing.RegisterRoute(nameof(TransactionDetailPage), typeof(TransactionDetailPage));
             Routing.RegisterRoute(nameof(BudgetHistoryPage), typeof(BudgetHistoryPage));
             Routing.RegisterRoute(nameof(ExportPage), typeof(ExportPage));
+            Routing.RegisterRoute(nameof(RuleExportPage), typeof(RuleExportPage));
+            Routing.RegisterRoute(nameof(RuleImportPage), typeof(RuleImportPage));
         }
 
         protected override async void OnAppearing()

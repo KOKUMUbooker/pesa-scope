@@ -70,9 +70,11 @@ public class AutoCategorizationRuleRepository(DatabaseService databaseService)
 
     public async Task<AutoCategorizationRule?> GetByTypeAndValueAsync(RuleType ruleType, string matchValue)
     {
-        return await _db.FindWithQueryAsync<AutoCategorizationRule>(
+        var results = await _db.QueryAsync<AutoCategorizationRule>(
             "SELECT * FROM AutoCategorizationRules WHERE rule_type = ? AND match_value = ? COLLATE NOCASE LIMIT 1",
             (int)ruleType, matchValue);
+
+        return results?.FirstOrDefault();
     }
 
     public async Task SeedDefaultsAsync()

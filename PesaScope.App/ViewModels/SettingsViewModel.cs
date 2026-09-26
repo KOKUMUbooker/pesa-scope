@@ -19,6 +19,8 @@ public partial class SettingsViewModel : ObservableObject
     private readonly IBiometricAuthService _biometricAuthService;
     private readonly IServiceProvider _services;
     private readonly IMpesaSMSSyncService _mpesaSyncService;
+    private readonly IRuleExportService _ruleExportService;
+    private readonly IPendingRuleImportSession _pendingImportSession;
 
     private AppSettings _appSettings = new();
 
@@ -30,6 +32,7 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _lastSyncedText = "Never";
     [ObservableProperty] private bool _isSyncing;
     [ObservableProperty] private bool _transactionNotificationsEnabled;
+    [ObservableProperty] private bool _isImportingRules;
 
     // ── Security ──────────────────────────────────────────────────────────────
 
@@ -46,6 +49,7 @@ public partial class SettingsViewModel : ObservableObject
     private const string GitHubUrl = "https://github.com/KOKUMUbooker";
     private const string AppGitHubUrl = "https://github.com/KOKUMUbooker/pesa-scope";
     private const string AppWebsiteUrl = "https://pesascope.bkokumu.com";
+    private const string PlayStoreUrl = "https://play.google.com/store/apps/details?id=com.bkokumu.pesascope";
 
     public SettingsViewModel(
         IAppSettingsRepository appSettingsRepo,
@@ -54,7 +58,9 @@ public partial class SettingsViewModel : ObservableObject
         IBiometricAuthService biometricAuthService,
         IServiceProvider services,
         DatabaseService databaseService,
-        IMpesaSMSSyncService mpesaSMSSyncService)
+        IMpesaSMSSyncService mpesaSMSSyncService,
+        IRuleExportService ruleExportService,
+        IPendingRuleImportSession pendingRuleImportSession)
     {
         _appSettingsRepo = appSettingsRepo;
         _syncMetadataRepo = syncMetadataRepo;
@@ -63,6 +69,8 @@ public partial class SettingsViewModel : ObservableObject
         _databaseService = databaseService;
         _services = services;
         _mpesaSyncService = mpesaSMSSyncService;
+        _ruleExportService = ruleExportService;
+        _pendingImportSession = pendingRuleImportSession;
     }
 
     // ── Load ──────────────────────────────────────────────────────────────────
@@ -246,6 +254,69 @@ public partial class SettingsViewModel : ObservableObject
     }
 
     [RelayCommand]
+    public async Task OpenRuleExportAsync() =>
+    await Shell.Current.GoToAsync(nameof(RuleExportPage));
+
+    [RelayCommand]
+    public async Task ImportRulesAsync()
+    {
+        if (IsImportingRules) return;
+        IsImportingRules = true;
+        try
+        {
+            var pickResult = await FilePicker.Default.PickAsync(new PickOptions
+            {
+                PickerTitle = "Select a PesaScope rules export file",
+                FileTypes = new FilePickerFileType(new Dictionary<DevicePlatform, IEnumerable<string>>
+            {
+                { DevicePlatform.Android, new[] { "application/json" } },
+                { DevicePlatform.iOS, new[] { "public.json" } },
+                { DevicePlatform.WinUI, new[] { ".json" } }
+            })
+            });
+
+            if (pickResult is null) return; // user cancelled
+
+            string json;
+            try
+            {
+                json = await File.ReadAllTextAsync(pickResult.FullPath);
+            }
+            catch (Exception ex)
+            {
+                await Shell.Current.DisplayAlertAsync("Couldn't Read File",
+                    $"The selected file couldn't be read: {ex.Message}", "OK");
+                return;
+            }
+
+            RuleImportPreview preview;
+            try
+            {
+                preview = await _ruleExportService.ParseAsync(json);
+            }
+            catch (InvalidDataException ex)
+            {
+                await Shell.Current.DisplayAlertAsync("Invalid File", ex.Message, "OK");
+                return;
+            }
+
+            if (preview.NewCount == 0 && preview.ModifiedCount == 0)
+            {
+                await Shell.Current.DisplayAlertAsync("Nothing to Import",
+                    "Every rule in this file already matches what's in your app.", "OK");
+                return;
+            }
+
+            _pendingImportSession.SetPreview(preview);
+            await Shell.Current.GoToAsync(nameof(RuleImportPage));
+        }
+        finally
+        {
+            IsImportingRules = false;
+        }
+    }
+
+    [RelayCommand]
     public async Task OpenExportsAsync() =>
         await Shell.Current.GoToAsync(nameof(ExportPage));
 
@@ -256,6 +327,9 @@ public partial class SettingsViewModel : ObservableObject
         await Clipboard.Default.SetTextAsync(AppVersion);
         //await Shell.Current.DisplayAlertAsync("Copied", "Version info copied to clipboard.", "OK");
     }
+
+    [RelayCommand]
+    public async Task OpenPlayStoreAsync() => await OpenLinkAsync(PlayStoreUrl);
 
     [RelayCommand]
     public async Task SendFeedbackAsync()

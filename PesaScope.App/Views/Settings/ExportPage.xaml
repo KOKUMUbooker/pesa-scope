@@ -65,7 +65,6 @@
                                 <!-- Date range -->
                                 <Grid ColumnDefinitions="*,Auto,*" ColumnSpacing="10">
 
-
                                     <!-- From date -->
                                     <VerticalStackLayout Grid.Column="0" Spacing="6">
                                         <Label Text="From" FontSize="12"
@@ -96,7 +95,7 @@
                                        Grid.Column="1" FontSize="18"
                                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"
                                        VerticalOptions="End" Margin="0,0,0,8"/>
-                                    
+
                                     <!-- To date -->
                                     <VerticalStackLayout Grid.Column="2" Spacing="6">
                                         <Label Text="To" FontSize="12"
@@ -116,7 +115,7 @@
                                                     <Image.Source>
                                                         <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Edit_calendar}"
                                                             Color="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"
-                                                            Size="18"/>     
+                                                            Size="18"/>
                                                     </Image.Source>
                                                 </Image>
                                             </Grid>
@@ -125,21 +124,63 @@
 
                                 </Grid>
 
-
-                                <!-- Export buttons -->
-                                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                                    <Button Grid.Column="0" Text="Export CSV"
+                                <!-- CSV row -->
+                                <Grid ColumnDefinitions="*,Auto" Padding="0,4">
+                                    <Label Grid.Column="0" Text="CSV" FontSize="14" FontAttributes="Bold" VerticalOptions="Center"
+                                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                                    <HorizontalStackLayout Grid.Column="1" Spacing="8">
+                                        <ImageButton
                                             Command="{Binding ExportTransactionsCsvCommand}"
                                             IsEnabled="{Binding IsExporting, Converter={StaticResource InvertedBool}}"
                                             BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
-                                            TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"
-                                            CornerRadius="10" FontSize="13" HeightRequest="42"/>
-                                    <Button Grid.Column="1" Text="Export PDF"
+                                            WidthRequest="40" HeightRequest="40" CornerRadius="20" Padding="9">
+                                            <ImageButton.Source>
+                                                <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Ios_share}"
+                                                    Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" Size="18"/>
+                                            </ImageButton.Source>
+                                        </ImageButton>
+                                        <ImageButton
+                                            Command="{Binding SaveTransactionsCsvCommand}"
+                                            IsEnabled="{Binding IsExporting, Converter={StaticResource InvertedBool}}"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
+                                            WidthRequest="40" HeightRequest="40" CornerRadius="20" Padding="9">
+                                            <ImageButton.Source>
+                                                <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Download}"
+                                                    Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" Size="18"/>
+                                            </ImageButton.Source>
+                                        </ImageButton>
+                                    </HorizontalStackLayout>
+                                </Grid>
+
+                                <BoxView HeightRequest="1" Opacity="0.4"
+                                    Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"/>
+
+                                <!-- PDF row -->
+                                <Grid ColumnDefinitions="*,Auto" Padding="0,4">
+                                    <Label Grid.Column="0" Text="PDF" FontSize="14" FontAttributes="Bold" VerticalOptions="Center"
+                                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                                    <HorizontalStackLayout Grid.Column="1" Spacing="8">
+                                        <ImageButton
                                             Command="{Binding ExportTransactionsPdfCommand}"
                                             IsEnabled="{Binding IsExporting, Converter={StaticResource InvertedBool}}"
                                             BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                                            TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"
-                                            CornerRadius="10" FontSize="13" HeightRequest="42"/>
+                                            WidthRequest="40" HeightRequest="40" CornerRadius="20" Padding="9">
+                                            <ImageButton.Source>
+                                                <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Ios_share}"
+                                                    Color="White" Size="18"/>
+                                            </ImageButton.Source>
+                                        </ImageButton>
+                                        <ImageButton
+                                            Command="{Binding SaveTransactionsPdfCommand}"
+                                            IsEnabled="{Binding IsExporting, Converter={StaticResource InvertedBool}}"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                            WidthRequest="40" HeightRequest="40" CornerRadius="20" Padding="9">
+                                            <ImageButton.Source>
+                                                <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Download}"
+                                                    Color="White" Size="18"/>
+                                            </ImageButton.Source>
+                                        </ImageButton>
+                                    </HorizontalStackLayout>
                                 </Grid>
 
                             </VerticalStackLayout>
@@ -163,19 +204,63 @@
                                        FontSize="12"
                                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
 
-                                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                                    <Button Grid.Column="0" Text="Export CSV"
+                                <!-- CSV row -->
+                                <Grid ColumnDefinitions="*,Auto" Padding="0,4">
+                                    <Label Grid.Column="0" Text="CSV" FontSize="14" FontAttributes="Bold" VerticalOptions="Center"
+                                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                                    <HorizontalStackLayout Grid.Column="1" Spacing="8">
+                                        <ImageButton
                                             Command="{Binding ExportSpendingSummaryCsvCommand}"
                                             IsEnabled="{Binding IsExporting, Converter={StaticResource InvertedBool}}"
                                             BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
-                                            TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"
-                                            CornerRadius="10" FontSize="13" HeightRequest="42"/>
-                                    <Button Grid.Column="1" Text="Export PDF"
+                                            WidthRequest="40" HeightRequest="40" CornerRadius="20" Padding="9">
+                                            <ImageButton.Source>
+                                                <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Ios_share}"
+                                                    Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" Size="18"/>
+                                            </ImageButton.Source>
+                                        </ImageButton>
+                                        <ImageButton
+                                            Command="{Binding SaveSpendingSummaryCsvCommand}"
+                                            IsEnabled="{Binding IsExporting, Converter={StaticResource InvertedBool}}"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
+                                            WidthRequest="40" HeightRequest="40" CornerRadius="20" Padding="9">
+                                            <ImageButton.Source>
+                                                <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Download}"
+                                                    Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" Size="18"/>
+                                            </ImageButton.Source>
+                                        </ImageButton>
+                                    </HorizontalStackLayout>
+                                </Grid>
+
+                                <BoxView HeightRequest="1" Opacity="0.4"
+                                    Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"/>
+
+                                <!-- PDF row -->
+                                <Grid ColumnDefinitions="*,Auto" Padding="0,4">
+                                    <Label Grid.Column="0" Text="PDF" FontSize="14" FontAttributes="Bold" VerticalOptions="Center"
+                                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                                    <HorizontalStackLayout Grid.Column="1" Spacing="8">
+                                        <ImageButton
                                             Command="{Binding ExportSpendingSummaryPdfCommand}"
                                             IsEnabled="{Binding IsExporting, Converter={StaticResource InvertedBool}}"
                                             BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                                            TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"
-                                            CornerRadius="10" FontSize="13" HeightRequest="42"/>
+                                            WidthRequest="40" HeightRequest="40" CornerRadius="20" Padding="9">
+                                            <ImageButton.Source>
+                                                <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Ios_share}"
+                                                    Color="White" Size="18"/>
+                                            </ImageButton.Source>
+                                        </ImageButton>
+                                        <ImageButton
+                                            Command="{Binding SaveSpendingSummaryPdfCommand}"
+                                            IsEnabled="{Binding IsExporting, Converter={StaticResource InvertedBool}}"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                            WidthRequest="40" HeightRequest="40" CornerRadius="20" Padding="9">
+                                            <ImageButton.Source>
+                                                <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Download}"
+                                                    Color="White" Size="18"/>
+                                            </ImageButton.Source>
+                                        </ImageButton>
+                                    </HorizontalStackLayout>
                                 </Grid>
 
                             </VerticalStackLayout>
@@ -238,26 +323,70 @@
                                                 <Image.Source>
                                                     <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Keyboard_arrow_down}"
                                                         Color="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"
-                                                        Size="18"/>         
+                                                        Size="18"/>
                                                 </Image.Source>
                                             </Image>
                                         </Grid>
                                     </Border>
                                 </Grid>
 
-                                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                                    <Button Grid.Column="0" Text="Export CSV"
+                                <!-- CSV row -->
+                                <Grid ColumnDefinitions="*,Auto" Padding="0,4">
+                                    <Label Grid.Column="0" Text="CSV" FontSize="14" FontAttributes="Bold" VerticalOptions="Center"
+                                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                                    <HorizontalStackLayout Grid.Column="1" Spacing="8">
+                                        <ImageButton
                                             Command="{Binding ExportBudgetComplianceCsvCommand}"
                                             IsEnabled="{Binding IsExporting, Converter={StaticResource InvertedBool}}"
                                             BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
-                                            TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"
-                                            CornerRadius="10" FontSize="13" HeightRequest="42"/>
-                                    <Button Grid.Column="1" Text="Export PDF"
+                                            WidthRequest="40" HeightRequest="40" CornerRadius="20" Padding="9">
+                                            <ImageButton.Source>
+                                                <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Ios_share}"
+                                                    Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" Size="18"/>
+                                            </ImageButton.Source>
+                                        </ImageButton>
+                                        <ImageButton
+                                            Command="{Binding SaveBudgetComplianceCsvCommand}"
+                                            IsEnabled="{Binding IsExporting, Converter={StaticResource InvertedBool}}"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
+                                            WidthRequest="40" HeightRequest="40" CornerRadius="20" Padding="9">
+                                            <ImageButton.Source>
+                                                <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Download}"
+                                                    Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" Size="18"/>
+                                            </ImageButton.Source>
+                                        </ImageButton>
+                                    </HorizontalStackLayout>
+                                </Grid>
+
+                                <BoxView HeightRequest="1" Opacity="0.4"
+                                    Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"/>
+
+                                <!-- PDF row -->
+                                <Grid ColumnDefinitions="*,Auto" Padding="0,4">
+                                    <Label Grid.Column="0" Text="PDF" FontSize="14" FontAttributes="Bold" VerticalOptions="Center"
+                                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                                    <HorizontalStackLayout Grid.Column="1" Spacing="8">
+                                        <ImageButton
                                             Command="{Binding ExportBudgetCompliancePdfCommand}"
                                             IsEnabled="{Binding IsExporting, Converter={StaticResource InvertedBool}}"
                                             BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
-                                            TextColor="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"
-                                            CornerRadius="10" FontSize="13" HeightRequest="42"/>
+                                            WidthRequest="40" HeightRequest="40" CornerRadius="20" Padding="9">
+                                            <ImageButton.Source>
+                                                <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Ios_share}"
+                                                    Color="White" Size="18"/>
+                                            </ImageButton.Source>
+                                        </ImageButton>
+                                        <ImageButton
+                                            Command="{Binding SaveBudgetCompliancePdfCommand}"
+                                            IsEnabled="{Binding IsExporting, Converter={StaticResource InvertedBool}}"
+                                            BackgroundColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                            WidthRequest="40" HeightRequest="40" CornerRadius="20" Padding="9">
+                                            <ImageButton.Source>
+                                                <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Download}"
+                                                    Color="White" Size="18"/>
+                                            </ImageButton.Source>
+                                        </ImageButton>
+                                    </HorizontalStackLayout>
                                 </Grid>
 
                             </VerticalStackLayout>
@@ -300,12 +429,7 @@
                             <VerticalStackLayout BindableLayout.ItemsSource="{Binding RecentExports}">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate x:DataType="vm:ExportHistoryRow">
-                                        <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,12" ColumnSpacing="14">
-                                            <Grid.GestureRecognizers>
-                                                <TapGestureRecognizer
-                                                    Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ExportViewModel}}, Path=ShareExistingCommand}"
-                                                    CommandParameter="{Binding .}"/>
-                                            </Grid.GestureRecognizers>
+                                        <Grid ColumnDefinitions="Auto,*,Auto,Auto" Padding="16,12" ColumnSpacing="10">
 
                                             <Image Grid.Column="0" VerticalOptions="Center" WidthRequest="24" HeightRequest="24">
                                                 <Image.Source>
@@ -331,14 +455,31 @@
                                                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
                                             </VerticalStackLayout>
 
-                                            <Image Grid.Column="2" VerticalOptions="Center" WidthRequest="20" HeightRequest="20">
-                                                <Image.Source>
+                                            <!-- Save -->
+                                            <ImageButton Grid.Column="2"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ExportViewModel}}, Path=SaveExistingCommand}"
+                                                CommandParameter="{Binding .}"
+                                                BackgroundColor="Transparent" WidthRequest="32" HeightRequest="32" Padding="6">
+                                                <ImageButton.Source>
+                                                    <FontImageSource FontFamily="MaterialSharp"
+                                                                     Glyph="{x:Static m:MaterialSharp.Download}"
+                                                                     Color="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                                                                     Size="18"/>
+                                                </ImageButton.Source>
+                                            </ImageButton>
+
+                                            <!-- Share -->
+                                            <ImageButton Grid.Column="3"
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:ExportViewModel}}, Path=ShareExistingCommand}"
+                                                CommandParameter="{Binding .}"
+                                                BackgroundColor="Transparent" WidthRequest="32" HeightRequest="32" Padding="6">
+                                                <ImageButton.Source>
                                                     <FontImageSource FontFamily="MaterialSharp"
                                                                      Glyph="{x:Static m:MaterialSharp.Ios_share}"
                                                                      Color="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
                                                                      Size="18"/>
-                                                </Image.Source>
-                                            </Image>
+                                                </ImageButton.Source>
+                                            </ImageButton>
                                         </Grid>
                                     </DataTemplate>
                                 </BindableLayout.ItemTemplate>

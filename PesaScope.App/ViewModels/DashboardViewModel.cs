@@ -354,7 +354,7 @@ public partial class DashboardViewModel : ObservableObject
 
         bool confirmed = await Shell.Current.DisplayAlertAsync(
             "Sync M-Pesa messages?",
-            "This reads new M-Pesa SMS on your device and adds any transactions found. It may take a few seconds.",
+            "This checks your device's SMS for any M-Pesa messages not yet added to PesaScope, and imports any transactions found. It may take a few seconds.",
             "Sync now",
             "Not now");
 

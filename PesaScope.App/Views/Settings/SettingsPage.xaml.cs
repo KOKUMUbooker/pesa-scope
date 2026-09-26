@@ -17,8 +17,11 @@ public partial class SettingsPage : UraniumUI.Pages.UraniumContentPage
     protected override async void OnAppearing()
     {
         base.OnAppearing();
-        if (_loaded) return;
-        _loaded = true;
+
+        // Since the Budgets page can also update the budget notification settings
+        // let the page recheck the db everytime it appears
+        //if (_loaded) return;
+        //_loaded = true;
 
         _settingsReady = false;
         await _vm.LoadAsync();

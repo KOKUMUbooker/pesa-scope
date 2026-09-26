@@ -7,9 +7,15 @@
     xmlns:vm="clr-namespace:PesaScope.App.ViewModels"
     xmlns:m="clr-namespace:UraniumUI.Icons.MaterialSymbols;assembly=UraniumUI.Icons.MaterialSymbols"
     x:DataType="vm:SettingsViewModel"
+    xmlns:converters="clr-namespace:PesaScope.App.Converters"
     SafeAreaEdges="All"
     NavigationPage.HasNavigationBar="False"
     BackgroundColor="{AppThemeBinding Light={StaticResource Background}, Dark={StaticResource BackgroundDark}}">
+
+
+    <uranium:UraniumContentPage.Resources>
+        <converters:InvertedBoolConverter x:Key="InvertedBoolConverter"/>
+    </uranium:UraniumContentPage.Resources>
 
     <Shell.TitleView>
         <Grid
@@ -345,6 +351,96 @@
                             Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
                             Opacity="0.5" />
 
+                        <!-- Rule Management -->
+                        <VerticalStackLayout Padding="16,14" Spacing="12">
+
+                            <!-- Icon + title + description -->
+                            <Grid ColumnDefinitions="Auto,*" ColumnSpacing="14">
+                                <Image Grid.Column="0" VerticalOptions="Start">
+                                    <Image.Source>
+                                        <FontImageSource
+                                           FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Rule}"
+                                           Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                           Size="24" />
+                                    </Image.Source>
+                                </Image>
+
+                                <VerticalStackLayout Grid.Column="1" Spacing="2">
+                                    <Label
+                                        Text="Rule Management"
+                                        FontSize="15"
+                                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                                    <Label
+                                        Text="Import or export your auto-categorization rules"
+                                        FontSize="11"
+                                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}" />
+                                </VerticalStackLayout>
+                            </Grid>
+
+                            <!-- Import / Export outline buttons -->
+                            <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+
+                                <Border Grid.Column="0"
+                                    Stroke="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                                    StrokeThickness="1"
+                                    BackgroundColor="Transparent"
+                                    Padding="0,10">     
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="10" />
+                                    </Border.StrokeShape>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding ImportRulesCommand}" />
+                                    </Border.GestureRecognizers>
+
+                                    <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="6" HorizontalOptions="Center">
+                                        <Image Grid.Column="0" VerticalOptions="Center">
+                                            <Image.Source>
+                                                <FontImageSource
+                                                   FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Ios_share}"
+                                                   Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                                   Size="16" />
+                                            </Image.Source>
+                                        </Image>
+                                        <Label Grid.Column="1" Text="Import" FontSize="13" FontAttributes="Bold"
+                                            VerticalOptions="Center"
+                                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                                    </Grid>
+                                </Border>
+
+                                <Border Grid.Column="1"
+                                    Stroke="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                                    StrokeThickness="1"
+                                    BackgroundColor="Transparent"
+                                    Padding="0,10">
+                                    <Border.StrokeShape>
+                                        <RoundRectangle CornerRadius="10" />
+                                    </Border.StrokeShape>
+                                    <Border.GestureRecognizers>
+                                        <TapGestureRecognizer Command="{Binding OpenRuleExportCommand}" />
+                                    </Border.GestureRecognizers>
+
+                                    <Grid ColumnDefinitions="Auto,Auto" ColumnSpacing="6" HorizontalOptions="Center">
+                                        <Image Grid.Column="0" VerticalOptions="Center">
+                                            <Image.Source>
+                                                <FontImageSource
+                                                   FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Sync_saved_locally}"
+                                                   Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                                   Size="16" />         
+                                            </Image.Source>
+                                        </Image>
+                                        <Label Grid.Column="1" Text="Export" FontSize="13" FontAttributes="Bold"
+                                            VerticalOptions="Center"
+                                            TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                                    </Grid>
+                                </Border>
+
+                            </Grid>
+                        </VerticalStackLayout>
+
+                        <BoxView HeightRequest="1" Margin="16,0"
+                            Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                            Opacity="0.5" />
+
                         <!-- Clear All Data -->
                         <Grid
                             ColumnDefinitions="Auto,*,Auto"
@@ -495,6 +591,36 @@
                                 TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
                         </Grid>
 
+                        <BoxView HeightRequest="1" Margin="16,0"
+                             Color="{AppThemeBinding Light={StaticResource OutlineVariant}, Dark={StaticResource OutlineVariantDark}}"
+                             Opacity="0.5" />
+
+                        <Grid ColumnDefinitions="Auto,*,Auto" Padding="16,14" ColumnSpacing="14">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Command="{Binding OpenPlayStoreCommand}" />
+                            </Grid.GestureRecognizers>
+
+                            <Image Grid.Column="0" VerticalOptions="Center">
+                                <Image.Source>
+                                    <FontImageSource
+                                        FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Storefront}"
+                                        Color="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"
+                                        Size="24" />
+                                </Image.Source>
+                            </Image>
+                            <Label
+                                Grid.Column="1"
+                                Text="Rate on Play Store"
+                                FontSize="15"
+                                VerticalOptions="Center"
+                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                            <Label
+                                Grid.Column="2"
+                                Text="↗"
+                                FontSize="18"
+                                VerticalOptions="Center"
+                                TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                        </Grid>
                     </VerticalStackLayout>
                 </Border>
             </VerticalStackLayout>

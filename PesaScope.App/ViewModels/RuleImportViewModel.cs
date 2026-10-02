@@ -10,6 +10,7 @@ public partial class RuleImportViewModel : ObservableObject
 {
     private readonly IRuleExportService _exportService;
     private readonly IPendingRuleImportSession _session;
+    private readonly IAutoCategorizationService _autoCategorizationService;
 
     private RuleImportPreview? _preview;
     private List<RuleImportRowItem> _allRows = [];
@@ -17,6 +18,7 @@ public partial class RuleImportViewModel : ObservableObject
     [ObservableProperty] private bool _isLoading = true;
     [ObservableProperty] private bool _isCommitting;
     [ObservableProperty] private bool _hasPreview;
+    [ObservableProperty] private bool _isRecategorizing;
     [ObservableProperty] private string _searchText = string.Empty;
     [ObservableProperty] private string _selectedCategoryFilter = "All categories";
 
@@ -36,10 +38,14 @@ public partial class RuleImportViewModel : ObservableObject
 
     public event Action? RequestClose;
 
-    public RuleImportViewModel(IRuleExportService exportService, IPendingRuleImportSession session)
+    public RuleImportViewModel(
+        IRuleExportService exportService, 
+        IPendingRuleImportSession session,
+        IAutoCategorizationService autoCategorizationService)
     {
         _exportService = exportService;
         _session = session;
+        _autoCategorizationService = autoCategorizationService;
     }
 
     [RelayCommand]
@@ -152,6 +158,23 @@ public partial class RuleImportViewModel : ObservableObject
                 $"Updated {result.Updated} modified rule{(result.Updated == 1 ? "" : "s")}.\n" +
                 (skippedByChoice > 0 ? $"Left out {skippedByChoice} unchecked.\n" : "") +
                 (notSelectable > 0 ? $"Skipped {notSelectable} (duplicates or unresolved categories)." : "");
+
+            if (result.Added > 0 || result.Updated > 0)
+            {
+                IsCommitting = false;
+                IsRecategorizing = true;
+                try
+                {
+                    int recategorized = await _autoCategorizationService.RecategorizeAllAsync();
+                    message += recategorized == 0
+                        ? "\n\nNo transactions needed recategorizing."
+                        : $"\n\n{recategorized} transaction{(recategorized == 1 ? "" : "s")} recategorized using your updated rules.";
+                }
+                finally
+                {
+                    IsRecategorizing = false;
+                }
+            }
 
             await Shell.Current.DisplayAlertAsync("Import Complete", message.Trim(), "OK");
             RequestClose?.Invoke();

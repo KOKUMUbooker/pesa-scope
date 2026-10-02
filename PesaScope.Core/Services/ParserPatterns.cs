@@ -95,7 +95,7 @@ public static class ParserPatterns
        @"Confirmed\.\s*" +
        @"Ksh\s*(?<amount>[\d,]+\.?\d*) from your M-PESA has been used to " +
        @"(?<repayment_type>fully|partially) pay your outstanding Fuliza M-PESA\.\s*" +
-       @"Available Fuliza M-PESA limit is Ksh\s*(?<limit>[\d,]+\.?\d*)\.",
+       @"(?:Your )?[Aa]vailable Fuliza M-PESA limit is Ksh\s*(?<limit>[\d,]+\.?\d*)\.",
        RegexOptions.Compiled | RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
     public static readonly Regex ReversalPattern = new(

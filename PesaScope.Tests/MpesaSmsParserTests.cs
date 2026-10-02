@@ -592,6 +592,38 @@ public class MpesaSmsParserTests
         Assert.Equal(expected.Date, result.TransactionDate.Date);
     }
 
+    private const string FulizaPartialWithPrefixSms =
+        "UJ2MK8PCWC Confirmed. Ksh 70.00 from your M-PESA has been used to " +
+        "partially pay your outstanding Fuliza M-PESA. Your available Fuliza " +
+        "M-PESA limit is Ksh 1184.73. Your M-PESA balance is 0.00.";
+
+    [Fact]
+    public void Parse_FulizaWithYourAvailablePrefix_ReturnsCorrectType()
+    {
+        var result = _parser.Parse(FulizaPartialWithPrefixSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(TransactionType.Fuliza, result.Type);
+        Assert.Equal(TransactionDirection.Outgoing, result.Direction);
+    }
+
+    [Fact]
+    public void Parse_FulizaWithYourAvailablePrefix_ExtractsAmount()
+    {
+        var result = _parser.Parse(FulizaPartialWithPrefixSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(70.00m, result.Amount);
+    }
+
+    [Fact]
+    public void Parse_FulizaWithYourAvailablePrefix_RegressionGuard_OriginalSampleStillWorks()
+    {
+        // The optional "Your " prefix must not break the original Fuliza fixture
+        // that has no such prefix.
+        var result = _parser.Parse(FulizaSms, SmsId, SmsTimestamp);
+        Assert.NotNull(result);
+        Assert.Equal(7.01m, result.Amount);
+    }
+
     // ─────────────────────────────────────────────────────────────────────────
     // Reversal
     // ─────────────────────────────────────────────────────────────────────────
@@ -1394,6 +1426,9 @@ public class MpesaSmsParserTests
         TransactionType.Deposit)]
     [InlineData(
         "UERMK5QVVY Confirmed. Ksh 7.01 from your M-PESA has been used to fully pay your outstanding Fuliza M-PESA. Available Fuliza M-PESA limit is Ksh 1200.00.Ksh0.00.",
+        TransactionType.Fuliza)]
+    [InlineData(
+        "UJ2MK8PCWC Confirmed. Ksh 70.00 from your M-PESA has been used to partially pay your outstanding Fuliza M-PESA. Your available Fuliza M-PESA limit is Ksh 1184.73. Your M-PESA balance is 0.00.",
         TransactionType.Fuliza)]
     [InlineData(
         "UF7MKM7FTT confirmed. Reversal of transaction UF7MK70VIL has been successfully reversed on 7/6/26 at 5:56 PM and Ksh30.00 is credited to your M-PESA account. New M-PESA account balance is Ksh1,956.99.",

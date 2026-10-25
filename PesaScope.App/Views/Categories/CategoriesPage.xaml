@@ -99,7 +99,38 @@
                    FontSize="11"
                    TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
                     <ScrollView Orientation="Horizontal" HorizontalScrollBarVisibility="Never">
-                        <HorizontalStackLayout Spacing="10" x:Name="ColorPickerLayout"/>
+                        <HorizontalStackLayout Spacing="6"
+                           BindableLayout.ItemsSource="{Binding ColorOptions}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="vm:ColorOption">
+                                    <!-- Outer ring: fixed size so selecting never shifts the layout -->
+                                    <Border
+                                        WidthRequest="40" HeightRequest="40"
+                                        Padding="4"
+                                        StrokeShape="RoundRectangle 20"
+                                        StrokeThickness="0"
+                                        BackgroundColor="Transparent"
+                                        Stroke="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}">
+                                        <Border.Triggers>
+                                            <DataTrigger TargetType="Border" Binding="{Binding IsSelected}" Value="True">
+                                                <Setter Property="StrokeThickness" Value="2.5"/>
+                                            </DataTrigger>
+                                        </Border.Triggers>
+                                        <Border.GestureRecognizers>
+                                            <TapGestureRecognizer
+                                                Command="{Binding Source={RelativeSource AncestorType={x:Type vm:CategoriesViewModel}}, Path=SelectColorCommand}"
+                                                CommandParameter="{Binding .}"/>
+                                        </Border.GestureRecognizers>
+
+                                        <!-- Swatch: the transparent padding above is the gap -->
+                                        <Border
+                                            StrokeShape="RoundRectangle 16"
+                                            StrokeThickness="0"
+                                            BackgroundColor="{Binding Color}"/>
+                                    </Border>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </HorizontalStackLayout>
                     </ScrollView>
                 </VerticalStackLayout>
 

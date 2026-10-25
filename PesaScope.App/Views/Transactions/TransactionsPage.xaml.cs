@@ -93,6 +93,16 @@ public partial class TransactionsPage : UraniumUI.Pages.UraniumContentPage
         return chip;
     }
 
+    private async void OnResetFilters(object? sender, EventArgs e)
+    {
+        _searchDebounce?.Cancel();
+        await _vm.ResetFiltersCommand.ExecuteAsync(null);
+        _searchDebounce?.Cancel();   // clearing the entry fires TextChanged; skip the duplicate load
+
+        _activeCategoryId = null;
+        BuildCategoryChips();
+    }
+
     // ── Search with 400ms debounce ────────────────────────────────────────────
 
     private void OnSearchTextChanged(object? sender, TextChangedEventArgs e)

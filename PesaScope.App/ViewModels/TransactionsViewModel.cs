@@ -6,6 +6,8 @@ using PesaScope.App.Views.Transactions;
 
 namespace PesaScope.App.ViewModels;
 
+public enum DatePreset { Today, Week, ThisMonth, LastMonth, Custom }
+
 [QueryProperty(nameof(InitialCategoryIdRaw), "categoryId")]
 [QueryProperty(nameof(FromDateRaw), "fromDate")]
 [QueryProperty(nameof(ToDateRaw), "toDate")]
@@ -44,6 +46,7 @@ public partial class TransactionsViewModel : ObservableObject
             {
                 FromDate = parsed.Date;
                 _pendingExternalDateRange = true;
+                ActivePreset = DatePreset.Custom;
             }
         }
     }
@@ -57,6 +60,7 @@ public partial class TransactionsViewModel : ObservableObject
             {
                 ToDate = parsed.Date;
                 _pendingExternalDateRange = true;
+                ActivePreset = DatePreset.Custom;
             }
         }
     }
@@ -77,6 +81,16 @@ public partial class TransactionsViewModel : ObservableObject
     [ObservableProperty] private List<Category> _categories = [];
     [ObservableProperty] private bool _isEmpty;
 
+    // ── Summary row ───────────────────────────────────────────────────────────
+    [ObservableProperty] private string _countLabel = "0 transactions";
+    [ObservableProperty] private string _formattedIn = string.Empty;
+    [ObservableProperty] private string _formattedOut = string.Empty;
+    [ObservableProperty] private bool _hasIncoming;
+    [ObservableProperty] private bool _hasOutgoing;
+    [ObservableProperty] private bool _showTotals;
+    [ObservableProperty] private bool _showSeparator;
+    [ObservableProperty] private bool _isFiltersActive;
+
     // ── Type filter chips (bound to CollectionView) ───────────────────────────
 
     public List<TypeFilterChip> TypeChips { get; } =
@@ -89,6 +103,18 @@ public partial class TransactionsViewModel : ObservableObject
         new("Airtime",    TransactionType.AirtimePurchase),
         new("Withdrawal", TransactionType.Withdrawal),
     ];
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsPresetToday))]
+    [NotifyPropertyChangedFor(nameof(IsPresetWeek))]
+    [NotifyPropertyChangedFor(nameof(IsPresetThisMonth))]
+    [NotifyPropertyChangedFor(nameof(IsPresetLastMonth))]
+    private DatePreset _activePreset = DatePreset.Week;
+
+    public bool IsPresetToday => ActivePreset == DatePreset.Today;
+    public bool IsPresetWeek => ActivePreset == DatePreset.Week;
+    public bool IsPresetThisMonth => ActivePreset == DatePreset.ThisMonth;
+    public bool IsPresetLastMonth => ActivePreset == DatePreset.LastMonth;
 
     public TransactionsViewModel(
         ITransactionRepository transactionRepo,
@@ -150,6 +176,7 @@ public partial class TransactionsViewModel : ObservableObject
             .ToList();
 
         IsEmpty = GroupedTransactions.Count == 0;
+        UpdateSummary(transactions);
         IsLoading = false;
     }
 
@@ -179,41 +206,40 @@ public partial class TransactionsViewModel : ObservableObject
     }
 
     // ── Date range presets ────────────────────────────────────────────────────
-
-    [RelayCommand]
     public async Task SetPresetTodayAsync()
     {
         FromDate = DateTime.Today;
         ToDate = DateTime.Today;
         DateRangeLabel = "Today";
+        ActivePreset = DatePreset.Today;
         await LoadAsync();
     }
 
-    [RelayCommand]
     public async Task SetPresetWeekAsync()
     {
         FromDate = GetWeekStart();
         ToDate = DateTime.Today;
         DateRangeLabel = "This Week";
+        ActivePreset = DatePreset.Week;
         await LoadAsync();
     }
 
-    [RelayCommand]
     public async Task SetPresetThisMonthAsync()
     {
         FromDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
         ToDate = DateTime.Today;
         DateRangeLabel = DateTime.Today.ToString("MMMM yyyy");
+        ActivePreset = DatePreset.ThisMonth;
         await LoadAsync();
     }
 
-    [RelayCommand]
     public async Task SetPresetLastMonthAsync()
     {
         var first = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(-1);
         FromDate = first;
         ToDate = first.AddMonths(1).AddDays(-1);
         DateRangeLabel = first.ToString("MMMM yyyy");
+        ActivePreset = DatePreset.LastMonth;
         await LoadAsync();
     }
 
@@ -224,6 +250,44 @@ public partial class TransactionsViewModel : ObservableObject
     {
         if (FromDate > ToDate) (FromDate, ToDate) = (ToDate, FromDate);
         DateRangeLabel = $"{FromDate:d MMM} – {ToDate:d MMM}";
+        ActivePreset = DatePreset.Custom;
+        await LoadAsync();
+    }
+
+    private void UpdateSummary(List<Transaction> transactions)
+    {
+        var totalIn = transactions.Where(t => t.Direction == TransactionDirection.Incoming).Sum(t => t.Amount);
+        var totalOut = transactions.Where(t => t.Direction == TransactionDirection.Outgoing).Sum(t => t.Amount);
+
+        CountLabel = transactions.Count == 1 ? "1 transaction" : $"{transactions.Count} transactions";
+
+        HasIncoming = totalIn > 0;
+        HasOutgoing = totalOut > 0;
+        FormattedIn = $"In Ksh {totalIn:N0}";
+        FormattedOut = $"Out Ksh {totalOut:N0}";
+        ShowTotals = HasIncoming || HasOutgoing;
+        ShowSeparator = HasIncoming && HasOutgoing;
+
+        IsFiltersActive =
+            !string.IsNullOrWhiteSpace(SearchQuery)
+            || SelectedType.HasValue
+            || SelectedCategoryId.HasValue
+            || ActivePreset != DatePreset.Week;
+    }
+
+    [RelayCommand]
+    public async Task ResetFiltersAsync()
+    {
+        SearchQuery = string.Empty;
+        SelectedType = null;
+        SelectedCategoryId = null;
+        foreach (var chip in TypeChips) chip.IsSelected = chip.Type is null;
+
+        FromDate = GetWeekStart();
+        ToDate = DateTime.Today;
+        DateRangeLabel = "This Week";
+        ActivePreset = DatePreset.Week;
+
         await LoadAsync();
     }
 

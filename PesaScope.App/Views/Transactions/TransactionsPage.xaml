@@ -191,6 +191,76 @@
                 </HorizontalStackLayout>
             </ScrollView>
 
+            <!-- ── Summary + reset ──────────────────────────────────────────── -->
+            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="2" Padding="2,0">
+
+                <Label
+                    Grid.Row="0" Grid.Column="0"
+                    Text="{Binding CountLabel}"
+                    FontSize="13"
+                    FontAttributes="Bold"
+                    TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+
+                <HorizontalStackLayout
+                    Grid.Row="1" Grid.Column="0"
+                    Spacing="8"
+                    IsVisible="{Binding ShowTotals}">
+                    <Label
+                        Text="{Binding FormattedIn}"
+                        IsVisible="{Binding HasIncoming}"
+                        FontSize="12"
+                        FontAttributes="Bold"
+                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                    <Label
+                        Text="·"
+                        IsVisible="{Binding ShowSeparator}"
+                        FontSize="12"
+                        TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                    <Label
+                        Text="{Binding FormattedOut}"
+                        IsVisible="{Binding HasOutgoing}"
+                        FontSize="12"
+                        FontAttributes="Bold"
+                        TextColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"/>
+                </HorizontalStackLayout>
+
+                <!-- Reset pill with dot badge -->
+                <Grid Grid.Row="0" Grid.RowSpan="2" Grid.Column="1"
+                  VerticalOptions="Center"
+                  IsEnabled="{Binding IsFiltersActive}">
+                    <Grid.Triggers>
+                        <DataTrigger TargetType="Grid" Binding="{Binding IsFiltersActive}" Value="False">
+                            <Setter Property="Opacity" Value="0.4"/>
+                        </DataTrigger>
+                    </Grid.Triggers>
+
+                    <Border
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 20"
+                        Padding="14,8"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}">
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Tapped="OnResetFilters"/>
+                        </Border.GestureRecognizers>
+                        <Label
+                            Text="Reset filters"
+                            FontSize="12"
+                            FontAttributes="Bold"
+                            TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                    </Border>
+
+                    <Border
+                        IsVisible="{Binding IsFiltersActive}"
+                        WidthRequest="9" HeightRequest="9"
+                        StrokeThickness="0"
+                        StrokeShape="Ellipse"
+                        HorizontalOptions="End" VerticalOptions="Start"
+                        Margin="0,-2,-2,0"
+                        InputTransparent="True"
+                        BackgroundColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"/>
+                </Grid>
+            </Grid>
+
         </VerticalStackLayout>
 
         <!-- ── Transaction list ──────────────────────────────────────── -->
@@ -393,15 +463,31 @@
                         HeightRequest="42" CornerRadius="21"
                         FontSize="13" FontAttributes="Bold"
                         BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
-                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsPresetToday}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"/>
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+
                     <Button
                         Grid.Row="0" Grid.Column="1"
                         Text="This Week"
                         Clicked="OnPresetWeek"
                         HeightRequest="42" CornerRadius="21"
                         FontSize="13" FontAttributes="Bold"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"
-                        TextColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}" />
+                        BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsPresetWeek}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"/>
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+
                     <Button
                         Grid.Row="1" Grid.Column="0"
                         Text="This Month"
@@ -409,7 +495,15 @@
                         HeightRequest="42" CornerRadius="21"
                         FontSize="13" FontAttributes="Bold"
                         BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
-                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsPresetThisMonth}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"/>
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
+
                     <Button
                         Grid.Row="1" Grid.Column="1"
                         Text="Last Month"
@@ -417,7 +511,14 @@
                         HeightRequest="42" CornerRadius="21"
                         FontSize="13" FontAttributes="Bold"
                         BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
-                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}" />
+                        TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}">
+                        <Button.Triggers>
+                            <DataTrigger TargetType="Button" Binding="{Binding IsPresetLastMonth}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource PrimaryContainer}, Dark={StaticResource PrimaryContainerDark}}"/>
+                                <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                            </DataTrigger>
+                        </Button.Triggers>
+                    </Button>
                 </Grid>
 
                 <!-- Divider -->

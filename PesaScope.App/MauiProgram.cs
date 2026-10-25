@@ -64,11 +64,11 @@ namespace PesaScope.App
             builder.Services.AddTransient<ExportPage>();
             builder.Services.AddTransient<RuleExportPage>();
             builder.Services.AddTransient<RuleImportPage>();
+            builder.Services.AddTransient<TransactionsPage>(); // Make this transient for efficient handling of navigation params - I think
 
             // App pages - Registered as Singleton to avoid recreation on every tab switch
             builder.Services.AddSingleton<AppLockPage>();
             builder.Services.AddSingleton<DashboardPage>();
-            builder.Services.AddSingleton<TransactionsPage>();
             builder.Services.AddSingleton<CategoriesPage>();
             builder.Services.AddSingleton<BudgetsPage>();
             builder.Services.AddSingleton<SettingsPage>();

@@ -75,7 +75,7 @@
                         Grid.Column="1"
                         x:Name="SearchEntry"
                         Text="{Binding SearchQuery}"
-                        Placeholder="Search by name, amount or code"
+                        Placeholder="Search by name, note or code"
                         PlaceholderColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
                         TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"
                         BackgroundColor="Transparent"
@@ -415,31 +415,12 @@
     <uranium:UraniumContentPage.Attachments>
         <material:BottomSheetView
             x:Name="DateRangeSheet"
-            IsPresented="False"
-            IsVisible="False"
-            CloseOnTapOutside="False"
+            IsPresented="{Binding IsDateSheetOpen}"
+            IsVisible="{Binding IsDateSheetOpen}"
+            CloseOnTapOutside="True"
             BackgroundColor="{AppThemeBinding Light={StaticResource Surface}, Dark={StaticResource SurfaceDark}}">
 
-            <VerticalStackLayout Padding="24,8,24,48" Spacing="20">
-                <AbsoluteLayout >
-                    <ImageButton
-                        AbsoluteLayout.LayoutBounds="1, 0.5, AutoSize, AutoSize"
-                        AbsoluteLayout.LayoutFlags="PositionProportional" 
-                        Grid.Column="1"
-                        Clicked="OnCloseBottomSheetTapped"
-                        BackgroundColor="{AppThemeBinding Light={StaticResource Error}, Dark={StaticResource ErrorDark}}"
-                        Padding="4"
-                        CornerRadius="16"
-                        WidthRequest="28" HeightRequest="28">
-                        <ImageButton.Source>
-                            <FontImageSource
-                                FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Close}"
-                                Color="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"
-                                Size="20" />
-                        </ImageButton.Source>
-                    </ImageButton>
-                </AbsoluteLayout>
-
+            <VerticalStackLayout Padding="24,12,24,48" Spacing="20">
                 <Label
                     Text="Filter by Date"
                     FontSize="18"
@@ -604,7 +585,6 @@
                 <!-- Apply button -->
                 <Button
                     Text="Apply Custom Range"
-                    Command="{Binding ApplyCustomRangeCommand}"
                     Clicked="OnApplyCustomRange"
                     HorizontalOptions="Fill"
                     HeightRequest="50"

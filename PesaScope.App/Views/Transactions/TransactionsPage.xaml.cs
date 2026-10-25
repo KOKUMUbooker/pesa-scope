@@ -126,21 +126,9 @@ public partial class TransactionsPage : UraniumUI.Pages.UraniumContentPage
     }
 
     // ── Date range bottom sheet ───────────────────────────────────────────────
-    private void HideBottomSheet()
-    {
-        DateRangeSheet.IsPresented = false;
-        DateRangeSheet.IsVisible = false;
-    }
+    private void HideBottomSheet() => _vm.IsDateSheetOpen = false;
 
-    private void OnCloseBottomSheetTapped(object? sender, EventArgs e)
-    {
-        HideBottomSheet();
-    }
-
-    private void OnDateFilterTapped(object? sender, EventArgs e)  {
-        DateRangeSheet.IsPresented = true;
-        DateRangeSheet.IsVisible = true;
-    }
+    private void OnDateFilterTapped(object? sender, EventArgs e) => _vm.IsDateSheetOpen = true;
 
     private async void OnPresetToday(object? sender, EventArgs e)
     {

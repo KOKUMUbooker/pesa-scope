@@ -91,6 +91,19 @@ public partial class TransactionsViewModel : ObservableObject
     [ObservableProperty] private bool _showSeparator;
     [ObservableProperty] private bool _isFiltersActive;
 
+    [ObservableProperty] private bool _isDateSheetOpen;
+
+    // The range that is actually loaded, so a dismissed sheet can discard unapplied picker edits
+    private DateTime _loadedFrom = GetWeekStart();
+    private DateTime _loadedTo = DateTime.Today;
+
+    partial void OnIsDateSheetOpenChanged(bool value)
+    {
+        if (value) return;
+        FromDate = _loadedFrom;   // closed without applying, so restore
+        ToDate = _loadedTo;
+    }
+
     // ── Type filter chips (bound to CollectionView) ───────────────────────────
 
     public List<TypeFilterChip> TypeChips { get; } =
@@ -130,6 +143,8 @@ public partial class TransactionsViewModel : ObservableObject
     public async Task LoadAsync()
     {
         IsLoading = true;
+        _loadedFrom = FromDate;
+        _loadedTo = ToDate;
 
         if (_pendingExternalDateRange)
         {
@@ -206,6 +221,7 @@ public partial class TransactionsViewModel : ObservableObject
     }
 
     // ── Date range presets ────────────────────────────────────────────────────
+    [RelayCommand]
     public async Task SetPresetTodayAsync()
     {
         FromDate = DateTime.Today;
@@ -215,6 +231,7 @@ public partial class TransactionsViewModel : ObservableObject
         await LoadAsync();
     }
 
+    [RelayCommand]
     public async Task SetPresetWeekAsync()
     {
         FromDate = GetWeekStart();
@@ -224,6 +241,7 @@ public partial class TransactionsViewModel : ObservableObject
         await LoadAsync();
     }
 
+    [RelayCommand]
     public async Task SetPresetThisMonthAsync()
     {
         FromDate = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
@@ -233,6 +251,7 @@ public partial class TransactionsViewModel : ObservableObject
         await LoadAsync();
     }
 
+    [RelayCommand]
     public async Task SetPresetLastMonthAsync()
     {
         var first = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(-1);

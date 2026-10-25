@@ -68,13 +68,15 @@ public class TransactionRepository(DatabaseService databaseService)
     {
         // sqlite-net-pcl doesn't support LIKE natively in LINQ; use raw query
         var like = $"%{query}%";
+        var amountLike = $"%{query.Replace(",", "")}%";   // let "1,500" match 1500
         return await _db.QueryAsync<Transaction>(
             @"SELECT * FROM Transactions
-              WHERE counterparty_name LIKE ?
-                 OR note            LIKE ?
-                 OR mpesa_code      LIKE ?
-              ORDER BY transaction_date DESC",
-            like, like, like);
+          WHERE counterparty_name LIKE ?
+             OR note LIKE ?
+             OR mpesa_code LIKE ?
+             OR CAST(amount AS TEXT) LIKE ?
+          ORDER BY transaction_date DESC",
+            like, like, like, amountLike);
     }
 
     public Task<List<Transaction>> GetByDateRangeAsync(DateTime from, DateTime to)

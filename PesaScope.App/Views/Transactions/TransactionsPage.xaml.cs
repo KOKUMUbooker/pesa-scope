@@ -93,6 +93,16 @@ public partial class TransactionsPage : UraniumUI.Pages.UraniumContentPage
         return chip;
     }
 
+    private async void OnResetFilters(object? sender, EventArgs e)
+    {
+        _searchDebounce?.Cancel();
+        await _vm.ResetFiltersCommand.ExecuteAsync(null);
+        _searchDebounce?.Cancel();   // clearing the entry fires TextChanged; skip the duplicate load
+
+        _activeCategoryId = null;
+        BuildCategoryChips();
+    }
+
     // ── Search with 400ms debounce ────────────────────────────────────────────
 
     private void OnSearchTextChanged(object? sender, TextChangedEventArgs e)
@@ -116,21 +126,9 @@ public partial class TransactionsPage : UraniumUI.Pages.UraniumContentPage
     }
 
     // ── Date range bottom sheet ───────────────────────────────────────────────
-    private void HideBottomSheet()
-    {
-        DateRangeSheet.IsPresented = false;
-        DateRangeSheet.IsVisible = false;
-    }
+    private void HideBottomSheet() => _vm.IsDateSheetOpen = false;
 
-    private void OnCloseBottomSheetTapped(object? sender, EventArgs e)
-    {
-        HideBottomSheet();
-    }
-
-    private void OnDateFilterTapped(object? sender, EventArgs e)  {
-        DateRangeSheet.IsPresented = true;
-        DateRangeSheet.IsVisible = true;
-    }
+    private void OnDateFilterTapped(object? sender, EventArgs e) => _vm.IsDateSheetOpen = true;
 
     private async void OnPresetToday(object? sender, EventArgs e)
     {

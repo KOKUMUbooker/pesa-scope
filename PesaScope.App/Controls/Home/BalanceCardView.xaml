@@ -35,7 +35,7 @@
                     Opacity="0.7">
                     <ImageButton.Source>
                         <FontImageSource
-                            FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Info}"
+                            FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Help}"
                             Color="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"
                             Size="14"/>
                     </ImageButton.Source>
@@ -126,6 +126,74 @@
                 </Border>
 
             </Grid>
+
+            <!-- ── Month summary footer (Monthly mode only) ─────────────────────── -->
+            <VerticalStackLayout
+                Spacing="0"
+                Margin="0,12,0,0"
+                IsVisible="{Binding Source={x:Reference this}, Path=ShowMonthSummary}">
+
+                <BoxView
+                    HeightRequest="1"
+                    Color="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"
+                    Opacity="0.15"/>
+
+                <!-- Header row: always visible, tap to expand/collapse -->
+                <Grid ColumnDefinitions="*,Auto" Padding="0,10,0,0" BackgroundColor="Transparent">
+                    <Grid.GestureRecognizers>
+                        <TapGestureRecognizer Tapped="OnMonthSummaryTapped"/>
+                    </Grid.GestureRecognizers>
+
+                    <Label
+                        Grid.Column="0"
+                        VerticalOptions="Center"
+                        FontSize="11"
+                        FontAttributes="Bold"
+                        CharacterSpacing="1.2"
+                        Opacity="0.7"
+                        TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}">
+                        <Label.Text>
+                            <MultiBinding StringFormat="MONTH TOTAL · {0}">
+                                <Binding Source="{x:Reference this}" Path="MonthLabel"/>
+                            </MultiBinding>
+                        </Label.Text>
+                    </Label>
+
+                    <Image x:Name="MonthChevron" Grid.Column="1" VerticalOptions="Center" Opacity="0.7">
+                        <Image.Source>
+                            <FontImageSource
+                                FontFamily="MaterialSharp"
+                                Glyph="{x:Static m:MaterialSharp.Keyboard_arrow_down}"
+                                Color="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"
+                                Size="20"/>
+                        </Image.Source>
+                    </Image>
+                </Grid>
+
+                <!-- Expanded content -->
+                <Grid
+                    ColumnDefinitions="*,*"
+                    ColumnSpacing="12"
+                    Padding="0,10,0,0"
+                    IsVisible="{Binding Source={x:Reference this}, Path=IsMonthSummaryExpanded}">
+
+                    <VerticalStackLayout Grid.Column="0" Spacing="2">
+                        <Label Text="Money In" FontSize="11" Opacity="0.7"
+                            TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"/>
+                        <Label Text="{Binding Source={x:Reference this}, Path=MonthMoneyIn}"
+                            FontSize="15" FontAttributes="Bold"
+                            TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"/>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout Grid.Column="1" Spacing="2">
+                        <Label Text="Money Out" FontSize="11" Opacity="0.7"
+                            TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"/>
+                        <Label Text="{Binding Source={x:Reference this}, Path=MonthMoneyOut}"
+                        FontSize="15" FontAttributes="Bold"
+                        TextColor="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"/>
+                    </VerticalStackLayout>
+                </Grid>
+            </VerticalStackLayout>
         </VerticalStackLayout>
     </Border>
 </ContentView>

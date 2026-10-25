@@ -34,6 +34,14 @@ public class MonthOption
     public override string ToString() => Name;
 }
 
+public partial class ColorOption : ObservableObject
+{
+    public string Hex { get; init; } = string.Empty;
+    public Color Color => Color.FromArgb(Hex);
+
+    [ObservableProperty] private bool _isSelected;
+}
+
 public partial class CategorySpendRow : ObservableObject
 {
     public Category Category { get; init; } = null!;
@@ -140,6 +148,27 @@ public partial class CategoriesViewModel : ObservableObject
     [ObservableProperty] private AutoCategorizationRule? _editingRule;
     [ObservableProperty] private bool _isAutoCategorizing;
 
+    public List<ColorOption> ColorOptions { get; } =
+    new[]
+    {
+        "#1A8C62", "#C98A00", "#D4522A", "#5C6BC0",
+        "#AB47BC", "#EF5350", "#42A5F5", "#EC407A",
+        "#8D6E63", "#26A69A", "#90A4AE", "#F06292"
+    }
+    .Select(h => new ColorOption { Hex = h })
+    .ToList();
+
+    partial void OnEditColorChanged(string value) => UpdateColorSelection();
+
+    private void UpdateColorSelection()
+    {
+        foreach (var option in ColorOptions)
+            option.IsSelected = option.Hex.Equals(EditColor, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [RelayCommand]
+    public void SelectColor(ColorOption option) => EditColor = option.Hex;
+
     // ── Resolved period (set by LoadChartAsync, read by the page for navigation) ──
     public DateTime PeriodStart { get; private set; }
     public DateTime PeriodEnd { get; private set; }
@@ -177,6 +206,8 @@ public partial class CategoriesViewModel : ObservableObject
         AvailableYears = Enumerable.Range(today.Year - 4, 5).Reverse().ToList();
         _selectedYear = today.Year;
         _selectedMonth = AvailableMonths.First(m => m.Value == today.Month);
+
+        UpdateColorSelection();
     }
 
     [RelayCommand]

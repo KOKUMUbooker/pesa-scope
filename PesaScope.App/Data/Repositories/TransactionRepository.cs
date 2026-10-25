@@ -45,12 +45,6 @@ public class TransactionRepository(DatabaseService databaseService)
         return (inserted, duplicates);
     }
 
-    public Task<List<Transaction>> GetByDateRangeAsync(DateTime from, DateTime to) =>
-        _db.Table<Transaction>()
-           .Where(t => t.TransactionDate >= from && t.TransactionDate <= to)
-           .OrderByDescending(t => t.TransactionDate)
-           .ToListAsync();
-
     public Task<List<Transaction>> GetByCategoryAsync(int categoryId) =>
         _db.Table<Transaction>()
            .Where(t => t.CategoryId == categoryId)
@@ -62,6 +56,13 @@ public class TransactionRepository(DatabaseService databaseService)
            .Where(t => t.Type == type)
            .OrderByDescending(t => t.TransactionDate)
            .ToListAsync();
+
+    // Local → UTC for querying. Local and Unspecified values are treated as local.
+    private static DateTime ToUtc(DateTime d) => d.ToUniversalTime();
+
+    // Stored values come back as Unspecified but are really UTC.
+    private static DateTime ToLocal(DateTime d) =>
+        DateTime.SpecifyKind(d, DateTimeKind.Utc).ToLocalTime();
 
     public async Task<List<Transaction>> SearchAsync(string query)
     {
@@ -76,69 +77,90 @@ public class TransactionRepository(DatabaseService databaseService)
             like, like, like);
     }
 
+    public Task<List<Transaction>> GetByDateRangeAsync(DateTime from, DateTime to)
+    {
+        var (fromUtc, toUtc) = (ToUtc(from), ToUtc(to));
+        return _db.Table<Transaction>()
+           .Where(x => x.TransactionDate >= fromUtc && x.TransactionDate <= toUtc)
+           .OrderByDescending(x => x.TransactionDate)
+           .ToListAsync();
+    }
+
     public async Task<List<Transaction>> GetFilteredAsync(
         DateTime? from = null,
         DateTime? to = null,
         int? categoryId = null,
         TransactionType? type = null)
     {
-        var query = _db.Table<Transaction>().OrderByDescending(t => t.TransactionDate);
+        var query = _db.Table<Transaction>().OrderByDescending(x => x.TransactionDate);
 
         if (from is not null)
-            query = query.Where(t => t.TransactionDate >= from.Value);
+        {
+            var fromUtc = ToUtc(from.Value);
+            query = query.Where(x => x.TransactionDate >= fromUtc);
+        }
 
         if (to is not null)
-            query = query.Where(t => t.TransactionDate <= to.Value);
+        {
+            var toUtc = ToUtc(to.Value);
+            query = query.Where(x => x.TransactionDate <= toUtc);
+        }
 
         if (categoryId is not null)
-            query = query.Where(t => t.CategoryId == categoryId.Value);
+            query = query.Where(x => x.CategoryId == categoryId.Value);
 
         if (type is not null)
-            query = query.Where(t => t.Type == type.Value);
+            query = query.Where(x => x.Type == type.Value);
 
         return await query.ToListAsync();
     }
 
     public async Task<decimal> GetTotalSpentAsync(DateTime from, DateTime to)
     {
+        var (f, t) = (ToUtc(from), ToUtc(to));
         var transactions = await _db.Table<Transaction>()
-            .Where(t => t.TransactionDate >= from && t.TransactionDate <= to
-                     && t.Direction == TransactionDirection.Outgoing)
+            .Where(x => x.TransactionDate >= f && x.TransactionDate <= t
+                     && x.Direction == TransactionDirection.Outgoing)
             .ToListAsync();
-        return transactions.Sum(t => t.Amount);
+        return transactions.Sum(x => x.Amount);
     }
 
     public async Task<decimal> GetTotalReceivedAsync(DateTime from, DateTime to)
     {
+        var (f, t) = (ToUtc(from), ToUtc(to));
         var transactions = await _db.Table<Transaction>()
-            .Where(t => t.TransactionDate >= from && t.TransactionDate <= to
-                     && t.Direction == TransactionDirection.Incoming)
+            .Where(x => x.TransactionDate >= f && x.TransactionDate <= t
+                     && x.Direction == TransactionDirection.Incoming)
             .ToListAsync();
-        return transactions.Sum(t => t.Amount);
+        return transactions.Sum(x => x.Amount);
     }
 
     public async Task<Dictionary<int, decimal>> GetSpendingByCategoryAsync(DateTime from, DateTime to)
     {
+        var (f, t) = (ToUtc(from), ToUtc(to));
         var transactions = await _db.Table<Transaction>()
-            .Where(t => t.TransactionDate >= from && t.TransactionDate <= to
-                     && t.Direction == TransactionDirection.Outgoing)
+            .Where(x => x.TransactionDate >= f && x.TransactionDate <= t
+                     && x.Direction == TransactionDirection.Outgoing)
             .ToListAsync();
 
         return transactions
-            .GroupBy(t => t.CategoryId)
-            .ToDictionary(g => g.Key, g => g.Sum(t => t.Amount));
+            .GroupBy(x => x.CategoryId)
+            .ToDictionary(g => g.Key, g => g.Sum(x => x.Amount));
     }
 
     public async Task<Dictionary<DateTime, decimal>> GetDailySpendingAsync(DateTime from, DateTime to)
     {
+        var (f, t) = (ToUtc(from), ToUtc(to));
         var transactions = await _db.Table<Transaction>()
-            .Where(t => t.TransactionDate >= from && t.TransactionDate <= to
-                     && t.Direction == TransactionDirection.Outgoing)
+            .Where(x => x.TransactionDate >= f && x.TransactionDate <= t
+                     && x.Direction == TransactionDirection.Outgoing)
             .ToListAsync();
 
+        // Group by the LOCAL calendar day. The key is a plain date,
+        // which matches the day.Date lookups in the ViewModel.
         return transactions
-            .GroupBy(t => t.TransactionDate.Date)
-            .ToDictionary(g => g.Key, g => g.Sum(t => t.Amount));
+            .GroupBy(x => ToLocal(x.TransactionDate).Date)
+            .ToDictionary(g => g.Key, g => g.Sum(x => x.Amount));
     }
 
     public async Task<int> UpdateCategoryAsync(string mpesaCode, int newCategoryId)

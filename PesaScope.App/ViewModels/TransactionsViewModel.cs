@@ -115,13 +115,16 @@ public partial class TransactionsViewModel : ObservableObject
 
         List<Transaction> transactions;
 
+        // Local day boundaries → UTC. ToDate is a date at midnight, so the exclusive
+        // upper bound is midnight at the start of the following day.
+        var fromUtc = FromDate.ToUniversalTime();
+        var toUtcExclusive = ToDate.AddDays(1).ToUniversalTime();
+
         if (!string.IsNullOrWhiteSpace(SearchQuery))
         {
             transactions = await _transactionRepo.SearchAsync(SearchQuery);
-            // Apply date + type on top of search results
-            var rangeEnd = ToDate.AddDays(1);
             transactions = transactions
-                .Where(t => t.TransactionDate >= FromDate && t.TransactionDate <= rangeEnd)
+                .Where(t => t.TransactionDate >= fromUtc && t.TransactionDate < toUtcExclusive)
                 .ToList();
             if (SelectedType.HasValue)
                 transactions = transactions.Where(t => t.Type == SelectedType).ToList();
@@ -132,7 +135,7 @@ public partial class TransactionsViewModel : ObservableObject
         {
             transactions = await _transactionRepo.GetFilteredAsync(
                 from: FromDate,
-                to: ToDate.AddDays(1),
+                to: ToDate.AddDays(1).AddTicks(-1),
                 categoryId: SelectedCategoryId,
                 type: SelectedType);
         }

@@ -35,7 +35,7 @@
                     Opacity="0.7">
                     <ImageButton.Source>
                         <FontImageSource
-                            FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Info}"
+                            FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Help}"
                             Color="{AppThemeBinding Light={StaticResource OnPrimaryContainer}, Dark={StaticResource OnPrimaryContainerDark}}"
                             Size="14"/>
                     </ImageButton.Source>

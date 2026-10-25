@@ -119,6 +119,11 @@ public partial class DashboardViewModel : ObservableObject
 
     [ObservableProperty] private bool _isSyncingSms;
 
+    // ── Month summary (Monthly mode only) ─────────────────────────────────────
+    [ObservableProperty] private string _monthSummaryLabel = string.Empty;
+    [ObservableProperty] private string _formattedMonthMoneyIn = "Ksh 0";
+    [ObservableProperty] private string _formattedMonthMoneyOut = "Ksh 0";
+
     public bool IsNetBalanceNegative => NetBalance < 0;
 
     [RelayCommand]
@@ -297,6 +302,20 @@ public partial class DashboardViewModel : ObservableObject
         };
     }
 
+    private async Task LoadMonthSummaryAsync()
+    {
+        var monthStart = new DateTime(SelectedYear, SelectedMonth.Value, 1);
+        var monthEnd = monthStart.AddMonths(1).AddTicks(-1);
+
+        var inTask = _transactions.GetTotalReceivedAsync(monthStart, monthEnd);
+        var outTask = _transactions.GetTotalSpentAsync(monthStart, monthEnd);
+        await Task.WhenAll(inTask, outTask);
+
+        MonthSummaryLabel = $"{SelectedMonth.Name} {SelectedYear}";
+        FormattedMonthMoneyIn = $"Ksh {inTask.Result:N0}";
+        FormattedMonthMoneyOut = $"Ksh {outTask.Result:N0}";
+    }
+
     // ── Commands ──────────────────────────────────────────────────────────────
 
     [RelayCommand]
@@ -400,12 +419,18 @@ public partial class DashboardViewModel : ObservableObject
             ? LoadYearlyChartAsync(SelectedYear)
             : LoadDailyChartAsync(period.from, period.to);
 
-        await Task.WhenAll(
+        var tasks = new List<Task>
+        {
             LoadSummaryAsync(period.from, period.to),
             chartTask,
             LoadTopCategoriesAsync(period.from, period.to),
             LoadRecentTransactionsAsync()
-        );
+        };
+
+        if (IsMonthlyMode)
+            tasks.Add(LoadMonthSummaryAsync());
+
+        await Task.WhenAll(tasks);
 
         ChartTitle = ViewMode switch
         {

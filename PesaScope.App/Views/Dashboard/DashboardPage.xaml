@@ -331,12 +331,16 @@
                      
 
                     <!-- ── NET BALANCE HERO CARD ─────────────────────────── -->
-                    <HomeControls:BalanceCardView
-                        NetBalance="{Binding FormattedNetBalance}"
-                        PeriodLabel="{Binding PeriodLabel}"
-                        MoneyIn="{Binding FormattedMoneyIn}"
-                        MoneyOut="{Binding FormattedMoneyOut}"
-                        ShowHelpCommand="{Binding ShowNetBalanceHelpCommand}" />
+                        <HomeControls:BalanceCardView
+                            NetBalance="{Binding FormattedNetBalance}"
+                            PeriodLabel="{Binding PeriodLabel}"
+                            MoneyIn="{Binding FormattedMoneyIn}"
+                            MoneyOut="{Binding FormattedMoneyOut}"
+                            ShowHelpCommand="{Binding ShowNetBalanceHelpCommand}"
+                            ShowMonthSummary="{Binding IsMonthlyMode}"
+                            MonthLabel="{Binding MonthSummaryLabel}"
+                            MonthMoneyIn="{Binding FormattedMonthMoneyIn}"
+                            MonthMoneyOut="{Binding FormattedMonthMoneyOut}" />
 
                         <!-- ── DAILY SPENDING CHART ──────────────────────────── -->
                         <HomeControls:SpendingChartView

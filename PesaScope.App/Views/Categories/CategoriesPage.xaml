@@ -346,9 +346,62 @@
         RefreshColor="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}">
 
         <ScrollView>
-            <VerticalStackLayout Spacing="24" Padding="20,16,20,40">
-                <!-- ── Period selector ───────────────────────────────────────── -->
-                <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+            <VerticalStackLayout Spacing="16" Padding="20,16,20,40">
+                <!-- ── View mode toggle ──────────────────────────────────────────── -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                    <Border Grid.Column="0" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="0,10">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding IsMonthlyMode}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                            </DataTrigger>
+                            <DataTrigger TargetType="Border" Binding="{Binding IsMonthlyMode}" Value="False">
+                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"/>
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SwitchViewModeCommand}"
+                                  CommandParameter="{x:Static vm:CategoriesViewMode.Monthly}"/>
+                        </Border.GestureRecognizers>
+                        <Label Text="Monthly" FontSize="13" FontAttributes="Bold" HorizontalOptions="Center">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding IsMonthlyMode}" Value="True">
+                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Label" Binding="{Binding IsMonthlyMode}" Value="False">
+                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                    </Border>
+
+                    <Border Grid.Column="1" StrokeThickness="0" StrokeShape="RoundRectangle 10" Padding="0,10">
+                        <Border.Triggers>
+                            <DataTrigger TargetType="Border" Binding="{Binding IsYearlyMode}" Value="True">
+                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource Primary}, Dark={StaticResource PrimaryDark}}"/>
+                            </DataTrigger>
+                            <DataTrigger TargetType="Border" Binding="{Binding IsYearlyMode}" Value="False">
+                                <Setter Property="BackgroundColor" Value="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"/>
+                            </DataTrigger>
+                        </Border.Triggers>
+                        <Border.GestureRecognizers>
+                            <TapGestureRecognizer Command="{Binding SwitchViewModeCommand}"
+                                  CommandParameter="{x:Static vm:CategoriesViewMode.Yearly}"/>
+                        </Border.GestureRecognizers>
+                        <Label Text="Yearly" FontSize="13" FontAttributes="Bold" HorizontalOptions="Center">
+                            <Label.Triggers>
+                                <DataTrigger TargetType="Label" Binding="{Binding IsYearlyMode}" Value="True">
+                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnPrimary}, Dark={StaticResource OnPrimaryDark}}"/>
+                                </DataTrigger>
+                                <DataTrigger TargetType="Label" Binding="{Binding IsYearlyMode}" Value="False">
+                                    <Setter Property="TextColor" Value="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                                </DataTrigger>
+                            </Label.Triggers>
+                        </Label>
+                    </Border>
+                </Grid>
+
+                <!-- ── Monthly: month + year ─────────────────────────────────────── -->
+                <Grid ColumnDefinitions="*,*" ColumnSpacing="12" IsVisible="{Binding IsMonthlyMode}">
                     <Border Grid.Column="0"
                         BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
                         StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14,4">
@@ -361,7 +414,7 @@
                                 <Image.Source>
                                     <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Keyboard_arrow_down}"
                                         Color="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"
-                                        Size="18"/>
+                                        Size="18"/>     
                                 </Image.Source>
                             </Image>
                         </Grid>
@@ -378,12 +431,31 @@
                                 <Image.Source>
                                     <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Keyboard_arrow_down}"
                                         Color="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"
-                                        Size="18"/>     
+                                        Size="18"/>
                                 </Image.Source>
                             </Image>
                         </Grid>
                     </Border>
                 </Grid>
+
+                <!-- ── Yearly: year only ─────────────────────────────────────────── -->
+                <Border IsVisible="{Binding IsYearlyMode}"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource SurfaceVariant}, Dark={StaticResource SurfaceVariantDark}}"
+                    StrokeThickness="0" StrokeShape="RoundRectangle 12" Padding="14,4">
+                    <Grid>
+                        <Picker ItemsSource="{Binding AvailableYears}"
+                            SelectedItem="{Binding SelectedYear}"
+                            FontSize="14" HeightRequest="46" BackgroundColor="Transparent"
+                            TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
+                        <Image InputTransparent="True" HorizontalOptions="End" VerticalOptions="Center" Margin="0,0,4,0">
+                            <Image.Source>
+                                <FontImageSource FontFamily="MaterialSharp" Glyph="{x:Static m:MaterialSharp.Keyboard_arrow_down}"
+                                    Color="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"
+                                    Size="18"/>
+                            </Image.Source>
+                        </Image>
+                    </Grid>
+                </Border>
 
                 <!-- ── Income summary ────────────────────────────────────────── -->
                 <Border
@@ -485,7 +557,7 @@
                                     FontSize="14" FontAttributes="Bold"
                                     HorizontalOptions="Center"
                                     TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
-                                <Label Text="Transactions you categorize this month will show up here."
+                                <Label Text="Transactions you categorize in this period will show up here." 
                                     FontSize="12" HorizontalTextAlignment="Center"
                                     HorizontalOptions="Center"
                                     TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"

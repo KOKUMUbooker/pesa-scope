@@ -26,6 +26,7 @@ public partial class TransactionDetailViewModel : ObservableObject
     [ObservableProperty] private bool _isNoteSheetOpen;
     [ObservableProperty] private bool _isCategorySheetOpen;
     [ObservableProperty] private string _editNote = string.Empty;
+    [ObservableProperty] private Category? _pendingCategory;
 
     // ── Create-rule sheet state ───────────────────────────────────────────────
     [ObservableProperty] private bool _isCreateRuleSheetOpen;
@@ -55,6 +56,15 @@ public partial class TransactionDetailViewModel : ObservableObject
     public Color AmountColor => IsCredit
         ? Color.FromArgb("#1A8C62")
         : Color.FromArgb("#C0392B");
+
+    public bool HasNote => !string.IsNullOrWhiteSpace(Transaction?.Note);
+    public bool HasNoNote => !HasNote;
+
+    partial void OnTransactionChanged(Transaction? value)
+    {
+        OnPropertyChanged(nameof(HasNote));
+        OnPropertyChanged(nameof(HasNoNote));
+    }
 
     public string AmountPrefix => IsCredit ? "+" : "-";
 
@@ -112,20 +122,24 @@ public partial class TransactionDetailViewModel : ObservableObject
     }
 
     // ── Category edit (3.8) ───────────────────────────────────────────────────
-
     [RelayCommand]
     public void OpenCategorySheet()
     {
+        PendingCategory = SelectedCategory;   // start from the committed value
         IsCategorySheetOpen = true;
     }
 
     [RelayCommand]
+    public void SelectCategoryForEdit(Category category) => PendingCategory = category;
+
+    [RelayCommand]
     public async Task SaveCategoryAsync()
     {
-        if (Transaction is null || SelectedCategory is null) return;
+        if (Transaction is null || PendingCategory is null) return;
 
-        await _transactionRepo.UpdateCategoryAsync(Transaction.MpesaCode, SelectedCategory.Id);
-        Transaction.CategoryId = SelectedCategory.Id;
+        await _transactionRepo.UpdateCategoryAsync(Transaction.MpesaCode, PendingCategory.Id);
+        Transaction.CategoryId = PendingCategory.Id;
+        SelectedCategory = PendingCategory;   // commit only now
         IsCategorySheetOpen = false;
     }
 
@@ -146,6 +160,8 @@ public partial class TransactionDetailViewModel : ObservableObject
         await _transactionRepo.UpdateNoteAsync(Transaction.MpesaCode, EditNote);
         Transaction.Note = EditNote;
         OnPropertyChanged(nameof(Transaction));
+        OnPropertyChanged(nameof(HasNote));
+        OnPropertyChanged(nameof(HasNoNote));
         IsNoteSheetOpen = false;
     }
 
@@ -218,12 +234,6 @@ public partial class TransactionDetailViewModel : ObservableObject
         IsCategorySheetOpen = false;
         IsCreateRuleSheetOpen = false;
         IsInfoSheetOpen = false;
-    }
-
-    [RelayCommand]
-    public void SelectCategoryForEdit(Category category)
-    {
-        SelectedCategory = category;
     }
 
     // ── Navigation ────────────────────────────────────────────────────────────

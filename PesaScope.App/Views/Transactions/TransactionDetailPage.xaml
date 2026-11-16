@@ -22,6 +22,7 @@
         <converters:StringToBoolConverter x:Key="StringToBoolConverter"/>
         <converters:IsEqualConverter x:Key="IsEqualConverter"/>
         <converters:EqualsToColorMultiConverter x:Key="EqualsToColorMultiConverter"/>
+        <converters:EqualsToBoolMultiConverter x:Key="EqualsToBool"/>
     </uranium:UraniumContentPage.Resources>
 
     <!-- ── Title bar ─────────────────────────────────────────────────────── -->
@@ -108,7 +109,7 @@
                                     Padding="14,12">
                                     <Border.BackgroundColor>
                                         <MultiBinding Converter="{StaticResource EqualsToColorMultiConverter}">
-                                            <Binding Source="{RelativeSource AncestorType={x:Type vm:TransactionDetailViewModel}}" Path="SelectedCategory.Id"/>
+                                            <Binding Source="{RelativeSource AncestorType={x:Type vm:TransactionDetailViewModel}}" Path="PendingCategory.Id"/>
                                             <Binding Path="Id"/>
                                         </MultiBinding>
                                     </Border.BackgroundColor>
@@ -138,11 +139,13 @@
                                         <Label Grid.Column="1" Text="{Binding Name}"
                                                FontSize="15" VerticalOptions="Center"
                                                TextColor="{AppThemeBinding Light={StaticResource OnSurface}, Dark={StaticResource OnSurfaceDark}}"/>
-                                        <Image Grid.Column="2" VerticalOptions="Center"
-                                               IsVisible="{Binding Source={RelativeSource AncestorType={x:Type vm:TransactionDetailViewModel}},
-                                                Path=SelectedCategory.Id,
-                                                Converter={StaticResource IsEqualConverter},
-                                                ConverterParameter={Binding Id}}">
+                                        <Image Grid.Column="2" VerticalOptions="Center">
+                                            <Image.IsVisible>
+                                                <MultiBinding Converter="{StaticResource EqualsToBool}">
+                                                    <Binding Source="{RelativeSource AncestorType={x:Type vm:TransactionDetailViewModel}}" Path="PendingCategory.Id"/>
+                                                    <Binding Path="Id"/>
+                                                </MultiBinding>
+                                            </Image.IsVisible>
                                             <Image.Source>
                                                 <FontImageSource FontFamily="MaterialSharp"
                                                     Glyph="{x:Static m:MaterialSharp.Check_circle}"
@@ -492,16 +495,15 @@
                     </Grid>
 
                     <Label Text="{Binding Transaction.Note}"
-                           FontSize="14" LineBreakMode="WordWrap"
-                           IsVisible="{Binding Transaction.Note, Converter={StaticResource StringToBoolConverter}}"
-                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                       FontSize="14" LineBreakMode="WordWrap"
+                       IsVisible="{Binding HasNote}"
+                       TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
 
                     <Label Text="No note added yet."
-                           FontSize="14"
-                           IsVisible="{Binding Transaction.Note, Converter={StaticResource StringToBoolConverter},
-                                       FallbackValue=True}"
-                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
-                           Opacity="0.6"/>
+                       FontSize="14"
+                       IsVisible="{Binding HasNoNote}"
+                       TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                       Opacity="0.6"/>
                 </VerticalStackLayout>
             </Border>
 

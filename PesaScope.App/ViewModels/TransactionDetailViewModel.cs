@@ -26,6 +26,7 @@ public partial class TransactionDetailViewModel : ObservableObject
     [ObservableProperty] private bool _isNoteSheetOpen;
     [ObservableProperty] private bool _isCategorySheetOpen;
     [ObservableProperty] private string _editNote = string.Empty;
+    [ObservableProperty] private Category? _pendingCategory;
 
     // ── Create-rule sheet state ───────────────────────────────────────────────
     [ObservableProperty] private bool _isCreateRuleSheetOpen;
@@ -121,20 +122,24 @@ public partial class TransactionDetailViewModel : ObservableObject
     }
 
     // ── Category edit (3.8) ───────────────────────────────────────────────────
-
     [RelayCommand]
     public void OpenCategorySheet()
     {
+        PendingCategory = SelectedCategory;   // start from the committed value
         IsCategorySheetOpen = true;
     }
 
     [RelayCommand]
+    public void SelectCategoryForEdit(Category category) => PendingCategory = category;
+
+    [RelayCommand]
     public async Task SaveCategoryAsync()
     {
-        if (Transaction is null || SelectedCategory is null) return;
+        if (Transaction is null || PendingCategory is null) return;
 
-        await _transactionRepo.UpdateCategoryAsync(Transaction.MpesaCode, SelectedCategory.Id);
-        Transaction.CategoryId = SelectedCategory.Id;
+        await _transactionRepo.UpdateCategoryAsync(Transaction.MpesaCode, PendingCategory.Id);
+        Transaction.CategoryId = PendingCategory.Id;
+        SelectedCategory = PendingCategory;   // commit only now
         IsCategorySheetOpen = false;
     }
 
@@ -229,12 +234,6 @@ public partial class TransactionDetailViewModel : ObservableObject
         IsCategorySheetOpen = false;
         IsCreateRuleSheetOpen = false;
         IsInfoSheetOpen = false;
-    }
-
-    [RelayCommand]
-    public void SelectCategoryForEdit(Category category)
-    {
-        SelectedCategory = category;
     }
 
     // ── Navigation ────────────────────────────────────────────────────────────

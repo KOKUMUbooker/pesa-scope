@@ -27,6 +27,12 @@ public enum CategorySortOption
     LowestAmount = 2
 }
 
+public enum CategoriesViewMode
+{
+    Monthly = 0,
+    Yearly = 1
+}
+
 public class MonthOption
 {
     public int Value { get; init; }
@@ -158,6 +164,15 @@ public partial class CategoriesViewModel : ObservableObject
     .Select(h => new ColorOption { Hex = h })
     .ToList();
 
+    // ── View mode ────────────────────────────────────────────────────────────
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsMonthlyMode))]
+    [NotifyPropertyChangedFor(nameof(IsYearlyMode))]
+    private CategoriesViewMode _viewMode = CategoriesViewMode.Monthly;
+
+    public bool IsMonthlyMode => ViewMode == CategoriesViewMode.Monthly;
+    public bool IsYearlyMode => ViewMode == CategoriesViewMode.Yearly;
+
     partial void OnEditColorChanged(string value) => UpdateColorSelection();
 
     private void UpdateColorSelection()
@@ -250,16 +265,29 @@ public partial class CategoriesViewModel : ObservableObject
         IsChartLoading = true;
         try
         {
-            var from = new DateTime(SelectedYear, SelectedMonth.Value, 1);
+            DateTime from, to;
+            var today = DateTime.Today;
 
-            var isCurrentMonth = from.Year == DateTime.Today.Year && from.Month == DateTime.Today.Month;
-            var to = isCurrentMonth
-                ? DateTime.Today.AddDays(1).AddTicks(-1)
-                : from.AddMonths(1).AddDays(-1).AddDays(1).AddTicks(-1);
+            if (ViewMode == CategoriesViewMode.Yearly)
+            {
+                from = new DateTime(SelectedYear, 1, 1);
+                to = SelectedYear == today.Year
+                    ? today.AddDays(1).AddTicks(-1)
+                    : from.AddYears(1).AddTicks(-1);
+                PeriodLabel = SelectedYear.ToString();
+            }
+            else
+            {
+                from = new DateTime(SelectedYear, SelectedMonth.Value, 1);
+                var isCurrentMonth = from.Year == today.Year && from.Month == today.Month;
+                to = isCurrentMonth
+                    ? today.AddDays(1).AddTicks(-1)
+                    : from.AddMonths(1).AddTicks(-1);
+                PeriodLabel = from.ToString("MMMM yyyy");
+            }
 
             PeriodStart = from;
             PeriodEnd = to;
-            PeriodLabel = from.ToString("MMMM yyyy");
 
             var categories = await _categoryRepo.GetAllActiveAsync();
             var spendMap = await _transactionRepo.GetSpendingByCategoryAsync(from, to); // outgoing-only now
@@ -745,6 +773,11 @@ public partial class CategoriesViewModel : ObservableObject
     }
 
     [RelayCommand]
+    public void SwitchViewMode(CategoriesViewMode mode) => ViewMode = mode;
+
+    partial void OnViewModeChanged(CategoriesViewMode value) => _ = LoadChartAsync();
+
+    [RelayCommand]
     public void CloseSheet()
     {
         IsSheetOpen = false;
@@ -753,7 +786,10 @@ public partial class CategoriesViewModel : ObservableObject
 
     partial void OnSelectedYearChanged(int value) => _ = LoadChartAsync();
 
-    partial void OnSelectedMonthChanged(MonthOption value) => _ = LoadChartAsync();
+    partial void OnSelectedMonthChanged(MonthOption value)
+    {
+        if (IsMonthlyMode) _ = LoadChartAsync();
+    }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 

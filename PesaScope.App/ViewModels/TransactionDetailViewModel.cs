@@ -56,6 +56,15 @@ public partial class TransactionDetailViewModel : ObservableObject
         ? Color.FromArgb("#1A8C62")
         : Color.FromArgb("#C0392B");
 
+    public bool HasNote => !string.IsNullOrWhiteSpace(Transaction?.Note);
+    public bool HasNoNote => !HasNote;
+
+    partial void OnTransactionChanged(Transaction? value)
+    {
+        OnPropertyChanged(nameof(HasNote));
+        OnPropertyChanged(nameof(HasNoNote));
+    }
+
     public string AmountPrefix => IsCredit ? "+" : "-";
 
     public bool IsUncategorized => SelectedCategory?.Name == "Uncategorized";
@@ -146,6 +155,8 @@ public partial class TransactionDetailViewModel : ObservableObject
         await _transactionRepo.UpdateNoteAsync(Transaction.MpesaCode, EditNote);
         Transaction.Note = EditNote;
         OnPropertyChanged(nameof(Transaction));
+        OnPropertyChanged(nameof(HasNote));
+        OnPropertyChanged(nameof(HasNoNote));
         IsNoteSheetOpen = false;
     }
 

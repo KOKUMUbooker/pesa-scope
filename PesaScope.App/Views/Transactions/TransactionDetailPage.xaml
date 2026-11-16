@@ -492,16 +492,15 @@
                     </Grid>
 
                     <Label Text="{Binding Transaction.Note}"
-                           FontSize="14" LineBreakMode="WordWrap"
-                           IsVisible="{Binding Transaction.Note, Converter={StaticResource StringToBoolConverter}}"
-                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
+                       FontSize="14" LineBreakMode="WordWrap"
+                       IsVisible="{Binding HasNote}"
+                       TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"/>
 
                     <Label Text="No note added yet."
-                           FontSize="14"
-                           IsVisible="{Binding Transaction.Note, Converter={StaticResource StringToBoolConverter},
-                                       FallbackValue=True}"
-                           TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
-                           Opacity="0.6"/>
+                       FontSize="14"
+                       IsVisible="{Binding HasNoNote}"
+                       TextColor="{AppThemeBinding Light={StaticResource OnSurfaceVariant}, Dark={StaticResource OnSurfaceVariantDark}}"
+                       Opacity="0.6"/>
                 </VerticalStackLayout>
             </Border>
 
